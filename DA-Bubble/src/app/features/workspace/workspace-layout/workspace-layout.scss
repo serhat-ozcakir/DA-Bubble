@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #ECEEFE;
+}
+
+.workspace-container {
+  min-height: 100vh;
+  background: #ECEEFE;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-content {
+  flex: 1;
+  display: flex;
+}

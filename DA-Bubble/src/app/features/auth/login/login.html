@@ -1,1 +1,46 @@
-<p>login works!</p>
+<section class="login-section">
+<div class="login-card">
+  <h1 >Anmeldung</h1>
+
+  <p class="login-description">
+    Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.
+  </p>
+
+  <form class="login-form">
+    <div class="input-wrapper">
+      <span class="input-icon">✉</span>
+      <input type="email" placeholder="beispielname@email.com" />
+    </div>
+
+    <div class="input-wrapper">
+      <span class="input-icon">🔒</span>
+      <input type="password" placeholder="Passwort" />
+    </div>
+
+    <a class="forgot-password" routerLink="/forgot-password">
+      Passwort vergessen?
+    </a>
+
+    <div class="divider">
+      <span></span>
+      <p>ODER</p>
+      <span></span>
+    </div>
+
+    <button type="button" class="google-button">
+      <img src="assets/logo/Google.png" alt="Google Logo" />
+      Anmelden mit Google
+    </button>
+
+    <div class="actions">
+      <button type="submit" class="primary-button">
+        Anmelden
+      </button>
+
+      <button type="button" class="secondary-button">
+        Gäste-Login
+      </button>
+    </div>
+  </form>
+</div>
+</section>

@@ -5,30 +5,38 @@ import { SignUp } from "./sign-up/sign-up";
 import { ForgotPassword } from "./forgot-password/forgot-password";
 import { ResetPassword } from "./reset-password/reset-password";
 import { ChooseAvatar } from "./choose-avatar/choose-avatar";
+import { AuthLayout } from "./auth-layout/auth-layout";
 
 export const Auth_Routes: Routes = [
-    {
-       path:'',
-       component:Intro
-    },
-    {
-       path:'login',
-       component:Login
-    },
-    {
-       path:'sign-up',
-       component:SignUp
-    },
-    {
-       path:'forgot-password',
-       component:ForgotPassword
-    },
-    {
-       path:'reset-password',
-       component:ResetPassword
-    },
-    {
-       path:'choose-avatar',
-       component:ChooseAvatar
-    },
+   {
+      path: '',
+      component: AuthLayout,
+      children: [
+         {
+            path: '',
+            component: Intro
+         },
+         {
+            path: 'login',
+            component: Login
+         },
+         {
+            path: 'sign-up',
+            component: SignUp
+         },
+         {
+            path: 'forgot-password',
+            component: ForgotPassword
+         },
+         {
+            path: 'reset-password',
+            component: ResetPassword
+         },
+         {
+            path: 'choose-avatar',
+            component: ChooseAvatar
+         },
+      ]
+   },
+
 ]
