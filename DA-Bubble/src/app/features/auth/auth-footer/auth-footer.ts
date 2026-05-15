@@ -1,5 +1,5 @@
 import { CommonModule, NgStyle } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 
 @Component({
@@ -9,5 +9,5 @@ import { Component } from '@angular/core';
   styleUrl: './auth-footer.scss',
 })
 export class AuthFooter {
-
+@Input() showLogo: boolean = false;
 }

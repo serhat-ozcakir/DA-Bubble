@@ -11,4 +11,5 @@ import { RouterLink } from '@angular/router';
 })
 export class AuthHeader {
 @Input() showRegisterLinks: boolean = false;
+@Input() showLogo: boolean = false;
 }
