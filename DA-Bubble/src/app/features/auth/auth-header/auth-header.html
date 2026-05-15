@@ -3,7 +3,9 @@
         <img src="assets/img/header/header_logo.png" alt="DA Bubble Logo" />
     </div>
     <div>
-        <p>Neu bei DABubble?</p>
-        <a [ngStyle]="{ 'text-decoration': 'none' }" routerLink="/auth/sign-up">Konto erstellen</a>
+        @if(showRegisterLinks){
+            <p>Neu bei DABubble?</p>
+            <a [ngStyle]="{ 'text-decoration': 'none' }" routerLink="/sign-up">Konto erstellen</a>
+        }
     </div>
 </header>

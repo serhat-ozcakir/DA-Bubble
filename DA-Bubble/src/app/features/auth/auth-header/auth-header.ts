@@ -1,5 +1,5 @@
 import { CommonModule, NgStyle } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 
@@ -10,5 +10,5 @@ import { RouterLink } from '@angular/router';
   styleUrl: './auth-header.scss',
 })
 export class AuthHeader {
-
+@Input() showRegisterLinks: boolean = false;
 }
