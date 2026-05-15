@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthHeader } from '../auth-header/auth-header';
 import { AuthFooter } from '../auth-footer/auth-footer'
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-auth-layout',
@@ -10,5 +10,11 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './auth-layout.scss',
 })
 export class AuthLayout {
+constructor(private router: Router) {
 
+}
+
+isLoginPage():boolean{
+  return this.router.url === '/login';
+}
 }

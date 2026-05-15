@@ -1,6 +1,6 @@
 
     <div class="auth-page">
-      <app-auth-header></app-auth-header>
+      <app-auth-header [showRegisterLinks] = "isLoginPage()"></app-auth-header>
     
       <main class="auth-content">
         <router-outlet></router-outlet>
