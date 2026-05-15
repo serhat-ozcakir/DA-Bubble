@@ -17,4 +17,7 @@ constructor(private router: Router) {
 isLoginPage():boolean{
   return this.router.url === '/login';
 }
+isIntro():boolean{
+  return this.router.url === '/';
+}
 }

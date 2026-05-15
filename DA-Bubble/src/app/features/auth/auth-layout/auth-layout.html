@@ -1,11 +1,11 @@
 
     <div class="auth-page">
-      <app-auth-header [showRegisterLinks] = "isLoginPage()"></app-auth-header>
+      <app-auth-header [showRegisterLinks] = "isLoginPage()" [showLogo] = isIntro()></app-auth-header>
     
       <main class="auth-content">
         <router-outlet></router-outlet>
       </main>
     
-      <app-auth-footer></app-auth-footer>
+      <app-auth-footer [showLogo] = isIntro()></app-auth-footer>
     </div>
 
