@@ -6,18 +6,28 @@
     Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.
   </p>
 
-  <form class="login-form">
+  <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onLogin()">
     <div class="input-wrapper">
       <span class="input-icon">✉</span>
-      <input type="email" placeholder="beispielname@email.com" />
+      <input type="email" placeholder="beispielname@email.com" formControlName="email" />
     </div>
+        @if(loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
+        <div class="error-message">
+          <span>Bitte geben Sie eine gültige E-Mail-Adresse ein.</span>
+        </div>
+      } 
 
     <div class="input-wrapper">
       <span class="input-icon">🔒</span>
-      <input type="password" placeholder="Passwort" />
+      <input type="password" placeholder="Passwort" formControlName="password" />
     </div>
+        @if(loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
+        <div class="error-message">
+          <span>Bitte geben Sie ein gültiges Passwort ein</span>
+        </div>
+      }
 
-    <a class="forgot-password" routerLink="/send-email">
+    <a class="forgot-password" routerLink="/forgot-password">
       Passwort vergessen?
     </a>
 
@@ -33,11 +43,11 @@
     </button>
 
     <div class="actions">
-      <button type="submit" class="primary-button">
+      <button type="submit" class="primary-button" [disabled]="loginForm.invalid">
         Anmelden
       </button>
 
-      <button type="button" class="secondary-button">
+      <button type="button" class="secondary-button" >
         Gäste-Login
       </button>
     </div>
