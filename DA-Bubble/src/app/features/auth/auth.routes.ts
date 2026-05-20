@@ -6,6 +6,7 @@ import { ForgotPassword } from "./forgot-password/forgot-password";
 import { ResetPassword } from "./reset-password/reset-password";
 import { ChooseAvatar } from "./choose-avatar/choose-avatar";
 import { AuthLayout } from "./auth-layout/auth-layout";
+import { SendEmail } from "./send-email/send-email";
 
 export const Auth_Routes: Routes = [
    {
@@ -31,6 +32,10 @@ export const Auth_Routes: Routes = [
          {
             path: 'reset-password',
             component: ResetPassword
+         },
+         {
+            path: 'send-email',
+            component: SendEmail
          },
          {
             path: 'choose-avatar',
