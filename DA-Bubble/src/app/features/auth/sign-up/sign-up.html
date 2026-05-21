@@ -1,42 +1,62 @@
 <section class="sign-up-section">
-<div class="sign-up-card">
+  <div class="sign-up-card">
     <div class="sign-up-header">
-        <img (click)="goBack()" src="assets/logo/arrow_back.png" alt="Back Logo" class="logo" />
-        <h1 >Konto erstellen</h1>
+      <img (click)="goBack()" src="assets/logo/arrow_back.png" alt="Back Logo" class="logo" />
+      <h1>Konto erstellen</h1>
     </div>
 
-  <p class="sign-up-description">
-    Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.
-  </p>
+    <p class="sign-up-description">
+      Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.
+    </p>
 
-  <form class="sign-up-form" [formGroup]="signUpForm" (ngSubmit)="onSignUp()">
-    <div class="input-wrapper">
-    <img src="assets/logo/person_filled.png" alt="Person Logo" />
-      <input type="text" placeholder="Name und Nachname" formControlName="name" />
-    </div>
+    <form class="sign-up-form" [formGroup]="signUpForm" (ngSubmit)="onSignUp()">
+      <div class="input-wrapper">
+        <img src="assets/logo/person_filled.png" alt="Person Logo" />
+        <input type="text" placeholder="Name und Nachname" formControlName="name" />
+      </div>
+      @if(signUpForm.get('name')?.invalid && (signUpForm.get('name')?.dirty || signUpForm.get('name')?.touched)) {
+      <div class="error-message">
+        <span>Bitte geben Sie Ihren Namen ein.</span>
+      </div>
+      }
 
-    <div class="input-wrapper">
-      <img src="assets/logo/mail.png" alt="Mail Logo" />
-      <input type="email" placeholder="beispielname@email.com" formControlName="email" />
-    </div>
+      <div class="input-wrapper">
+        <img src="assets/logo/mail.png" alt="Mail Logo" />
+        <input type="email" placeholder="beispielname@email.com" formControlName="email" />
+      </div>
+      @if(signUpForm.get('email')?.invalid && (signUpForm.get('email')?.dirty || signUpForm.get('email')?.touched)) {
+      <div class="error-message">
+        <span>Bitte geben Sie eine gültige E-Mail-Adresse ein.</span>
+      </div>
+      }
 
-    <div class="input-wrapper">
-      <img src="assets/logo/lock.png" alt="Lock Logo" />
-      <input type="password" placeholder="Passwort" formControlName="password" />
-    </div>
+      <div class="input-wrapper">
+        <img src="assets/logo/lock.png" alt="Lock Logo" />
+        <input type="password" placeholder="Passwort" formControlName="password" />
+      </div>
+      @if(signUpForm.get('password')?.invalid && (signUpForm.get('password')?.dirty || signUpForm.get('password')?.touched)) {
+      <div class="error-message">
+        <span>Bitte geben Sie ein gültiges Passwort ein</span>  
+      </div>
+      } 
 
-    <div class="input-wrapper-checkbox">
-      <input type="checkbox" id="terms" formControlName="terms" />
-      <label for="terms">Ich akzeptiere die <a  routerLink="/Datenschuz" target="_blank">Datenschutzerklärung</a> zu.</label>
-    </div>
+      <div class="input-wrapper-checkbox">
+        <input type="checkbox" id="terms" formControlName="terms" />
+        <label for="terms">Ich akzeptiere die <a routerLink="/Datenschuz" target="_blank">Datenschutzerklärung</a>
+          zu.</label>
+      </div>
+      @if(signUpForm.get('terms')?.invalid && (signUpForm.get('terms')?.dirty || signUpForm.get('terms')?.touched)) {
+      <div class="error-message-2">
+        <span>Bitte akzeptieren Sie die Datenschutzerklärung.</span>
+      </div>
+      }
 
-    <div class="actions">
-      <button type="submit" class="primary-button" [disabled]="signUpForm.invalid">
-        Weiter
-      </button>
+      <div class="actions">
+        <button type="submit" class="primary-button" [disabled]="signUpForm.invalid">
+          Weiter
+        </button>
 
-    </div>
-  </form>
-</div>
+      </div>
+    </form>
+  </div>
 </section>
-
