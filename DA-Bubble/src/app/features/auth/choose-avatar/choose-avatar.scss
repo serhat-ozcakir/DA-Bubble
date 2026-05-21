@@ -50,12 +50,28 @@ h1 {
   > .form_content {
     p {
         margin-top: 10px;
+        font-size: 20px;
+        font-weight: 500;
+    }
+    img{
+      min-width: 180px;
+      width: 100%;
     }
   }
   > .form_image {
     p {
         text-align: left;
     }
+  }
+}
+
+.choose_avatar-avatar-list img {
+  cursor: pointer;
+  border-radius: 50%;
+  border: 3px solid transparent;
+
+  &.selected {
+    border-color: #444df2;
   }
 }
 
@@ -84,6 +100,16 @@ h1 {
 
   &:hover {
     background: #797ef3;
+  }
+   &:disabled {
+    background: #686868;
+    color: #ffffff;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:disabled:hover {
+    background: #686868;
   }
 }
 

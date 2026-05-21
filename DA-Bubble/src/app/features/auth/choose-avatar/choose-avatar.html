@@ -5,29 +5,26 @@
         <h1 >Wähle deinen Avatar</h1>
     </div>
 
-  <form class="choose_avatar-form">
+  <div class="choose_avatar-form">
     <div class="form_content">
-        <img src="assets/logo/Profile.png" alt="Avatar Logo">
-        <p>Name</p>
+        <img [src]="selectedAvatar" alt="Avatar Logo">
+        <p>{{ userName }}</p>
     </div>
     <div class="form_image">
         <p>Aus der Liste wählen</p>
         <div class="choose_avatar-avatar-list">
-            <img src="assets/img/avatar/avatar-1.png" alt="Avatar 1">
-            <img src="assets/img/avatar/avatar-2.png" alt="Avatar 2">
-            <img src="assets/img/avatar/avatar-3.png" alt="Avatar 3">
-            <img src="assets/img/avatar/avatar-4.png" alt="Avatar 4">
-            <img src="assets/img/avatar/avatar-5.png" alt="Avatar 5">
-            <img src="assets/img/avatar/avatar-6.png" alt="Avatar 6">
+          @for(avatar of avatars; track avatar) {
+            <img [src]="avatar" [alt]="'Avatar ' + $index" (click)="selectAvatar(avatar)" [class.selected]="selectedAvatar === avatar"/>
+          }
         </div>
     </div>
 
     <div class="actions">
-      <button type="submit" class="primary-button" routerLink="/forgot-password">
+      <button type="submit" class="primary-button" (click)="onChooseAvatar()">
         Weiter
       </button>
     </div>
-  </form>
+  </div>
 </div>
 </section>
 
