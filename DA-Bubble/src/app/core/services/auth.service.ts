@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Supabase } from '../supabase/supabase.service';
 
 export interface RegisterData {
 
@@ -14,8 +15,11 @@ export interface RegisterData {
 
 export class Auth {
   private  RegisterData?: RegisterData;
+  constructor(private supabase: Supabase) {
 
-  setRegisterData(data: RegisterData) {
+  }
+
+  setRegisterData(data: RegisterData): void {
     this.RegisterData = data;
   }
 
@@ -23,11 +27,26 @@ export class Auth {
     return this.RegisterData;
   }
 
-  setAvatar(avatar: string) {
+  setAvatar(avatar: string): void {
     if (!this.RegisterData) return;
     this.RegisterData.avatar = avatar;
   }
-  clearRegisterData() {
+  clearRegisterData(): void {
     this.RegisterData = undefined;
   }
+
+  async signUp(){
+    if (!this.RegisterData) {
+      throw new Error('Register data is not set.');
+    }
+    const {email, password} = this.RegisterData;
+    const { data, error } = await this.supabase.supabase.auth.signUp({
+      email,
+      password, 
+  })
+  if (error) {
+    throw error;
+  }
+  return data;
+}
 }
