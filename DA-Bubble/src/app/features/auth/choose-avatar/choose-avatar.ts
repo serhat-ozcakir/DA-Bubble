@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth.service';
-import { Form, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+
 
 @Component({
   selector: 'app-choose-avatar',
-  imports: [ReactiveFormsModule],
+  imports: [],
   templateUrl: './choose-avatar.html',
   styleUrl: './choose-avatar.scss',
 })
@@ -44,9 +44,17 @@ export class ChooseAvatar {
     this.selectedAvatar = avatar; 
   }
 
-  onChooseAvatar(){
+  async onChooseAvatar(): Promise<void> {
     this.authService.setAvatar(this.selectedAvatar);
-    console.log(this.authService.getRegisterData());
-    this.router.navigate(['/login']);
+
+    try{
+      const data = await this.authService.signUp();
+      console.log('Supabase user:', data);
+      this.authService.clearRegisterData();
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error choosing avatar:', error);
+    }
+
   }
 }
