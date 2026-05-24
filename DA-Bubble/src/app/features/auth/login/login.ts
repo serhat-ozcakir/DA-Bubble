@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators} from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink,RouterEvent, Router } from '@angular/router';
+import { Auth } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,21 +12,27 @@ import { RouterLink } from '@angular/router';
 export class Login {
   loginForm: FormGroup;
 
-  constructor() {
+  constructor(private authService: Auth, private router: Router) {
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)]),
       password: new FormControl('', [Validators.required, Validators.minLength(6)])
     });
   }
-  onLogin() {
+  async onLogin(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
     const email = this.loginForm.get('email')?.value;
     const password = this.loginForm.get('password')?.value;
+    try {
+      const data = await this.authService.login(email, password);
+      console.log('Login successful:', data);
+      this.router.navigate(['/workspace']);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
     this.loginForm.reset();
-    console.log('Email:', email);
-    console .log('Password:', password);
+
 }
 }
