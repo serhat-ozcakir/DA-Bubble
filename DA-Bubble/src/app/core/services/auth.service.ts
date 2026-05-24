@@ -14,7 +14,7 @@ export interface RegisterData {
 })
 
 export class Auth {
-  private  RegisterData?: RegisterData;
+  private RegisterData?: RegisterData;
   constructor(private supabase: Supabase) {
 
   }
@@ -35,18 +35,50 @@ export class Auth {
     this.RegisterData = undefined;
   }
 
-  async signUp(){
+  async signUp() {
     if (!this.RegisterData) {
       throw new Error('Register data is not set.');
     }
-    const {email, password} = this.RegisterData;
+    const { email, password } = this.RegisterData;
     const { data, error } = await this.supabase.supabase.auth.signUp({
       email,
-      password, 
-  })
-  if (error) {
-    throw error;
+      password,
+    })
+    if (error) {
+      throw error;
+    }
+    return data;
   }
-  return data;
-}
+
+  async login(email: string, password: string) {
+    const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (error) {
+      throw error;
+    }
+    return data;
+  }
+
+  async resetPassword(email: string) {
+    const { data, error } = await this.supabase.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'http://localhost:4200/reset-password',
+    
+    });
+    if (error) {
+      throw error;
+    }
+    return data;
+  }
+
+  async updatePassword(newPassword: string) {
+    const { data, error } = await this.supabase.supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) {
+      throw error;
+    }
+    return data;
+  }
 }
