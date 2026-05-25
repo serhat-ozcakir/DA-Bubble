@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Supabase } from '../supabase/supabase.service';
+import {User} from '@supabase/supabase-js';
 
 export interface RegisterData {
 
@@ -9,12 +10,26 @@ export interface RegisterData {
   avatar?: string;
 }
 
+export interface Profile {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  status: 'online' | 'offline';
+  created_at?: string;
+}
+
+
 @Injectable({
   providedIn: 'root',
 })
 
 export class Auth {
   private RegisterData?: RegisterData;
+
+  currentUser = signal<User | null>(null);
+  currentUserProfile = signal<Profile | null>(null);
+
   constructor(private supabase: Supabase) {
 
   }
@@ -35,11 +50,34 @@ export class Auth {
     this.RegisterData = undefined;
   }
 
+  async loadCurrentUser() {
+    const { data, error } = await this.supabase.supabase.auth.getUser();
+    
+    if(error || !data.user) {
+      this.currentUser.set(null);
+      this.currentUserProfile.set(null);
+      return;
+    }
+    this.currentUser.set(data.user);
+
+    const { data: profile, error: profileError } = await this.supabase.supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError) {
+      throw profileError;
+    } 
+      this.currentUserProfile.set(profile);
+    
+  }
+
   async signUp() {
     if (!this.RegisterData) {
       throw new Error('Register data is not set.');
     }
-    const { email, password } = this.RegisterData;
+    const { email, password, name, avatar } = this.RegisterData;
     const { data, error } = await this.supabase.supabase.auth.signUp({
       email,
       password,
@@ -47,6 +85,26 @@ export class Auth {
     if (error) {
       throw error;
     }
+
+    if(!data.user) {
+      this.clearRegisterData();
+      throw new Error('User data is missing after sign up.');
+    }
+
+      const { error: profileError } = await this.supabase.supabase.from('profiles').insert({ 
+        id: data.user.id,
+        email,
+        name,
+        avatar,
+        status:'offline',    
+      })
+
+    if(profileError) {
+      throw profileError;
+    }
+
+    this.clearRegisterData();
+
     return data;
   }
 
@@ -58,6 +116,7 @@ export class Auth {
     if (error) {
       throw error;
     }
+    await this.loadCurrentUser();
     return data;
   }
 
