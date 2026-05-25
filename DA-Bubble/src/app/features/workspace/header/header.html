@@ -1,1 +1,27 @@
-<p>header works!</p>
+<header class="header">
+  <div class="header__logo">
+    <img src="assets/img/header/header_logo.png" alt="DABubble Logo" />
+
+  </div>
+
+  <div class="header__search">
+    <input type="text" placeholder="Devspace durchsuchen" />
+    <img src="assets/icons/search.png" alt="search icon" />
+  </div>
+
+  <div class="header__user">
+    <span class="header__username">{{ auth.currentUserProfile()?.name }}</span>
+
+    <div class="header__avatar-wrapper">
+      <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" />
+      <span class="header__status"></span>
+    </div>
+    <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
+    @if (isUserMenuOpen) {
+        <app-user-menu (onProfileClick)="openProfileMenu()"></app-user-menu>
+    }
+    @if (isProfileMenuOpen) {
+        <app-profile-dialog (closeDialog)="closeProfileMenu()"></app-profile-dialog>
+    }
+  </div>
+</header>
