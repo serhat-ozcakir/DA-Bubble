@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators} from '@angular/forms';
-import { RouterLink,RouterEvent, Router } from '@angular/router';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { RouterLink, RouterEvent, Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,10 @@ import { Auth } from '../../../core/services/auth.service';
 export class Login {
   loginForm: FormGroup;
 
-  constructor(private authService: Auth, private router: Router) {
+  constructor(
+    private authService: Auth,
+    private router: Router,
+    private toastService: ToastService) {
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)]),
       password: new FormControl('', [Validators.required, Validators.minLength(6)])
@@ -28,11 +32,17 @@ export class Login {
     try {
       const data = await this.authService.login(email, password);
       console.log('Login successful:', data);
-      this.router.navigate(['/workspace']);
+      this.toastService.show('Erfolgreich eingeloggt!');
+      setTimeout(() => {
+
+        this.router.navigate(['/workspace']);
+      }, 1000)
+
     } catch (error) {
       console.error('Login error:', error);
+      this.toastService.show('Fehler beim Einloggen.');
     }
     this.loginForm.reset();
 
-}
+  }
 }
