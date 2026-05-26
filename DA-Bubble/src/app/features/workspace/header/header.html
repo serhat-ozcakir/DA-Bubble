@@ -18,10 +18,13 @@
     </div>
     <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
     @if (isUserMenuOpen) {
-        <app-user-menu (onProfileClick)="openProfileMenu()"></app-user-menu>
+        <app-user-menu (onProfileClick)="openProfileMenu()"/>
     }
     @if (isProfileMenuOpen) {
-        <app-profile-dialog (closeDialog)="closeProfileMenu()"></app-profile-dialog>
+        <app-profile-dialog (openEditProfileDialogEvent)="openEditProfileDialog()" (closeDialog)="closeProfileMenu()"/>
+    }
+    @if(isEditProfileDialogOpen) {
+        <app-edit-profile-dialog  (closeDialogEvent)="closeEditProfileDialog()"/>
     }
   </div>
 </header>
