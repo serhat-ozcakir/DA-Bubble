@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
 import { ChatArea } from '../chat-area/chat-area';
 import { ThreadPanel } from '../thread-panel/thread-panel';
+import { Auth } from '../../../core/services/auth.service';
 
 
 @Component({
@@ -14,4 +15,11 @@ import { ThreadPanel } from '../thread-panel/thread-panel';
 })
 export class WorkspaceLayout {
 
+  constructor(private auth: Auth) {
+
+  }
+
+  async ngOnInit() {
+    await this.auth.loadCurrentUser();
+  }
 }
