@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Supabase } from '../supabase/supabase.service';
-import {User} from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 
 export interface RegisterData {
 
@@ -52,8 +52,8 @@ export class Auth {
 
   async loadCurrentUser() {
     const { data, error } = await this.supabase.supabase.auth.getUser();
-    
-    if(error || !data.user) {
+
+    if (error || !data.user) {
       this.currentUser.set(null);
       this.currentUserProfile.set(null);
       return;
@@ -64,13 +64,14 @@ export class Auth {
       .from('profiles')
       .select('*')
       .eq('id', data.user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError) {
       throw profileError;
-    } 
-      this.currentUserProfile.set(profile);
-    
+    }
+
+    this.currentUserProfile.set(profile);
+
   }
 
   async signUp() {
@@ -86,20 +87,20 @@ export class Auth {
       throw error;
     }
 
-    if(!data.user) {
+    if (!data.user) {
       this.clearRegisterData();
       throw new Error('User data is missing after sign up.');
     }
 
-      const { error: profileError } = await this.supabase.supabase.from('profiles').insert({ 
-        id: data.user.id,
-        email,
-        name,
-        avatar,
-        status:'offline',    
-      })
+    const { error: profileError } = await this.supabase.supabase.from('profiles').insert({
+      id: data.user.id,
+      email,
+      name,
+      avatar,
+      status: 'offline',
+    })
 
-    if(profileError) {
+    if (profileError) {
       throw profileError;
     }
 
@@ -122,8 +123,8 @@ export class Auth {
 
   async resetPassword(email: string) {
     const { data, error } = await this.supabase.supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'http://localhost:4200/reset-password',
-    
+      redirectTo: 'http://localhost:4200/reset-password',
+
     });
     if (error) {
       throw error;
@@ -140,4 +141,24 @@ export class Auth {
     }
     return data;
   }
+
+  async updateProfileName(name: string) {
+    const user = this.currentUser();
+    if (!user) {
+      throw new Error('No user is currently logged in.');
+    }
+    const { data, error } = await this.supabase.supabase.from('profiles')
+      .update({ name })
+      .eq('id', user.id)
+      .select()
+      .maybeSingle();
+      
+      if (error) {
+        throw error;
+      }
+      this.currentUserProfile.set(data);
+      return data;
+  }
+
+
 }
