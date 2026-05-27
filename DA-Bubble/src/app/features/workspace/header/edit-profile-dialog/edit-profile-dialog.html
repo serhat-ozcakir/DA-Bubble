@@ -1,1 +1,26 @@
-<p>edit-profile-dialog works!</p>
+<div class="edit-profile-dialog">
+    <div class="edit-profile-dialog__content-wrapper">
+        <div class="edit-profile-dialog__header">
+            <h2>Dein Profil bearbeiten</h2>
+            <button type="button" class="close-button" (click)="close()">X</button>
+        </div>
+        <div class="edit-profile-dialog__content">
+            <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" class="edit-profile-dialog__avatar" />
+            <div class="edit-profile-dialog__info">
+                <img src="assets/logo/account_circle.png" alt="Account icon" class="edit-profile-dialog__edit-icon" />
+                <h4>Volständiger Name</h4>
+
+            </div>
+
+        </div>
+        <div class="edit-profile-dialog__footer">
+            <form class="edit-profile-dialog__form" >
+                <input type="text"  [formControl]="nameControl"  class="edit-profile-dialog__input"/>
+                <div class="edit-profile-dialog__buttons">
+                    <button type="button" class="edit-button" (click)="close()">Abbrechen</button>
+                    <button type="button" class="edit-button" (click)="onProfileName()">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
