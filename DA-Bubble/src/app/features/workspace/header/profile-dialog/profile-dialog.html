@@ -8,7 +8,7 @@
             <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" class="profile-dialog__avatar" />
             <div class="profile-dialog__info">
                 <h4>{{ auth.currentUserProfile()?.name }}</h4>
-                <button type="button" class="edit-button">Bearbeiten</button>
+                <button type="button" class="edit-button" (click)="openEditProfileDialog()">Bearbeiten</button>
             </div>
             <span class="profile-dialog__status">Status: Aktif</span>
         </div>

@@ -8,12 +8,16 @@ import { Auth } from '../../../../core/services/auth.service';
   styleUrl: './profile-dialog.scss',
 })
 export class ProfileDialog {
- constructor(public auth: Auth) { }
+  constructor(public auth: Auth) { }
 
-@Output() closeDialog = new EventEmitter<void>();
+  @Output() closeDialog = new EventEmitter<void>();
+  @Output() openEditProfileDialogEvent = new EventEmitter<void>();
 
-close(): void {
-  this.closeDialog.emit();
-}
+  close(): void {
+    this.closeDialog.emit();
+  }
 
+  openEditProfileDialog(): void {
+    this.openEditProfileDialogEvent.emit();
+  }
 }
