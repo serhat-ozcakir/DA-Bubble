@@ -12,10 +12,15 @@ export class UserMenu {
 
   constructor(public auth: Auth) { }
 
-  @Output() onProfileClick = new EventEmitter<void>();
+  @Output() ProfileClick = new EventEmitter<void>();
+  @Output() LogoutClick = new EventEmitter<void>();
 
-  onProfileButtonClick(): void {
-    this.onProfileClick.emit();
+  ProfileButtonClick(): void {
+    this.ProfileClick.emit();
+  }
+
+  LogoutButtonClicked(): void {
+    this.LogoutClick.emit();
   }
 
 }
