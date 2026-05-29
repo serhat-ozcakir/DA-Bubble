@@ -3,6 +3,7 @@ import { Auth } from '../../../core/services/auth.service';
 import {UserMenu} from './user-menu/user-menu';
 import {ProfileDialog} from './profile-dialog/profile-dialog';
 import {EditProfileDialog} from './edit-profile-dialog/edit-profile-dialog';  
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -16,7 +17,9 @@ export class Header {
   isProfileMenuOpen = false;
   isEditProfileDialogOpen = false;
 
-  constructor(public auth: Auth) {
+  constructor(public auth: Auth,
+    private router: Router
+  ) {
 
   }
 
@@ -40,6 +43,13 @@ export class Header {
 
   closeEditProfileDialog(): void {
     this.isEditProfileDialogOpen = false;
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.isUserMenuOpen = false;
+    this.isProfileMenuOpen = false;
+    this.router.navigate(['/login']);
   }
 }
 

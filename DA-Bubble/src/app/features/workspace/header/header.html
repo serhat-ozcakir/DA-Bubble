@@ -18,7 +18,7 @@
     </div>
     <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
     @if (isUserMenuOpen) {
-        <app-user-menu (onProfileClick)="openProfileMenu()"/>
+        <app-user-menu (ProfileClick)="openProfileMenu()" (LogoutClick)="logout()" />
     }
     @if (isProfileMenuOpen) {
         <app-profile-dialog (openEditProfileDialogEvent)="openEditProfileDialog()" (closeDialog)="closeProfileMenu()"/>
