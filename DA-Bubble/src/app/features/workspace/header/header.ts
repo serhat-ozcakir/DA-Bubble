@@ -45,8 +45,8 @@ export class Header {
     this.isEditProfileDialogOpen = false;
   }
 
-  logout(): void {
-    this.auth.logout();
+  async logout(): Promise<void> {
+    await this.auth.logout();
     this.isUserMenuOpen = false;
     this.isProfileMenuOpen = false;
     this.router.navigate(['/login']);
