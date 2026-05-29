@@ -121,6 +121,15 @@ export class Auth {
     return data;
   }
 
+  async logout() {
+    const { error } = await this.supabase.supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
+    this.currentUser.set(null);
+    this.currentUserProfile.set(null);
+  }
+
   async resetPassword(email: string) {
     const { data, error } = await this.supabase.supabase.auth.resetPasswordForEmail(email, {
       redirectTo: 'http://localhost:4200/reset-password',
