@@ -118,10 +118,12 @@ export class Auth {
       throw error;
     }
     await this.loadCurrentUser();
+    await this.updateStatus('online');
     return data;
   }
 
   async logout() {
+    await this.updateStatus('offline');
     const { error } = await this.supabase.supabase.auth.signOut();
     if (error) {
       throw error;
@@ -169,5 +171,22 @@ export class Auth {
       return data;
   }
 
+  async updateStatus(status: 'online' | 'offline') {
+    const user = this.currentUser();
+
+    if (!user) return;
+
+    const { data, error } = await this.supabase.supabase.from('profiles')
+      .update({ status })
+      .eq('id', user.id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+    this.currentUserProfile.set(data);
+    return data;
+  }
 
 }
