@@ -14,7 +14,7 @@
 
     <div class="header__avatar-wrapper">
       <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" />
-      <span class="header__status"></span>
+      <span class="header__status" [class.online]="auth.currentUserProfile()?.status === 'online'" [class.offline]="auth.currentUserProfile()?.status === 'offline'"></span>
     </div>
     <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
     @if (isUserMenuOpen) {
