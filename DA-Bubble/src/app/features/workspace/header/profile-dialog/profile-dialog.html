@@ -10,7 +10,14 @@
                 <h4>{{ auth.currentUserProfile()?.name }}</h4>
                 <button type="button" class="edit-button" (click)="openEditProfileDialog()">Bearbeiten</button>
             </div>
-            <span class="profile-dialog__status">Status: Aktif</span>
+            <div class="profile-dialog__status-indicator" [class.online]="auth.currentUserProfile()?.status === 'online'" [class.offline]="auth.currentUserProfile()?.status === 'offline'">
+                <span class="status-indicator__dot" ></span>
+                <span class="profile-dialog__status" [class.online]="auth.currentUserProfile()?.status === 'online'" [class.offline]="auth.currentUserProfile()?.status === 'offline'">
+                    {{ auth.currentUserProfile()?.status }}
+                </span>
+            </div>
+
+            
         </div>
         <div class="profile-dialog__footer">
             <div>
