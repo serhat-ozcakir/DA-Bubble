@@ -1,52 +1,54 @@
 .header {
-  height: 80px;
-  padding: 0 48px;
-  display: grid;
-  grid-template-columns: 220px 1fr 220px;
-  align-items: center;
-  gap: 32px;
   background: #eceefe;
+  padding: 16px 48px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+
+  &__top {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 180px minmax(280px, 520px) 1fr;
+    align-items: center;
+    gap: 32px;
+  }
 
   &__logo {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 24px;
-    font-weight: 700;
 
     img {
       width: 130px;
       height: auto;
+      display: block;
     }
   }
 
   &__search {
     position: relative;
-
-  input {
     width: 100%;
-    height: 48px;
-    border: none;
-    border-radius: 999px;
-    padding: 0 56px 0 24px;
-    font-size: 16px;
-    outline: none;
-    background: white;
-  }
 
-  img {
-    position: absolute;
-    right: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    cursor: pointer;
-  }
-  }
+    input {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 999px;
+      padding: 0 56px 0 24px;
+      font-size: 16px;
+      outline: none;
+      background: white;
+    }
 
-
+    img {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+  }
 
   &__user {
     position: relative;
@@ -59,12 +61,14 @@
 
   &__avatar-wrapper {
     position: relative;
+    cursor: pointer;
 
     img {
       width: 48px;
       height: 48px;
       border-radius: 50%;
       object-fit: cover;
+      display: block;
     }
   }
 
@@ -74,21 +78,60 @@
     bottom: 2px;
     width: 12px;
     height: 12px;
-    background: #92c83e;
     border: 2px solid white;
     border-radius: 50%;
   }
 
   .online {
-  background-color: #92c83e;
-}
+    background-color: #92c83e;
+  }
 
-.offline {
-  background-color: #686868;
-}
+  .offline {
+    background-color: #686868;
+  }
 
   &__arrow {
     font-size: 20px;
     cursor: pointer;
+  }
+}
+
+@media (max-width: 991px) {
+  .header {
+    height: auto;
+    padding: 16px;
+    align-items: stretch;
+
+    &__top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+    }
+
+    &__search {
+      grid-column: 1 / -1;
+      order: 3;
+
+      input {
+        height: 40px;
+        font-size: 14px;
+        padding-left: 20px;
+      }
+    }
+
+    &__logo img {
+      width: 118px;
+    }
+
+    &__username,
+    &__arrow,
+    &__status {
+      display: none;
+    }
+
+    &__avatar-wrapper img {
+      width: 40px;
+      height: 40px;
+    }
   }
 }

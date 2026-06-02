@@ -1,30 +1,36 @@
 <header class="header">
-  <div class="header__logo">
-    <img src="assets/img/header/header_logo.png" alt="DABubble Logo" />
-
-  </div>
-
-  <div class="header__search">
-    <input type="text" placeholder="Devspace durchsuchen" />
-    <img src="assets/icons/search.png" alt="search icon" />
-  </div>
-
-  <div class="header__user">
-    <span class="header__username">{{ auth.currentUserProfile()?.name }}</span>
-
-    <div class="header__avatar-wrapper">
-      <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" />
-      <span class="header__status" [class.online]="auth.currentUserProfile()?.status === 'online'" [class.offline]="auth.currentUserProfile()?.status === 'offline'"></span>
+  <div class="header__top">
+    <div class="header__logo">
+      <img src="assets/img/header/header_logo.png" alt="DABubble Logo" />
     </div>
-    <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
-    @if (isUserMenuOpen) {
-        <app-user-menu (ProfileClick)="openProfileMenu()" (LogoutClick)="logout()" />
-    }
-    @if (isProfileMenuOpen) {
-        <app-profile-dialog (openEditProfileDialogEvent)="openEditProfileDialog()" (closeDialog)="closeProfileMenu()"/>
-    }
-    @if(isEditProfileDialogOpen) {
-        <app-edit-profile-dialog  (closeDialogEvent)="closeEditProfileDialog()"/>
-    }
+
+    <div class="header__search">
+      <input type="text" placeholder="Devspace durchsuchen" />
+      <img src="assets/icons/search.png" alt="search icon" />
+    </div>
+
+    <div class="header__user">
+      <span class="header__username">
+        {{ auth.currentUserProfile()?.name }}
+      </span>
+
+      <div class="header__avatar-wrapper" (click)="toggleUserMenu()">
+        <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" />
+        <span class="header__status" [class.online]="auth.currentUserProfile()?.status === 'online'"
+          [class.offline]="auth.currentUserProfile()?.status === 'offline'"></span>
+      </div>
+
+      <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
+
+      @if (isUserMenuOpen) {
+      <app-user-menu (ProfileClick)="openProfileMenu()" (LogoutClick)="logout()" />
+      }
+      @if (isProfileMenuOpen) {
+      <app-profile-dialog (openEditProfileDialogEvent)="openEditProfileDialog()" (closeDialog)="closeProfileMenu()" />
+      }
+      @if(isEditProfileDialogOpen) {
+      <app-edit-profile-dialog (closeDialogEvent)="closeEditProfileDialog()" />
+      }
+    </div>
   </div>
 </header>
