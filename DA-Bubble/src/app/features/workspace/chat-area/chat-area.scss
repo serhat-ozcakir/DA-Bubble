@@ -1,4 +1,9 @@
-:host {
+.chat-area {
+  display: flex;
+  flex-direction: column;
   flex: 1;
- 
+  background: white;
+  border-radius: 30px;
+  overflow: hidden;
+  height: 100%;
 }

@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import {ChatHeader} from "./chat-header/chat-header";
+import {MessageInput} from "./message-input/message-input";
+import {MessageList} from "./message-list/message-list";
 
 @Component({
   selector: 'app-chat-area',
-  imports: [],
+  imports: [ChatHeader, MessageInput, MessageList],
   templateUrl: './chat-area.html',
   styleUrl: './chat-area.scss',
 })
