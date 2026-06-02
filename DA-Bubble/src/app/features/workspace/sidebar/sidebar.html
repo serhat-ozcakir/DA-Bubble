@@ -1,1 +1,73 @@
-<p>sidebar works!</p>
+<aside class="sidebar">
+  <div class="sidebar__header">
+    <div class="sidebar__workspace-info">
+      <img
+        class="sidebar__workspace-logo"
+        src="assets/logo/Workspace logo.png"
+        alt="Workspace Logo"
+      />
+
+      <span>Devspace</span>
+    </div>
+
+    <button class="sidebar__edit-btn" type="button">
+      <img src="assets/icons/edit_square.png" alt="Edit" />
+    </button>
+  </div>
+
+  <section class="sidebar__section">
+    <div class="sidebar__section-title">
+      <div class="sidebar__section-left">
+        <span class="sidebar__chevron" [class.sidebar__chevron--closed]="!isChannelsOpen" (click)="toggleSection('channels')">⌄</span>
+        <img src="assets\icons\workspaces.png" alt="workspaces icon" />
+        <strong>Channels</strong>
+      </div>
+
+      <button class="sidebar__add-btn" type="button">+</button>
+    </div>
+
+    @if (isChannelsOpen) {
+
+    <ul class="sidebar__list">
+      <li class="sidebar__channel active">
+        <span>#</span>
+        Entwicklerteam
+      </li>
+
+      <li class="sidebar__add-channel">
+        <span>⊕</span>
+        Channel hinzufügen
+      </li>
+    </ul>
+  }
+  </section>
+
+  <section class="sidebar__section">
+    <div class="sidebar__section-title">
+      <div class="sidebar__section-left">
+        <span class="sidebar__chevron" [class.sidebar__chevron--closed]="!isDirectMessagesOpen" (click)="toggleSection('directMessages')">⌄</span>
+        <img src="assets/logo/account_circle.png" alt="account circle logo" />
+        <strong>Direktnachrichten</strong>
+      </div>
+    </div>
+@if (isDirectMessagesOpen) {
+    <ul class="sidebar__dm-list">
+      @for (user of users; track user.id) {
+        <li class="sidebar__dm-item">
+          <div class="sidebar__avatar-wrapper">
+            <img [src]="user.avatar" [alt]="user.name" />
+
+            <span
+              class="sidebar__status"
+              [class.online]="user.status === 'online'"
+              [class.offline]="user.status === 'offline'"
+            ></span>
+          </div>
+
+          <span>{{ user.name }}</span>
+        </li>
+      }
+    </ul>
+    }
+  </section>
+</aside>
