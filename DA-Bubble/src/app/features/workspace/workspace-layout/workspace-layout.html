@@ -1,8 +1,27 @@
-<div class="workspace-container">
-    <app-header></app-header>
-    <div class="workspace-content">
-        <app-sidebar></app-sidebar>
-        <app-chat-area></app-chat-area>
-        <app-thread-panel></app-thread-panel>
+<div class="workspace">
+  <app-header></app-header>
+
+  <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed">
+    <app-sidebar></app-sidebar>
+
+    <button
+      class="workspace__sidebar-toggle"
+      type="button"
+      (click)="toggleSidebar()"
+    >
+    <div class="workspace__toggle-content">
+        @if (isSidebarClosed) {
+            <span> Workspace-Menü öffnen </span>
+            <img src="assets\icons\Group 2.png" alt="sidebar icon" />
+        } @else {
+            <span> Workspace-Menü schließen </span>
+            <img src="assets\icons\Group 3.png" alt="sidebar icon" />
+        }
+       
     </div>
+    </button>
+
+    <app-chat-area></app-chat-area>
+    <app-thread-panel></app-thread-panel>
+  </main>
 </div>

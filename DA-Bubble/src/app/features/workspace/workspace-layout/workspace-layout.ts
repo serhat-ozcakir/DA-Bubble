@@ -15,11 +15,17 @@ import { Auth } from '../../../core/services/auth.service';
 })
 export class WorkspaceLayout {
 
+  isSidebarClosed = false;
+
   constructor(private auth: Auth) {
 
   }
 
   async ngOnInit() {
     await this.auth.loadCurrentUser();
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarClosed = !this.isSidebarClosed;
   }
 }

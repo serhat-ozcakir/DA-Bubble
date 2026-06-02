@@ -11,7 +11,63 @@
   flex-direction: column;
 }
 
-.workspace-content {
-  flex: 1;
+.workspace__content {
+  position: relative;
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  gap: 16px;
+  padding: 0 24px 16px;
+  height: calc(100vh - 80px);
+  transition: grid-template-columns 0.2s ease;
+}
+
+.workspace__toggle-content {
   display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  > span{
+    font-size: 18px;
+    font-weight: 700;
+    color: #000000;
+  }
+}
+
+.workspace__content.sidebar-closed {
+  grid-template-columns: 0 1fr 360px;
+}
+
+.workspace__content.sidebar-closed app-sidebar {
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.workspace__sidebar-toggle {
+  position: absolute;
+  left: 0;
+  top: 300px;
+  z-index: 20;
+
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+
+  height: 305px;
+  width: 40px;
+
+  border: none;
+  border-radius: 20px 0px 0px 20px;;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  font-size: 14px;
+  cursor: pointer;
+}
+
+@media (max-width: 991px) {
+
+    app-chat-area,
+  app-thread-panel {
+    display: none;
+  }
+
 }
