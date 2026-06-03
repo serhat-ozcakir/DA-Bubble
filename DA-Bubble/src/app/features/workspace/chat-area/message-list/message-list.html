@@ -1,1 +1,8 @@
-<p>message-list works!</p>
+<div class="message-list">
+  <div class="message-list__date-line">
+    <span>Dienstag, 14. Januar</span>
+  </div>
+@for(message of messages; track message.text){
+    <app-message-item [message]="message"></app-message-item>
+}
+</div>
