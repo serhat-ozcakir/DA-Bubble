@@ -1,1 +1,23 @@
-<p>message-item works!</p>
+<div class="message" [class.message--own]="message.isOwnMessage">
+  <img
+    class="message__avatar"
+    [src]="message.avatar"
+    [alt]="message.author"
+  />
+
+  <div class="message__content">
+    <div class="message__meta">
+      <span class="message__author">{{ message.author }}</span>
+      <span class="message__time">{{ message.time }}</span>
+    </div>
+
+    <div class="message__bubble">
+      {{ message.text }}
+    </div>
+    @if (message.threadCount) {
+      <button class="message__thread">
+        {{ message.threadCount }} Antworten
+      </button>
+    }
+  </div>
+</div>
