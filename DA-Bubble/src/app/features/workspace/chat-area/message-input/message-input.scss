@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  flex-shrink: 0;
+  padding: 0 32px 24px;
+}
+
+.message-input {
+  border: 1px solid #adb0d9;
+  border-radius: 20px;
+  padding: 16px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  textarea {
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 16px;
+    font-family: inherit;
+    min-height: 60px;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 12px;
+
+    button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+    }
+  }
+
+  &__send {
+    border: none;
+    background: transparent;
+    color: #535af1;
+    font-size: 28px;
+    cursor: pointer;
+  }
+}
