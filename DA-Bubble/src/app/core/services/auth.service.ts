@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Supabase } from '../supabase/supabase.service';
 import { User } from '@supabase/supabase-js';
+import { Profile } from '../models/profile.model';
 
 export interface RegisterData {
 
@@ -8,15 +9,6 @@ export interface RegisterData {
   email: string;
   password: string;
   avatar?: string;
-}
-
-export interface Profile {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  status: 'online' | 'offline';
-  created_at?: string;
 }
 
 
