@@ -1,13 +1,5 @@
-import { Component, Input } from '@angular/core';
-
-export type MessageItem = {
-  author: string;
-  time: string;
-  text: string;
-  avatar: string;
-  isOwnMessage: boolean;
-  threadCount?: number;
-};
+import { Component, input, Input } from '@angular/core';
+import { MessageView } from '../../../../core/models/message-view.model';
 
 @Component({
   selector: 'app-message-item',
@@ -17,6 +9,6 @@ export type MessageItem = {
 })
 export class MessageItemComponent {
 
-  @Input() message!: MessageItem;
+  message= input.required<MessageView>();
 
 }
