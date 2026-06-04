@@ -12,4 +12,8 @@ import { MessageService } from '../../../../core/services/message.service';
 export class MessageList {
   messageService = inject(MessageService);
 
+ngOnInit(){
+  this.messageService.loadMessages();
+}
+
 }
