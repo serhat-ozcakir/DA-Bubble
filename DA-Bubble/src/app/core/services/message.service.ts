@@ -1,16 +1,17 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { MessageView } from "../models/message-view.model";
 import { Supabase } from "../supabase/supabase.service";
+import { ChannelService } from "./channel.service";
+import { Auth } from './auth.service'
 
 @Injectable({
   providedIn: 'root',
 })
 export class MessageService {
 
-  private channelId = '838e45a7-d261-406b-b9e8-616226ab43bc';
-  private authorId = 'ece84594-4c34-4308-a13b-fd3898ed66e1';
   private supabase = inject(Supabase);
-
+  private channelService = inject(ChannelService);
+  private authService = inject(Auth);
 
   private formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('de-DE', {
@@ -22,35 +23,54 @@ export class MessageService {
   messages = signal<MessageView[]>([]);
 
   async loadMessages(): Promise<void> {
+    const channel = this.channelService.currentChannel();
+    const currentUserProfile = this.authService.currentUserProfile();
+
+    if (!channel || !currentUserProfile) {
+      console.error('Kein Kanal ausgewählt oder kein Benutzerprofil verfügbar');
+      return;
+    }
+
     const { data, error } = await this.supabase.supabase
       .from('messages')
-      .select('*')
-      .eq('channel_id', this.channelId)
+      .select('*, profiles(name, avatar)')
+      .eq('channel_id', channel.id)
       .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Fehler beim Laden der Nachrichten:', error);
       return;
     }
+
     const loadedMessages: MessageView[] = data.map((message) => ({
       id: message.id,
-      authorName: message.author_id === this.authorId ? 'Serhat Özcakir' : 'Unbekannter Autor',
-      avatar: message.avatar || 'assets/img/avatar/avatar-3.png',
+      authorName:message.profiles?.name ?? 'Unbekannter Benutzer',
+      avatar:message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
       text: message.text,
       time: this.formatTime(message.created_at),
-      isOwnMessage: message.author_id === this.authorId,
+      isOwnMessage: message.author_id === currentUserProfile.id,
     }));
     this.messages.set(loadedMessages);
 
   }
-  
 
   async sendMessage(text: string): Promise<void> {
+    const currentUserProfile = this.authService.currentUserProfile();
+    if (!currentUserProfile) {
+      console.error('Kein Benutzerprofil verfügbar');
+      return;
+    }
+    const channel = this.channelService.currentChannel();
+    if (!channel) {
+      console.error('Kein Kanal ausgewählt');
+      return;
+    }
+
     const { data, error } = await this.supabase.supabase
       .from('messages')
       .insert({
-        channel_id: this.channelId,
-        author_id: this.authorId,
+        channel_id: channel.id,
+        author_id: currentUserProfile.id,
         text,
       })
       .select()
@@ -65,8 +85,8 @@ export class MessageService {
       ...messages,
       {
         id: data.id,
-        authorName: 'Serhat Özçakır',
-        avatar: 'assets/img/avatar/avatar-3.png',
+        authorName: currentUserProfile.name,
+        avatar: currentUserProfile.avatar || 'assets/img/avatar/avatar-3.png',
         text: data.text,
         time: 'Jetzt',
         isOwnMessage: true,
