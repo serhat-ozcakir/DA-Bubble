@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {Auth} from "../../../core/services/auth.service";
+import { ChannelService } from '../../../core/services/channel.service';
+import {UserService} from "../../../core/services/user.service";
+
 
 @Component({
   selector: 'app-sidebar',
@@ -7,33 +10,23 @@ import {Auth} from "../../../core/services/auth.service";
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
-export class Sidebar {
+export class Sidebar implements OnInit {
+
+  channelService = inject(ChannelService);
+  userService = inject(UserService);
+  authService = inject(Auth);
+
   isChannelsOpen = true;
   isDirectMessagesOpen = true;
 
- constructor(public auth: Auth) {
+ constructor() {
  }
 
- users = [
-  {
-    id: 1,
-    name: 'Frederik Beck (Du)',
-    avatar: 'assets/img/avatar/avatar-1.png',
-    status: 'online',
-  },
-  {
-    id: 2,
-    name: 'Sofia Müller',
-    avatar: 'assets/img/avatar/avatar-2.png',
-    status: 'online',
-  },
-  {
-    id: 3,
-    name: 'Noah Braun',
-    avatar: 'assets/img/avatar/avatar-3.png',
-    status: 'offline',
-  },
-];
+ async ngOnInit(): Promise<void> {
+   await this.userService.loadUsers();
+   await this.channelService.loadChannels();
+  }
+
 
   toggleSection(section: 'channels' | 'directMessages'): void {
     if (section === 'channels') {
