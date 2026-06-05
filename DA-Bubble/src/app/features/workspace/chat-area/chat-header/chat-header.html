@@ -1,7 +1,7 @@
 <div class="chat-header">
   <div class="chat-header__left">
     <span class="chat-header__hash">#</span>
-    <span class="chat-header__title">Entwicklerteam</span>
+    <span class="chat-header__title">{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</span>
     <img
       class="chat-header__arrow"
       src="assets/icons/keyboard_arrow_down.png"
