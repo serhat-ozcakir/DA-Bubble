@@ -15,6 +15,8 @@ export class MessageService {
   private authService = inject(Auth);
   private realtimeChannel: any = null;
   private userService = inject(UserService);
+  selectedThreadMessage = signal<MessageView | null>(null)
+  threadMessages = signal<MessageView[]>([])
 
 
   private formatTime(dateString: string): string {
@@ -46,14 +48,24 @@ export class MessageService {
       return;
     }
 
-    const loadedMessages: MessageView[] = data.map((message) => ({
-      id: message.id,
-      authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
-      avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
-      text: message.text,
-      time: this.formatTime(message.created_at),
-      isOwnMessage: message.author_id === currentUserProfile.id,
-    }));
+    const mainMessages = data.filter((message) => !message.parent_message_id)
+    const replies = data.filter((message) => message.parent_message_id)
+
+    const loadedMessages: MessageView[] = mainMessages.map((message) => {
+      const threadCount = replies.filter(
+        (reply) => reply.parent_message_id === message.id
+      ).length;
+
+      return {
+        id: message.id,
+        authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
+        avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
+        text: message.text,
+        time: this.formatTime(message.created_at),
+        isOwnMessage: message.author_id === currentUserProfile.id,
+        threadCount,
+      };
+    });
     this.messages.set(loadedMessages);
 
   }
@@ -160,5 +172,69 @@ export class MessageService {
       .subscribe((status) => {
         console.log('Realtime status:', status);
       });
+  }
+
+  async openThread(message: MessageView): Promise<void> {
+    console.log('Thread geöffnet:', message);
+    this.selectedThreadMessage.set(message);
+    await this.loadThreadMessages(message.id)
+  }
+
+  async loadThreadMessages(parentMessageId: string): Promise<void> {
+
+    const currentUserProfile = this.authService.currentUserProfile()
+
+    if (!currentUserProfile) {
+      return;
+    }
+
+    const { data, error } = await this.supabase.supabase
+      .from('messages')
+      .select('*, profiles(name,avatar)')
+      .eq('parent_message_id', parentMessageId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.log('Fehler beim Laden der Thread-Nachrichten:', error);
+      return;
+    }
+
+    const loadedThreadMessages: MessageView[] = data.map((message) => ({
+      id: message.id,
+      authorName: message.profiles?.name || 'Unbekannter Benutzer',
+      avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
+      text: message.text,
+      time: this.formatTime(message.created_at),
+      isOwnMessage: message.author_id === currentUserProfile.id
+    }));
+    console.log('Thread messages:', loadedThreadMessages);
+    this.threadMessages.set(loadedThreadMessages)
+  }
+
+  async sendThreadMessage(text: string): Promise<void> {
+    const selectedMessage = this.selectedThreadMessage();
+    const currentUserProfile = this.authService.currentUserProfile();
+    const channel = this.channelService.currentChannel();
+
+    if (!selectedMessage || !currentUserProfile || !channel) {
+      console.error('Thread, Benutzer oder Channel fehlt');
+      return;
+    }
+
+    const { data, error } = await this.supabase.supabase
+      .from('messages')
+      .insert({
+        channel_id: channel.id,
+        author_id: currentUserProfile.id,
+        text,
+        parent_message_id: selectedMessage.id,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Fehler beim Senden der Thread-Nachricht:', error);
+    }
+    await this.loadThreadMessages(selectedMessage.id);
   }
 }
