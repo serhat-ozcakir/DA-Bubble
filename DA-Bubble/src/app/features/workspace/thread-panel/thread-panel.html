@@ -1,1 +1,54 @@
-<p>thread-panel works!</p>
+@if (messageService.selectedThreadMessage(); as message) {
+  <div class="thread-panel">
+    <app-thread-header />
+
+    <div class="thread-panel__content">
+      <div class="thread-panel__message">
+        <img class="thread-panel__avatar" [src]="message.avatar" alt="" />
+
+        <div class="thread-panel__body">
+          <div class="thread-panel__meta">
+            <strong>{{ message.authorName }}</strong>
+            <span>{{ message.time }}</span>
+          </div>
+
+          <div class="thread-panel__bubble">
+            {{ message.text }}
+          </div>
+        </div>
+      </div>
+
+      <div class="thread-panel__divider">
+        {{ message.threadCount || messageService.threadMessages().length }} Antworten
+      </div>
+
+      @for (reply of messageService.threadMessages(); track reply.id) {
+        <div
+          class="thread-panel__reply"
+          [class.thread-panel__reply--own]="reply.isOwnMessage"
+        >
+          @if (!reply.isOwnMessage) {
+            <img class="thread-panel__avatar" [src]="reply.avatar" alt="" />
+          }
+
+          <div class="thread-panel__body">
+            <div class="thread-panel__meta">
+              <strong>{{ reply.authorName }}</strong>
+              <span>{{ reply.time }}</span>
+            </div>
+
+            <div class="thread-panel__bubble">
+              {{ reply.text }}
+            </div>
+          </div>
+
+          @if (reply.isOwnMessage) {
+            <img class="thread-panel__avatar" [src]="reply.avatar" alt="" />
+          }
+        </div>
+      }
+    </div>
+
+    <app-thread-input />
+  </div>
+}
