@@ -101,18 +101,25 @@ export class Auth {
     return data;
   }
 
-  async login(email: string, password: string) {
-    const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) {
-      throw error;
-    }
-    await this.loadCurrentUser();
-    await this.updateStatus('online');
-    return data;
+async login(email: string, password: string) {
+  this.currentUser.set(null);
+  this.currentUserProfile.set(null);
+
+  const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    throw error;
   }
+
+  await this.loadCurrentUser();
+  await this.updateStatus('online');
+  await this.loadCurrentUser();
+
+  return data;
+}
 
   async logout() {
     await this.updateStatus('offline');

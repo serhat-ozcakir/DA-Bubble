@@ -3,6 +3,7 @@ import { MessageView } from "../models/message-view.model";
 import { Supabase } from "../supabase/supabase.service";
 import { ChannelService } from "./channel.service";
 import { Auth } from './auth.service'
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,9 @@ export class MessageService {
   private supabase = inject(Supabase);
   private channelService = inject(ChannelService);
   private authService = inject(Auth);
+  private realtimeChannel: any = null;
+  private userService = inject(UserService);
+
 
   private formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('de-DE', {
@@ -44,8 +48,8 @@ export class MessageService {
 
     const loadedMessages: MessageView[] = data.map((message) => ({
       id: message.id,
-      authorName:message.profiles?.name ?? 'Unbekannter Benutzer',
-      avatar:message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
+      authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
+      avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
       text: message.text,
       time: this.formatTime(message.created_at),
       isOwnMessage: message.author_id === currentUserProfile.id,
@@ -55,22 +59,37 @@ export class MessageService {
   }
 
   async sendMessage(text: string): Promise<void> {
+    const { data: authUserData } =
+      await this.supabase.supabase.auth.getUser();
+
+    const authUser = authUserData.user;
+
+    if (!authUser) {
+      console.error('Kein eingeloggter Benutzer');
+      return;
+    }
+
     const currentUserProfile = this.authService.currentUserProfile();
+
     if (!currentUserProfile) {
       console.error('Kein Benutzerprofil verfügbar');
       return;
     }
+
     const channel = this.channelService.currentChannel();
+
     if (!channel) {
       console.error('Kein Kanal ausgewählt');
       return;
     }
 
+
+
     const { data, error } = await this.supabase.supabase
       .from('messages')
       .insert({
         channel_id: channel.id,
-        author_id: currentUserProfile.id,
+        author_id: authUser.id,
         text,
       })
       .select()
@@ -81,16 +100,65 @@ export class MessageService {
       return;
     }
 
-    this.messages.update((messages) => [
-      ...messages,
-      {
-        id: data.id,
-        authorName: currentUserProfile.name,
-        avatar: currentUserProfile.avatar || 'assets/img/avatar/avatar-3.png',
-        text: data.text,
-        time: 'Jetzt',
-        isOwnMessage: true,
-      },
-    ]);
+
+  }
+
+  listenToMessages(): void {
+    const channel = this.channelService.currentChannel();
+
+    if (!channel) {
+      return;
+    }
+
+    if (this.realtimeChannel) {
+      this.supabase.supabase.removeChannel(this.realtimeChannel);
+    }
+
+    this.realtimeChannel = this.supabase.supabase
+      .channel(`messages-${channel.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `channel_id=eq.${channel.id}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as any;
+
+          const alreadyExists = this.messages().some(
+            (message) => message.id === newMessage.id
+          );
+
+          if (alreadyExists) {
+            return;
+          }
+
+          const currentUserProfile = this.authService.currentUserProfile();
+
+          if (!currentUserProfile) {
+            return;
+          }
+          const author = this.userService.user().find((user) => user.id === newMessage.author_id)
+
+          const realtimeMessage: MessageView = {
+            id: newMessage.id,
+            authorName: author?.name ?? 'Unbekannter Benutzer',
+            avatar: author?.avatar || 'assets/img/avatar/avatar-3.png',
+            text: newMessage.text,
+            time: this.formatTime(newMessage.created_at),
+            isOwnMessage: newMessage.author_id === currentUserProfile.id,
+          };
+
+          this.messages.update((messages) => [
+            ...messages,
+            realtimeMessage,
+          ]);
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime status:', status);
+      });
   }
 }
