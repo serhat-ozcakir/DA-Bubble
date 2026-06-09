@@ -1,5 +1,6 @@
-import { Component, input, Input } from '@angular/core';
+import { Component, inject, input, Input } from '@angular/core';
 import { MessageView } from '../../../../core/models/message-view.model';
+import {MessageService} from '../../../../core/services/message.service'
 
 @Component({
   selector: 'app-message-item',
@@ -10,5 +11,10 @@ import { MessageView } from '../../../../core/models/message-view.model';
 export class MessageItemComponent {
 
   message= input.required<MessageView>();
+  private messageService = inject(MessageService)
+
+  openThread():void{
+    this.messageService.openThread(this.message())
+  }
 
 }

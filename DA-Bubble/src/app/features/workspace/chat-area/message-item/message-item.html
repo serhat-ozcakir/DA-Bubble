@@ -11,11 +11,11 @@
       <span class="message__time">{{ message().time }}</span>
     </div>
 
-    <div class="message__bubble">
+    <div class="message__bubble" (click)="openThread()">
       {{ message().text }}
     </div>
     @if (message().threadCount) {
-      <button class="message__thread">
+      <button class="message__thread" (click)="openThread()">
         {{ message().threadCount }} Antworten
       </button>
     }
