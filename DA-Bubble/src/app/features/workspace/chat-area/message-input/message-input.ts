@@ -13,10 +13,12 @@ export class MessageInput {
  messageService = inject(MessageService);
   messageText: string = '';
 
-  sendMessage() {
+
+
+ async sendMessage() {
     if (this.messageText.trim() !== '') {
       console.log('Nachricht gesendet:', this.messageText);
-      this.messageService.sendMessage(this.messageText);
+      await this.messageService.sendMessage(this.messageText);
       this.messageText = '';
     }
   }

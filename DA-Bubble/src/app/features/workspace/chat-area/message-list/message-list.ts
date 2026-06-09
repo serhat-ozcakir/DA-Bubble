@@ -22,6 +22,7 @@ export class MessageList {
     const channel = this.channelService.currentChannel();
     if (channel) {    
         this.messageService.loadMessages();
+        this.messageService.listenToMessages()
     }
   });
 }
