@@ -237,4 +237,9 @@ export class MessageService {
     }
     await this.loadThreadMessages(selectedMessage.id);
   }
+
+  closeThread():void{
+    this.selectedThreadMessage.set(null);
+    this.threadMessages.set([])
+  }
 }
