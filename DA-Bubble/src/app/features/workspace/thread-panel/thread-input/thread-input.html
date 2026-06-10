@@ -1,1 +1,22 @@
-<p>thread-input works!</p>
+<div class="thread-input">
+  <textarea 
+  [(ngModel)]="replyText"
+    placeholder="Antworten..."
+  ></textarea>
+
+  <div class="thread-input__footer">
+    <div class="thread-input__actions">
+      <button type="button">
+        <img src="assets/icons/sentiment_satisfied.png" alt="emoji">
+      </button>
+
+      <button type="button">
+        <img src="assets\icons\alternate_email.png" alt="mention">
+      </button>
+    </div>
+
+    <button class="thread-input__send" type="button" (click)="sendReply()">
+      <img src="assets/icons/send.png" alt="send">
+    </button>
+  </div>
+</div>

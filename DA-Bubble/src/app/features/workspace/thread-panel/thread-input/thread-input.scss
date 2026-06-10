@@ -1,0 +1,78 @@
+.thread-input {
+  margin: 16px 24px 21px;
+  padding: 16px;
+  border: 1px solid #adb0d9;
+  border-radius: 20px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  textarea {
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 16px;
+    font-family: inherit;
+    color: #000;
+    background: transparent;
+
+    &::placeholder {
+      color: #686868;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 12px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: #eceefe;
+      }
+
+      img {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  &__send {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
