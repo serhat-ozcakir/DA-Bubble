@@ -2,10 +2,10 @@
   <div class="thread-panel__header">
     <div class="thread-panel__header-left">
       <span class="thread-panel__title">Thread</span>
-      <span class="thread-panel__channel"># Entwicklerteam</span>
+      <span class="thread-panel__channel"># {{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</span>
     </div>
 
-    <button class="thread-panel__close" type="button">
+    <button class="thread-panel__close" type="button" (click)="messageService.closeThread()">
       <img src="assets/icons/close.png" alt="Close" />
     </button>
   </div>
