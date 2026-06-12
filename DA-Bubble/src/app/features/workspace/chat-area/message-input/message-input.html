@@ -1,8 +1,16 @@
 <div class="message-input">
-  <textarea placeholder="Nachricht an #Entwicklerteam"
+  @if(directMessageService.currentDmUser()){
+  <textarea placeholder="Nachricht an  {{directMessageService.currentDmUser()?.name}}"
   [(ngModel)]="messageText"
   (keydown.enter)="sendMessage()"
   ></textarea>
+  } @else {
+      <textarea placeholder="Nachricht an # {{channelService.currentChannel()?.name}}"
+  [(ngModel)]="messageText"
+  (keydown.enter)="sendMessage()"
+  ></textarea>
+  }
+
 
   <div class="message-input__footer">
     <div class="message-input__actions">
@@ -11,7 +19,7 @@
     </div>
 
     <button class="message-input__send" type="button" (click)="sendMessage()">
-      ➤
+      <img src="assets/icons/send.png" alt="send">
     </button>
   </div>
 </div>
