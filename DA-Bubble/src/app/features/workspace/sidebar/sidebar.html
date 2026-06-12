@@ -31,7 +31,7 @@
     <ul class="sidebar__list">
       @for (channel of channelService.channels(); track channel.id) {
         <li class="sidebar__channel" [class.sidebar__channel--active]="channelService.currentChannel()?.id === channel.id" 
-        (click)="channelService.currentChannel.set(channel)">
+        (click)="selectChannel(channel)">
           
           <span>#</span>
           {{ channel.name }}
@@ -58,7 +58,7 @@
 @if (isDirectMessagesOpen) {
     <ul class="sidebar__dm-list">
       @for (user of userService.user(); track user.id) {
-        <li class="sidebar__dm-item">
+        <li class="sidebar__dm-item" (click)="selectDmUser(user)">
           <div class="sidebar__avatar-wrapper">
             <img [src]="user.avatar" [alt]="user.name" />
 
