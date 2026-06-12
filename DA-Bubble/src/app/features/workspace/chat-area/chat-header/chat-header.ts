@@ -1,5 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
+import { DirectMessageService } from '../../../../core/services/direct-message.service';
+import { UserService } from '../../../../core/services/user.service';
+import { Auth } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-chat-header',
@@ -9,6 +12,9 @@ import { ChannelService } from '../../../../core/services/channel.service';
 })
 export class ChatHeader {
   channelService = inject(ChannelService);
+  directMessageService = inject(DirectMessageService);
+   userService = inject(UserService);
+   authService = inject(Auth)
   
   constructor() {
 }
