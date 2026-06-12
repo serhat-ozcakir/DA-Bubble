@@ -14,6 +14,7 @@ export class MessageService {
   private channelService = inject(ChannelService);
   private authService = inject(Auth);
   private realtimeChannel: any = null;
+  private threadRealtimeChannel: any = null;
   private userService = inject(UserService);
   selectedThreadMessage = signal<MessageView | null>(null)
   threadMessages = signal<MessageView[]>([])
@@ -70,6 +71,25 @@ export class MessageService {
 
   }
 
+  private incrementThreadCount(parentMessageId: string): void {
+    this.messages.update((messages) =>
+      messages.map((message) =>
+        message.id === parentMessageId ? {
+          ...message,
+          threadCount: (message.threadCount || 0) + 1,
+        } : message
+      )
+    );
+    const selectedMessage = this.selectedThreadMessage();
+
+    if (selectedMessage?.id === parentMessageId) {
+      this.selectedThreadMessage.set({
+        ...selectedMessage,
+        threadCount: (selectedMessage.threadCount || 0) + 1,
+      });
+    }
+  }
+
   async sendMessage(text: string): Promise<void> {
     const { data: authUserData } =
       await this.supabase.supabase.auth.getUser();
@@ -114,7 +134,6 @@ export class MessageService {
 
 
   }
-
   listenToMessages(): void {
     const channel = this.channelService.currentChannel();
 
@@ -139,6 +158,23 @@ export class MessageService {
         (payload) => {
           const newMessage = payload.new as any;
 
+          // Thread cevabıysa sadece cevap sayısını artır
+          if (newMessage.parent_message_id) {
+            this.messages.update((messages) =>
+              messages.map((message) =>
+                message.id === newMessage.parent_message_id
+                  ? {
+                    ...message,
+                    threadCount: (message.threadCount || 0) + 1,
+                  }
+                  : message
+              )
+            );
+
+            return;
+          }
+
+          // Ana mesaj duplicate kontrolü
           const alreadyExists = this.messages().some(
             (message) => message.id === newMessage.id
           );
@@ -152,15 +188,21 @@ export class MessageService {
           if (!currentUserProfile) {
             return;
           }
-          const author = this.userService.user().find((user) => user.id === newMessage.author_id)
+
+          const author = this.userService
+            .user()
+            .find((user) => user.id === newMessage.author_id);
 
           const realtimeMessage: MessageView = {
             id: newMessage.id,
             authorName: author?.name ?? 'Unbekannter Benutzer',
-            avatar: author?.avatar || 'assets/img/avatar/avatar-3.png',
+            avatar:
+              author?.avatar || 'assets/img/avatar/avatar-3.png',
             text: newMessage.text,
             time: this.formatTime(newMessage.created_at),
-            isOwnMessage: newMessage.author_id === currentUserProfile.id,
+            isOwnMessage:
+              newMessage.author_id === currentUserProfile.id,
+            threadCount: 0,
           };
 
           this.messages.update((messages) => [
@@ -178,6 +220,7 @@ export class MessageService {
     console.log('Thread geöffnet:', message);
     this.selectedThreadMessage.set(message);
     await this.loadThreadMessages(message.id)
+    this.listenToThreadMessage(message.id)
   }
 
   async loadThreadMessages(parentMessageId: string): Promise<void> {
@@ -238,8 +281,32 @@ export class MessageService {
     await this.loadThreadMessages(selectedMessage.id);
   }
 
-  closeThread():void{
+  closeThread(): void {
     this.selectedThreadMessage.set(null);
     this.threadMessages.set([])
+  }
+
+  listenToThreadMessage(parentMessageId: string): void {
+    if (this.threadRealtimeChannel) {
+      this.supabase.supabase.removeChannel(this.threadRealtimeChannel)
+    }
+
+    this.threadRealtimeChannel = this.supabase.supabase
+      .channel(`thread-messages-${parentMessageId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `parent_message_id=eq.${parentMessageId}`,
+        },
+        (payload) => {
+          console.log('Realtime thread reply:', payload.new);
+        }
+      )
+      .subscribe((status) => {
+        console.log('Thread realtime status:', status);
+      });
   }
 }
