@@ -19,14 +19,20 @@ export class MessageList {
   private channelService = inject(ChannelService);
   directMessageService = inject(DirectMessageService)
 
-  constructor() { 
+constructor() {
   effect(() => {
+    const dmUser = this.directMessageService.currentDmUser();
     const channel = this.channelService.currentChannel();
-    const dmUSer = this.directMessageService.currentDmUser();
-    if (channel) {    
-        this.messageService.loadMessages();
-      }
-      if(dmUSer){
+
+    if (dmUser) {
+      this.directMessageService.loadDirectMessages();
+      this.directMessageService.listenToDirectMessages();
+      return;
+    }
+
+    if (channel) {
+      this.directMessageService.removeDmRealtimeChannel();
+      this.messageService.loadMessages();
       this.messageService.listenToMessages();
     }
   });
