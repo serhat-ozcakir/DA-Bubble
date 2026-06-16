@@ -19,7 +19,7 @@
       </div>
 
       <div class="thread-panel__divider">
-        {{ message.threadCount || messageService.threadMessages().length }} Antworten
+        {{ messageService.threadMessages().length }} Antworten
       </div>
 
       @for (reply of messageService.threadMessages(); track reply.id) {
