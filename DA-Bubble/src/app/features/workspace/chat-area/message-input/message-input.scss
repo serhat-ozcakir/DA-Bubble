@@ -4,6 +4,7 @@
   padding: 0 32px 24px;
 }
 
+
 .message-input {
   border: 1px solid #adb0d9;
   border-radius: 20px;
@@ -12,6 +13,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  position: relative;
 
   textarea {
     border: none;
@@ -47,4 +49,15 @@
     font-size: 28px;
     cursor: pointer;
   }
+}
+
+.emoji-picker {
+  position: absolute;
+  left: 0;
+  bottom: 56px;
+  z-index: 1000;
+  max-height: 360px;
+  overflow: hidden;
+  cursor: pointer;
+  
 }

@@ -1,20 +1,30 @@
 <div class="message-input">
   @if(directMessageService.currentDmUser()){
-  <textarea placeholder="Nachricht an  {{directMessageService.currentDmUser()?.name}}"
-  [(ngModel)]="messageText"
-  (keydown.enter)="sendMessage()"
-  ></textarea>
+  <textarea placeholder="Nachricht an  {{directMessageService.currentDmUser()?.name}}" [(ngModel)]="messageText"
+    (keydown.enter)="sendMessage();"></textarea>
   } @else {
-      <textarea placeholder="Nachricht an # {{channelService.currentChannel()?.name}}"
-  [(ngModel)]="messageText"
-  (keydown.enter)="sendMessage()"
-  ></textarea>
+  <textarea placeholder="Nachricht an # {{channelService.currentChannel()?.name}}" [(ngModel)]="messageText"
+    (keydown.enter)="sendMessage();"></textarea>
   }
 
 
   <div class="message-input__footer">
     <div class="message-input__actions">
-      <button type="button">😊</button>
+      <button type="button" (click)="toggleEmojiPicker()">
+        <img src="assets/icons/sentiment_satisfied.png" alt="emoji">
+      </button>
+      @if(showEmojiPicker){
+      <div class="emoji-picker">
+        <emoji-mart 
+        set="apple" [showPreview]="false" 
+        [isNative]="true" 
+        [emojiSize]="22" 
+        [perLine]="8"
+        [exclude]="['flags']" 
+        (emojiClick)="addEmoji($event)">
+        </emoji-mart>
+      </div>
+      }
       <button type="button">@</button>
     </div>
 
