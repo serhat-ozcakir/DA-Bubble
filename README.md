@@ -19,7 +19,7 @@ A modern Slack-inspired real-time communication platform built with Angular 20 &
 
 ## 🚀 Live Demo
 
-🔗 https://your-demo-link.com
+🔗 
 
 ---
 
@@ -79,9 +79,7 @@ Built with **Angular 20** and **Supabase**, the project focuses on scalability, 
 
 ### Workspace
 
-<p align="center">
 <img src="assets/img/DABubble.png">
-</p>
 
 ---
 
