@@ -76,3 +76,14 @@
     }
   }
 }
+
+.emoji-picker {
+  position: absolute;
+  left: 0;
+  bottom: 66px;
+  z-index: 1000;
+  max-height: 360px;
+  overflow: hidden;
+  cursor: pointer;
+  
+}

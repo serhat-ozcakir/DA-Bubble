@@ -6,10 +6,21 @@
 
   <div class="thread-input__footer">
     <div class="thread-input__actions">
-      <button type="button">
+      <button type="button" (click)="toggleEmojiPicker()">
         <img src="assets/icons/sentiment_satisfied.png" alt="emoji">
       </button>
-
+      @if(showEmojiPicker){
+      <div class="emoji-picker">
+        <emoji-mart 
+        set="apple" [showPreview]="false" 
+        [isNative]="true" 
+        [emojiSize]="22" 
+        [perLine]="6"
+        [exclude]="['flags']" 
+        (emojiClick)="addEmoji($event)">
+        </emoji-mart>
+      </div>
+      }
       <button type="button">
         <img src="assets\icons\alternate_email.png" alt="mention">
       </button>
