@@ -1,7 +1,7 @@
 # 💬 DaBubble
 
 <p align="center">
-  <img src="./src/assets/img/header/header_logo.png" width="140">
+  <img src="assets/img/header/header_logo.png" width="140">
 </p>
 
 <h3 align="center">
@@ -80,7 +80,7 @@ Built with **Angular 20** and **Supabase**, the project focuses on scalability, 
 ### Workspace
 
 <p align="center">
-<img src="./src/assets/img/DABubble.png">
+<img src="assets/img/DABubble.png">
 </p>
 
 ---
