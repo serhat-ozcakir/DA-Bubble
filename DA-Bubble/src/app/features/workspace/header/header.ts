@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, ElementRef, inject } from '@angular/core';
 import { Auth } from '../../../core/services/auth.service';
-import {UserMenu} from './user-menu/user-menu';
-import {ProfileDialog} from './profile-dialog/profile-dialog';
-import {EditProfileDialog} from './edit-profile-dialog/edit-profile-dialog';  
+import { UserMenu } from './user-menu/user-menu';
+import { ProfileDialog } from './profile-dialog/profile-dialog';
+import { EditProfileDialog } from './edit-profile-dialog/edit-profile-dialog';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,15 +12,27 @@ import { Router } from '@angular/router';
   styleUrl: './header.scss',
 })
 export class Header {
-
+  private elementRef = inject(ElementRef)
   isUserMenuOpen = false;
   isProfileMenuOpen = false;
   isEditProfileDialogOpen = false;
 
   constructor(public auth: Auth,
     private router: Router
-  ) {
+  ) { }
 
+  @HostListener('document:click', ['$event'])
+  closeUserMenuOnOutsideClick(event: MouseEvent): void {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+
+    if (!clickedInside) {
+      this.isUserMenuOpen = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  closeUserMenuOnEscape(): void {
+    this.isUserMenuOpen = false;
   }
 
   toggleUserMenu(): void {
