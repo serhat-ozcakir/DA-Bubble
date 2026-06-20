@@ -1,7 +1,7 @@
 # 💬 DaBubble
 
 <p align="center">
-  <img src="assets/img/header/header_logo.png" width="140">
+  <img src="src/assets/img/header/header_logo.png" width="140" alt="DA Bubble Logo">
 </p>
 
 <h3 align="center">
