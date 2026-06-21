@@ -11,7 +11,6 @@ export class ChannelService {
   channels = signal<Channel[]>([]);
 
   currentChannel = signal<Channel | null>(null);
-
   async loadChannels(): Promise<void> {
     const { data, error } = await this.supabase.supabase
       .from('channels')
