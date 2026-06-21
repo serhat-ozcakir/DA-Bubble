@@ -20,28 +20,32 @@ export class MessageInput {
   messageText: string = '';
   showEmojiPicker = false;
 
+  handleEnter(event: Event): void {
+    event.preventDefault();
+    this.sendMessage();
+  }
+
   async sendMessage(): Promise<void> {
-    console.log('SEND CLICKED, messageText:', this.messageText);
     const text = this.messageText.trim();
 
     if (!text) return;
-
-
-    if (this.directMessageService.currentDmUser()) {
-      console.log('DM gönderiliyor');
-      await this.directMessageService.sendDirectMessage(text);
-    } else {
-      console.log('Channel mesajı gönderiliyor');
-      await this.messageService.sendMessage(text);
-    }
-
     this.messageText = '';
+
+    try {
+      if (this.directMessageService.currentDmUser()) {
+        await this.directMessageService.sendDirectMessage(text);
+      } else {
+        await this.messageService.sendMessage(text);
+      }
+    } catch (error) {
+      console.error('Message could not be sent:', error);
+      this.messageText = text;
+    }
   }
 
   @HostListener('document:click', ['$event'])
   closeEmojiPickerOnOutsideClick(event: MouseEvent): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
-
     if (!clickedInside) {
       this.showEmojiPicker = false;
     }

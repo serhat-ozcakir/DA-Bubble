@@ -1,12 +1,12 @@
 <div class="message-input">
   @if(directMessageService.currentDmUser()){
   <textarea placeholder="Nachricht an  {{directMessageService.currentDmUser()?.name}}" [(ngModel)]="messageText"
-    (keydown.enter)="sendMessage();"></textarea>
+    (keydown.enter)="handleEnter($event);"></textarea>
   } @else {
-  <textarea placeholder="Nachricht an # {{channelService.currentChannel()?.name}}" [(ngModel)]="messageText"
-    (keydown.enter)="sendMessage();"></textarea>
+  <textarea placeholder="Nachricht an # {{ channelService.currentChannel()?.name }}" [(ngModel)]="messageText"
+    (keydown.enter)="handleEnter($event)">
+</textarea>
   }
-
 
   <div class="message-input__footer">
     <div class="message-input__actions">
@@ -15,13 +15,8 @@
       </button>
       @if(showEmojiPicker){
       <div class="emoji-picker">
-        <emoji-mart 
-        set="apple" [showPreview]="false" 
-        [isNative]="true" 
-        [emojiSize]="22" 
-        [perLine]="8"
-        [exclude]="['flags']" 
-        (emojiClick)="addEmoji($event)">
+        <emoji-mart set="apple" [showPreview]="false" [isNative]="true" [emojiSize]="22" [perLine]="8"
+          [exclude]="['flags']" (emojiClick)="addEmoji($event)">
         </emoji-mart>
       </div>
       }
