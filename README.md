@@ -2,7 +2,7 @@
 
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/serhat-ozcakir/DA-Bubble/master/public/assets/img/header/header_logo.png"
+    src="https://raw.githubusercontent.com/serhat-ozcakir/DA-Bubble/master/DA-Bubble/public/assets/img/header/header_logo.png"
     width="140"
     alt="DA Bubble Logo">
 </p>
