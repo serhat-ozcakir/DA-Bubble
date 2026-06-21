@@ -2,6 +2,7 @@
   <textarea 
   [(ngModel)]="replyText"
     placeholder="Antworten..."
+    (keydown.enter)="handleEnter($event)"
   ></textarea>
 
   <div class="thread-input__footer">

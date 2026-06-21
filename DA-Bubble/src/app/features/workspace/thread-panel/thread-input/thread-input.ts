@@ -16,6 +16,11 @@ export class ThreadInput {
   replyText = '';
   showEmojiPicker = false;
 
+  handleEnter(event:Event):void{
+    event.preventDefault();
+    this.sendReply();
+  }
+
   @HostListener('document:click', ['$event'])
   closeEmojiPickerOnOutsideClick(event:MouseEvent):void{
     const threadClickedInside = this.elementRef.nativeElement.contains(event.target);
