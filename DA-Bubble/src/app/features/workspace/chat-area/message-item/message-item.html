@@ -1,23 +1,51 @@
-<div class="message" [class.message--own]="message().isOwnMessage">
-  <img
-    class="message__avatar"
-    [src]="message().avatar"
-    [alt]="message().authorName"
-  />
-
-  <div class="message__content">
-    <div class="message__meta">
-      <span class="message__author">{{ message().authorName }}</span>
-      <span class="message__time">{{ message().time }}</span>
+<div class="message-wrapper" [class.message-wrapper--own]="message().isOwnMessage">
+  <div class="message-actions-container" [class.message-actions-container--own]="message().isOwnMessage">
+    <div class="message-actions">
+      @for(emoji of reactionService.reactionOptions; track emoji){
+      <button type="button" class="message-actions__button" (click)="reactionService.addReaction(message().id, emoji)">
+        {{ emoji }}
+      </button>
+      }
+      <button type="button" class="message-actions__button">
+        <img src="assets/icons/add_reaction.png" alt="Thread-icon">
+      </button>
+      <button type="button" class="message-actions__button" (click)="openThread()">
+        <img src="assets/icons/comment.png" alt="Thread-icon">
+      </button>
+      @if(message().isOwnMessage){
+        <button type="button" class="message-actions__button">
+          <img src="assets/icons/more_vert.png" alt="Thread-icon">
+        </button>
+      }
     </div>
+  </div>
 
-    <div class="message__bubble" (click)="openThread()">
-      {{ message().text }}
-    </div>
-    @if (message().threadCount) {
+  <div class="message" [class.message--own]="message().isOwnMessage">
+    <img class="message__avatar" [src]="message().avatar" [alt]="message().authorName" />
+
+    <div class="message__content">
+      <div class="message__meta">
+        <span class="message__author">{{ message().authorName }}</span>
+        <span class="message__time">{{ message().time }}</span>
+      </div>
+
+      <div class="message__bubble" (click)="openThread()">
+        {{ message().text }}
+      </div>
+      @if (message().threadCount) {
       <button class="message__thread" (click)="openThread()">
         {{ message().threadCount }} Antworten
       </button>
-    }
+      }
+      <div class="message-reactions">
+        @for(reaction of reactionService.getReactionForMessage(message().id); track reaction.emoji){
+        <button type="button" class="message-reactions__button"
+          [class.message-reactions__button--active]="reaction.reactedByCurrentUser">
+          <span>{{ reaction.emoji }}</span>
+          <span>{{ reaction.count }}</span>
+        </button>
+        }
+      </div>
+    </div>
   </div>
 </div>
