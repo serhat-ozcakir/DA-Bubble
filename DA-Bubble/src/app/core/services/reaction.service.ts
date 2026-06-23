@@ -3,6 +3,7 @@ import { Supabase } from '../supabase/supabase.service';
 import { Auth } from './auth.service';
 import { MessageReaction } from '../models/message-reaction.model';
 import { ReactionSummary } from '../models/reaction-summary.model'
+import { last } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -10,8 +11,33 @@ import { ReactionSummary } from '../models/reaction-summary.model'
 export class ReactionService {
   private supabase = inject(Supabase);
   private authService = inject(Auth);
-  readonly reactionOptions = ['✅', '👍', '🚀'];
+  readonly defaultReactionOptions = ['✅', '👍', '🚀'];
   reactions = signal<MessageReaction[]>([]);
+  lastUsedReactions = signal<string[]>([]);
+
+  reactionOptions = computed<string[] | undefined>(()=> {
+    const lastUsed = this.lastUsedReactions();
+
+    if(lastUsed.length === 0 ){
+      return this.defaultReactionOptions;
+    }
+
+    return [
+      ...lastUsed,
+      ...this.defaultReactionOptions.filter(
+        (emoji)=> !lastUsed.includes(emoji)
+      )
+    ].slice(0,2)
+  })
+
+  private updateLastUsedReactions(emoji:string):void{
+    this.lastUsedReactions.update((current)=>{
+      return[
+        emoji, 
+        ...current.filter((item)=> item !== emoji)
+      ].slice(0,2)
+    })
+  }
 
   reactionSummaries = computed<ReactionSummary[]>(() => {
     const currentUser = this.authService.currentUserProfile();
@@ -107,6 +133,7 @@ export class ReactionService {
       console.log('error', error);
       return;
     }
+    this.updateLastUsedReactions(emoji);
     await this.loadReactions();
   }
 

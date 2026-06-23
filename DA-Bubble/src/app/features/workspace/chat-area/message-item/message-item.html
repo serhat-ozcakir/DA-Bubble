@@ -1,7 +1,7 @@
 <div class="message-wrapper" [class.message-wrapper--own]="message().isOwnMessage">
   <div class="message-actions-container" [class.message-actions-container--own]="message().isOwnMessage">
     <div class="message-actions">
-      @for(emoji of reactionService.reactionOptions; track emoji){
+      @for(emoji of reactionService.reactionOptions(); track emoji){
       <button type="button" class="message-actions__button" (click)="reactionService.addReaction(message().id, emoji)">
         {{ emoji }}
       </button>
