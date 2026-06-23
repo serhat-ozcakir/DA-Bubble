@@ -5,6 +5,7 @@ import { MessageService } from '../../../../core/services/message.service';
 import { Auth } from '../../../../core/services/auth.service';
 import { ChannelService } from '../../../../core/services/channel.service';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
+import { ReactionService } from '../../../../core/services/reaction.service'; 
 
 @Component({
   selector: 'app-message-list',
@@ -17,12 +18,14 @@ export class MessageList {
   messageService = inject(MessageService);
   private authService = inject(Auth);
   private channelService = inject(ChannelService);
-  directMessageService = inject(DirectMessageService)
+  directMessageService = inject(DirectMessageService);
+  private reactionService = inject(ReactionService);
 
 constructor() {
   effect(() => {
     const dmUser = this.directMessageService.currentDmUser();
     const channel = this.channelService.currentChannel();
+    this.reactionService.loadReactions();
 
     if (dmUser) {
       this.directMessageService.loadDirectMessages();
