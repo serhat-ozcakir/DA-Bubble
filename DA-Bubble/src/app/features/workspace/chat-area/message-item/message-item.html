@@ -6,16 +6,23 @@
         {{ emoji }}
       </button>
       }
-      <button type="button" class="message-actions__button">
+      <button type="button" class="message-actions__button" (click)="toggleEmojiPicker()">
         <img src="assets/icons/add_reaction.png" alt="Thread-icon">
       </button>
+      @if(isShowEmojiPicker()){
+      <div class="emoji-picker">
+        <emoji-mart set="apple" [showPreview]="false" [isNative]="true" [emojiSize]="20" [perLine]="6"
+          [exclude]="['flags']" (emojiClick)="addEmojiReaction($event)">
+        </emoji-mart>
+      </div>
+      }
       <button type="button" class="message-actions__button" (click)="openThread()">
         <img src="assets/icons/comment.png" alt="Thread-icon">
       </button>
       @if(message().isOwnMessage){
-        <button type="button" class="message-actions__button">
-          <img src="assets/icons/more_vert.png" alt="Thread-icon">
-        </button>
+      <button type="button" class="message-actions__button">
+        <img src="assets/icons/more_vert.png" alt="Thread-icon">
+      </button>
       }
     </div>
   </div>

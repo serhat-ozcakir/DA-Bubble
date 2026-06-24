@@ -39,6 +39,26 @@
   }
 }
 
+.emoji-picker {
+  position: absolute;
+  top: 58px;
+  right: 0;
+  z-index: 30;
+  max-height: 250px;
+  background: white;
+  border: 1px solid #adb0d9;
+  border-radius: 24px;
+  padding: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.emoji-picker emoji-mart {
+  display: block;
+  width: 100%;
+}
+
 .message {
   display: flex;
   width: 100%;
