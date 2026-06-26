@@ -158,7 +158,6 @@ export class MessageService {
         (payload) => {
           const newMessage = payload.new as any;
 
-          // Thread cevabıysa sadece cevap sayısını artır
           if (newMessage.parent_message_id) {
             this.messages.update((messages) =>
               messages.map((message) =>
@@ -174,7 +173,6 @@ export class MessageService {
             return;
           }
 
-          // Ana mesaj duplicate kontrolü
           const alreadyExists = this.messages().some(
             (message) => message.id === newMessage.id
           );
@@ -309,4 +307,28 @@ export class MessageService {
         console.log('Thread realtime status:', status);
       });
   }
+
+  async updateMessage(messageId: string, newText: string): Promise<void> {
+    const text = newText.trim();
+
+    if (!text) return
+
+    const {data, error } = await this.supabase.supabase
+      .from('messages')
+      .update({
+        text: text,
+      })
+      .eq('id', messageId)
+      .select('*');
+
+    if (error) {
+      console.log('error:', error);
+    }
+    this.messages.update((messages) =>
+      messages.map((message) =>
+        message.id === messageId ?
+          { ...message, text: text } : message)
+    )
+  }
+
 }

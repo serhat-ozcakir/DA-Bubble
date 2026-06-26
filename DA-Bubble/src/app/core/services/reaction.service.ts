@@ -11,7 +11,7 @@ import { last } from 'rxjs';
 export class ReactionService {
   private supabase = inject(Supabase);
   private authService = inject(Auth);
-  readonly defaultReactionOptions = ['✅', '👍', '🚀'];
+  readonly defaultReactionOptions = ['✅', '👍'];
   reactions = signal<MessageReaction[]>([]);
   lastUsedReactions = signal<string[]>([]);
 
