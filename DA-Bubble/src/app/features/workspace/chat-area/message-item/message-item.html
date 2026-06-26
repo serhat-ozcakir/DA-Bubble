@@ -20,9 +20,16 @@
         <img src="assets/icons/comment.png" alt="Thread-icon">
       </button>
       @if(message().isOwnMessage){
-      <button type="button" class="message-actions__button">
+      <button type="button" class="message-actions__button" (click)="toggleMessageEdited()">
         <img src="assets/icons/more_vert.png" alt="Thread-icon">
       </button>
+      @if(isMessageEdited()){
+      <div class="message-edit">
+        <button type="button" class="message-edit__button">
+          Nachricht bearbeiten
+        </button>
+      </div>
+      }
       }
     </div>
   </div>

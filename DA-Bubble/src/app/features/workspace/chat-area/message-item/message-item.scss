@@ -145,6 +145,7 @@
 }
 
 .message-actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -159,6 +160,48 @@
   visibility: hidden;
 
   z-index: 10;
+}
+
+.message-edit {
+  position: absolute;
+  top: 52px;
+  right: -190px;
+
+  min-width: 260px;
+  padding: 20px 25px;
+
+  background: white;
+  border-radius: 0 30px 30px 30px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+  z-index: 100;
+  
+}
+
+.message-edit__button {
+    display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 14px 24px;
+
+  border: none;
+  border-radius: 100px;
+
+  background: transparent;
+
+  font-size: 20px;
+  font-weight: 400;
+  color: #000;
+
+  cursor: pointer;
+  transition: all .15s ease;
+
+  &:hover {
+    background: #ECEEFE;
+    color: #535AF1;
+    font-weight: 700;
+  }
 }
 
 .message-actions__button {

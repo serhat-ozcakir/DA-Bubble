@@ -18,19 +18,23 @@ export class MessageItemComponent {
   reactionService = inject(ReactionService);
   isShowEmojiPicker = signal(false);
   private elementRef = inject(ElementRef);
+  isMessageEdited = signal(false)
 
   @HostListener('document:click', ['$event'])
   closeEmojiPickerOnOutsideClick(event:Event){
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
 
     if(!clickedInside){
-      this.isShowEmojiPicker.set(false)
+      this.isShowEmojiPicker.set(false);
+      this.isMessageEdited.set(false);
+
     }
   }
 
   @HostListener('document:keydown.escape')
   closeEmojiPickerOnEscape():void{
-    this.isShowEmojiPicker.set(false)
+    this.isShowEmojiPicker.set(false);
+    this.isMessageEdited.set(false);
   }
 
   openThread():void{
@@ -45,6 +49,10 @@ export class MessageItemComponent {
 
     this.reactionService.addReaction(this.message().id, emoji);
     this.isShowEmojiPicker.set(false);
+  }
+
+  toggleMessageEdited():void{
+    this.isMessageEdited.update(value=>!value)
   }
 
 }
