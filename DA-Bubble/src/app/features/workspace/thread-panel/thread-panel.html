@@ -1,54 +1,99 @@
 @if (messageService.selectedThreadMessage(); as message) {
-  <div class="thread-panel">
-    <app-thread-header />
+<div class="thread-panel">
+  <app-thread-header />
 
-    <div class="thread-panel__content">
-      <div class="thread-panel__message">
-        <img class="thread-panel__avatar" [src]="message.avatar" alt="" />
+  <div class="thread-panel__content">
+    <div class="thread-panel__message">
+      <img class="thread-panel__avatar" [src]="message.avatar" alt="" />
+
+      <div class="thread-panel__body">
+        <div class="thread-panel__meta">
+          <strong>{{ message.authorName }}</strong>
+          <span>{{ message.time }}</span>
+        </div>
+
+        <div class="thread-panel__bubble">
+          {{ message.text }}
+        </div>
+      </div>
+    </div>
+
+    <div class="thread-panel__divider">
+      {{ messageService.threadMessages().length }} Antworten
+    </div>
+
+    @for (reply of messageService.threadMessages(); track reply.id) {
+
+    <div class="thread-reply-wrapper" [class.thread-reply-wrapper--own]="reply.isOwnMessage">
+
+      <div class="thread-actions-container" [class.thread-actions-container--own]="reply.isOwnMessage">
+
+        <div class="thread-actions">
+
+          <button type="button" class="thread-actions__button" (click)="toggleThreadEmojiPicker(reply.id, $event)">
+            <img src="assets/icons/add_reaction.png" alt="Add reaction">
+          </button>
+          @if (openedReactionPickerId() === reply.id) {
+          <div class="thread-emoji-picker">
+            <emoji-mart set="apple" [showPreview]="false" [isNative]="true" [emojiSize]="20" [perLine]="6"
+              (emojiClick)="addThreadEmojiReaction($event, reply.id)">
+            </emoji-mart>
+          </div>
+          }
+
+          @if (reply.isOwnMessage) {
+          <button type="button" class="thread-actions__button">
+            <img src="assets/icons/more_vert.png" alt="More">
+          </button>
+          }
+        </div>
+      </div>
+
+      <div class="thread-panel__reply" [class.thread-panel__reply--own]="reply.isOwnMessage">
+
+        @if (!reply.isOwnMessage) {
+        <img class="thread-panel__avatar" [src]="reply.avatar" alt="" />
+        }
 
         <div class="thread-panel__body">
+
           <div class="thread-panel__meta">
-            <strong>{{ message.authorName }}</strong>
-            <span>{{ message.time }}</span>
+            <strong>{{ reply.authorName }}</strong>
+            <span>{{ reply.time }}</span>
           </div>
 
           <div class="thread-panel__bubble">
-            {{ message.text }}
-          </div>
-        </div>
-      </div>
-
-      <div class="thread-panel__divider">
-        {{ messageService.threadMessages().length }} Antworten
-      </div>
-
-      @for (reply of messageService.threadMessages(); track reply.id) {
-        <div
-          class="thread-panel__reply"
-          [class.thread-panel__reply--own]="reply.isOwnMessage"
-        >
-          @if (!reply.isOwnMessage) {
-            <img class="thread-panel__avatar" [src]="reply.avatar" alt="" />
-          }
-
-          <div class="thread-panel__body">
-            <div class="thread-panel__meta">
-              <strong>{{ reply.authorName }}</strong>
-              <span>{{ reply.time }}</span>
-            </div>
-
-            <div class="thread-panel__bubble">
-              {{ reply.text }}
-            </div>
+            {{ reply.text }}
           </div>
 
-          @if (reply.isOwnMessage) {
-            <img class="thread-panel__avatar" [src]="reply.avatar" alt="" />
-          }
+          <div class="thread-reactions">
+            @for(reaction of reactionService.getReactionForMessage(reply.id); track reaction.emoji){
+            <button type="button" class="thread-reactions__button"
+              [class.thread-reactions__button--active]="reaction.reactedByCurrentUser">
+              <span>{{ reaction.emoji }}</span>
+              <span>{{ reaction.count }}</span>
+            </button>
+            }
+
+            <button type="button" class="thread-reactions__add">
+              <img src="assets/icons/add_reaction.png" alt="Add reaction">
+            </button>
+
+          </div>
+
         </div>
-      }
+
+        @if (reply.isOwnMessage) {
+        <img class="thread-panel__avatar" [src]="reply.avatar" alt="" />
+        }
+
+      </div>
+
     </div>
 
-    <app-thread-input />
+    }
   </div>
+
+  <app-thread-input />
+</div>
 }
