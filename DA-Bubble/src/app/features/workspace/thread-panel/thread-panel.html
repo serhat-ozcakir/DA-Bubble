@@ -42,9 +42,16 @@
           }
 
           @if (reply.isOwnMessage) {
-          <button type="button" class="thread-actions__button">
+          <button type="button" class="thread-actions__button" (click)="toggleMessageEdited()">
             <img src="assets/icons/more_vert.png" alt="More">
           </button>
+          @if(isMessageEdited()){
+          <div class="message-edit">
+            <button type="button" class="message-edit__button">
+              Nachricht bearbeiten
+            </button>
+          </div>
+          }
           }
         </div>
       </div>

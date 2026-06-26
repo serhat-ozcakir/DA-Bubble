@@ -17,6 +17,7 @@ export class ThreadPanel {
   reactionService = inject(ReactionService);
   elementRef = inject(ElementRef);
   openedReactionPickerId = signal<string | null>(null);
+  isMessageEdited = signal(false);
 
   toggleThreadEmojiPicker(messageId:string, event:Event):void{
     this.openedReactionPickerId.update((currentID)=>
@@ -33,13 +34,19 @@ export class ThreadPanel {
   closeEmojiPickerOnOutsideClick(event:Event):void{
     const clickedOutside = this.elementRef.nativeElement.contains(event?.target)
     if(!clickedOutside){
-      this.openedReactionPickerId.set(null)
+      this.openedReactionPickerId.set(null);
+      this.isMessageEdited.set(false);
     }
   }
 
  @HostListener('document:keydown.escape')
  closeEmojiPickerOnEscape():void{
-  this.openedReactionPickerId.set(null)
+  this.openedReactionPickerId.set(null);
+  this.isMessageEdited.set(false);
+ }
+
+ toggleMessageEdited():void{
+  this.isMessageEdited.update(value=>!value)
  }
 
 }
