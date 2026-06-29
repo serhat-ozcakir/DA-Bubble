@@ -3,11 +3,12 @@ import { MessageView } from '../../../../core/models/message-view.model';
 import {MessageService} from '../../../../core/services/message.service';
 import { ReactionService } from '../../../../core/services/reaction.service';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { FormsModule } from '@angular/forms';
 
 
 @Component({
   selector: 'app-message-item',
-  imports: [PickerComponent],
+  imports: [PickerComponent, FormsModule],
   templateUrl: './message-item.html',
   styleUrl: './message-item.scss',
 })
@@ -18,7 +19,9 @@ export class MessageItemComponent {
   reactionService = inject(ReactionService);
   isShowEmojiPicker = signal(false);
   private elementRef = inject(ElementRef);
-  isMessageEdited = signal(false)
+  isMessageEdited = signal(false);
+  editingMessageID = signal<string | null>(null);
+  editingText = signal<string>('');
 
   @HostListener('document:click', ['$event'])
   closeEmojiPickerOnOutsideClick(event:Event){
@@ -51,8 +54,30 @@ export class MessageItemComponent {
     this.isShowEmojiPicker.set(false);
   }
 
-  toggleMessageEdited():void{
+  toggleMessageEdited(event:Event):void{
+    event.stopPropagation();
     this.isMessageEdited.update(value=>!value)
   }
 
+  startEditingMessage(event:Event):void{
+    console.log('edit:', this.message().id);
+    event.stopPropagation();
+    this.editingMessageID.set(this.message().id);
+    this.editingText.set(this.message().text);
+    this.isMessageEdited.set(false);
+  }
+
+  cancelEditMessage(event:Event):void{
+    event.stopPropagation();
+    this.editingMessageID.set(null);
+    this.editingText.set('');
+  }
+
+ async saveEditedMessage(event:Event):Promise<void>{
+     event.stopPropagation();
+    await this.messageService.updateMessage(this.message().id, this.editingText());
+
+    this.editingMessageID.set(null);
+    this.editingText.set('');
+  }
 }

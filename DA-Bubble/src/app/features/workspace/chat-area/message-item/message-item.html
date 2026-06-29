@@ -20,12 +20,15 @@
         <img src="assets/icons/comment.png" alt="Thread-icon">
       </button>
       @if(message().isOwnMessage){
-      <button type="button" class="message-actions__button" (click)="toggleMessageEdited()">
+      <button type="button" class="message-actions__button" (click)="toggleMessageEdited($event)">
         <img src="assets/icons/more_vert.png" alt="Thread-icon">
       </button>
       @if(isMessageEdited()){
-      <div class="message-edit">
-        <button type="button" class="message-edit__button">
+      <div class="message-edit" >
+        <button type="button" 
+        class="message-edit__button"
+        (click)="startEditingMessage($event)"
+        >
           Nachricht bearbeiten
         </button>
       </div>
@@ -43,9 +46,30 @@
         <span class="message__time">{{ message().time }}</span>
       </div>
 
+      @if (editingMessageID() === message().id) {
+      <div class="message-edit-form">
+        <textarea #editTextarea class="message-edit-form__textarea" [value]="editingText()"
+          (input)="editingText.set($any($event.target).value)">
+    </textarea>
+
+        <div class="message-edit-form__actions">
+          <button type="button" class="message-edit-form__button" (click)="cancelEditMessage($event)">
+            Abbrechen
+          </button>
+
+          <button type="button" 
+          class="message-edit-form__button message-edit-form__button--save"
+          (click)="saveEditedMessage($event)"
+          >
+            Speichern
+          </button>
+        </div>
+      </div>
+      } @else {
       <div class="message__bubble" (click)="openThread()">
         {{ message().text }}
       </div>
+      }
       @if (message().threadCount) {
       <button class="message__thread" (click)="openThread()">
         {{ message().threadCount }} Antworten
