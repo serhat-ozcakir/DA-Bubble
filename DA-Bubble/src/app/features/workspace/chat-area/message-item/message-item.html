@@ -24,11 +24,8 @@
         <img src="assets/icons/more_vert.png" alt="Thread-icon">
       </button>
       @if(isMessageEdited()){
-      <div class="message-edit" >
-        <button type="button" 
-        class="message-edit__button"
-        (click)="startEditingMessage($event)"
-        >
+      <div class="message-edit">
+        <button type="button" class="message-edit__button" (click)="startEditingMessage($event)">
           Nachricht bearbeiten
         </button>
       </div>
@@ -48,19 +45,17 @@
 
       @if (editingMessageID() === message().id) {
       <div class="message-edit-form">
-        <textarea #editTextarea class="message-edit-form__textarea" [value]="editingText()"
-          (input)="editingText.set($any($event.target).value)">
+        <textarea autofocus #editTextarea class="message-edit-form__textarea" [value]="editingText()"
+          (input)="editingText.set($any($event.target).value)" (keydown.enter)="saveOnEnter($any($event))">
     </textarea>
 
         <div class="message-edit-form__actions">
-          <button type="button" class="message-edit-form__button" (click)="cancelEditMessage($event)">
+          <button type="button" class="message-edit-form__button" (click)="cancelEditMessage()">
             Abbrechen
           </button>
 
-          <button type="button" 
-          class="message-edit-form__button message-edit-form__button--save"
-          (click)="saveEditedMessage($event)"
-          >
+          <button type="button" class="message-edit-form__button message-edit-form__button--save"
+            (click)="saveEditedMessage()">
             Speichern
           </button>
         </div>

@@ -1,6 +1,6 @@
-import {ElementRef, HostListener, Component, inject, input, Input, signal } from '@angular/core';
+import { ElementRef, HostListener, Component, inject, input, Input, signal } from '@angular/core';
 import { MessageView } from '../../../../core/models/message-view.model';
-import {MessageService} from '../../../../core/services/message.service';
+import { MessageService } from '../../../../core/services/message.service';
 import { ReactionService } from '../../../../core/services/reaction.service';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class MessageItemComponent {
 
-  message= input.required<MessageView>();
+  message = input.required<MessageView>();
   private messageService = inject(MessageService);
   reactionService = inject(ReactionService);
   isShowEmojiPicker = signal(false);
@@ -24,10 +24,10 @@ export class MessageItemComponent {
   editingText = signal<string>('');
 
   @HostListener('document:click', ['$event'])
-  closeEmojiPickerOnOutsideClick(event:Event){
+  closeEmojiPickerOnOutsideClick(event: Event) {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
 
-    if(!clickedInside){
+    if (!clickedInside) {
       this.isShowEmojiPicker.set(false);
       this.isMessageEdited.set(false);
 
@@ -35,31 +35,32 @@ export class MessageItemComponent {
   }
 
   @HostListener('document:keydown.escape')
-  closeEmojiPickerOnEscape():void{
+  closeEmojiPickerOnEscape(): void {
     this.isShowEmojiPicker.set(false);
     this.isMessageEdited.set(false);
+    this.cancelEditMessage();
   }
 
-  openThread():void{
+  openThread(): void {
     this.messageService.openThread(this.message())
   }
 
-  toggleEmojiPicker():void{
-    this.isShowEmojiPicker.update(value=>!value)
+  toggleEmojiPicker(): void {
+    this.isShowEmojiPicker.update(value => !value)
   }
-  addEmojiReaction(event:any):void{
+  addEmojiReaction(event: any): void {
     const emoji = event.emoji.native;
 
     this.reactionService.addReaction(this.message().id, emoji);
     this.isShowEmojiPicker.set(false);
   }
 
-  toggleMessageEdited(event:Event):void{
+  toggleMessageEdited(event: Event): void {
     event.stopPropagation();
-    this.isMessageEdited.update(value=>!value)
+    this.isMessageEdited.update(value => !value)
   }
 
-  startEditingMessage(event:Event):void{
+  startEditingMessage(event: Event): void {
     console.log('edit:', this.message().id);
     event.stopPropagation();
     this.editingMessageID.set(this.message().id);
@@ -67,17 +68,22 @@ export class MessageItemComponent {
     this.isMessageEdited.set(false);
   }
 
-  cancelEditMessage(event:Event):void{
-    event.stopPropagation();
+  cancelEditMessage(): void {
     this.editingMessageID.set(null);
     this.editingText.set('');
   }
 
- async saveEditedMessage(event:Event):Promise<void>{
-     event.stopPropagation();
+  async saveEditedMessage(): Promise<void> {
     await this.messageService.updateMessage(this.message().id, this.editingText());
 
     this.editingMessageID.set(null);
     this.editingText.set('');
+  }
+  
+  async saveOnEnter(event: KeyboardEvent): Promise<void> {
+    if (event.shiftKey) {
+      return;
+    }
+    await this.saveEditedMessage()
   }
 }
