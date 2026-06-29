@@ -47,7 +47,7 @@
           </button>
           @if(isMessageEdited()){
           <div class="message-edit">
-            <button type="button" class="message-edit__button">
+            <button type="button" class="message-edit__button" (click)="startEditingThreadMessage(reply, $event)">
               Nachricht bearbeiten
             </button>
           </div>
@@ -69,9 +69,32 @@
             <span>{{ reply.time }}</span>
           </div>
 
+          @if (editingThreadMessageId() === reply.id) {
+          <div class="message-edit-form">
+            <textarea autofocus class="message-edit-form__textarea" 
+            [value]="editingThreadText()"
+            (input)="editingThreadText.set($any($event.target).value)"
+              (keydown.enter)="saveOnEnter($any($event))">
+              
+            </textarea>
+
+            <div class="message-edit-form__actions">
+              <button type="button" class="message-edit-form__button" (click)="cancelThreadEdit()">
+                Abbrechen
+              </button>
+
+              <button type="button"
+               class="message-edit-form__button message-edit-form__button--save"
+               (click)="saveThreadEditedMessage()">
+                Speichern
+              </button>
+            </div>
+          </div>
+          } @else {
           <div class="thread-panel__bubble">
             {{ reply.text }}
           </div>
+          }
 
           <div class="thread-reactions">
             @for(reaction of reactionService.getReactionForMessage(reply.id); track reaction.emoji){
