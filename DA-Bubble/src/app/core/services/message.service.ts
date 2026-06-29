@@ -329,6 +329,11 @@ export class MessageService {
         message.id === messageId ?
           { ...message, text: text } : message)
     )
+    this.threadMessages.update((messages)=>
+    messages.map((message)=>
+    message.id === messageId ?
+    {...message, text} : message
+  ))
   }
 
 }
