@@ -4,4 +4,7 @@ export interface MessageReaction{
   user_id: string;
   emoji: string;
   created_at: string;
+  profiles?: {
+    name: string;
+  };
 }

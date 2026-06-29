@@ -3,4 +3,5 @@ export interface ReactionSummary{
   emoji: string;
   count: number;
   reactedByCurrentUser: boolean;
+  userNames:string[]
 }
