@@ -51,11 +51,17 @@ export class ReactionService {
           messageId: reaction.message_id,
           emoji: reaction.emoji,
           count: 0,
-          reactedByCurrentUser: false
+          reactedByCurrentUser: false,
+          userNames:[]
         })
       }
       const summary = groupedReactions.get(key)!;
       summary.count++;
+
+      if(reaction.profiles?.name){
+        summary.userNames.push(reaction.profiles.name)
+      }
+
 
       if (reaction.user_id === currentUser?.id) {
         summary.reactedByCurrentUser = true;
@@ -69,7 +75,7 @@ export class ReactionService {
   async loadReactions(): Promise<void> {
     const { data, error } = await this.supabase.supabase
       .from('message_reactions')
-      .select('*')
+      .select('*, profiles(name)')
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -91,9 +97,6 @@ export class ReactionService {
       .eq('id', reactionId)
       .eq('user_id', currentUser?.id)
       .select();
-
-    console.log('Delete result:', data);
-    console.log('Delete error:', error);
 
     if (error) {
       console.error('Fehler beim Entfernen der Reaction:', error);
