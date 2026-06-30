@@ -71,11 +71,9 @@
 
           @if (editingThreadMessageId() === reply.id) {
           <div class="message-edit-form">
-            <textarea autofocus class="message-edit-form__textarea" 
-            [value]="editingThreadText()"
-            (input)="editingThreadText.set($any($event.target).value)"
-              (keydown.enter)="saveOnEnter($any($event))">
-              
+            <textarea autofocus class="message-edit-form__textarea" [value]="editingThreadText()"
+              (input)="editingThreadText.set($any($event.target).value)" (keydown.enter)="saveOnEnter($any($event))">
+
             </textarea>
 
             <div class="message-edit-form__actions">
@@ -83,9 +81,8 @@
                 Abbrechen
               </button>
 
-              <button type="button"
-               class="message-edit-form__button message-edit-form__button--save"
-               (click)="saveThreadEditedMessage()">
+              <button type="button" class="message-edit-form__button message-edit-form__button--save"
+                (click)="saveThreadEditedMessage()">
                 Speichern
               </button>
             </div>
@@ -102,6 +99,16 @@
               [class.thread-reactions__button--active]="reaction.reactedByCurrentUser">
               <span>{{ reaction.emoji }}</span>
               <span>{{ reaction.count }}</span>
+              <div class="reaction-tooltip">
+                <div class="reaction-tooltip__emoji">
+                  {{ reaction.emoji }}
+                </div>
+  
+                <div class="reaction-tooltip__text">
+                  <strong>{{getReactionUsersNames(reaction.userNames)}}</strong>
+                  <span>{{getReactionVerb(reaction.userNames)}}</span>
+                </div>
+              </div>
             </button>
             }
 

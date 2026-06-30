@@ -86,4 +86,17 @@ export class ThreadPanel {
     this.saveThreadEditedMessage();
   }
 
+  getReactionUsersNames(userNames: string[]): string {
+    if (userNames.length === 1) {
+      return userNames[0];
+    }
+    if (userNames.length === 2) {
+      return `${userNames[0]} und ${userNames[1]}`
+    }
+    return `${userNames[0]} und ${userNames[1]} und ${userNames.length - 2} weitere`
+  }
+
+  getReactionVerb(userNames: string[]): string {
+    return userNames.length === 1 ? 'hat reagiert' : 'haben reagiert'
+  }
 }
