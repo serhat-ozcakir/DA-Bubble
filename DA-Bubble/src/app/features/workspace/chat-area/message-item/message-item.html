@@ -76,6 +76,16 @@
           [class.message-reactions__button--active]="reaction.reactedByCurrentUser">
           <span>{{ reaction.emoji }}</span>
           <span>{{ reaction.count }}</span>
+          <div class="reaction-tooltip">
+            <div class="reaction-tooltip__emoji">
+              {{ reaction.emoji }}
+            </div>
+
+            <div class="reaction-tooltip__text">
+              <strong>{{getReactionUsersNames(reaction.userNames)}}</strong>
+              <span>{{getReactionVerb(reaction.userNames)}}</span>
+            </div>
+          </div>
         </button>
         }
       </div>

@@ -222,6 +222,7 @@
 }
 
 .message-reactions__button {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -302,5 +303,50 @@
         border-color: #444DF2;
       }
     }
+  }
+}
+
+.reaction-tooltip{
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 38px;
+  left: 140%;
+  transform: translateX(-25%);
+
+  min-width: 190px;
+  padding: 8px 15px;
+
+  background: #444df2;
+  color: white;
+  border-radius: 30px 30px 30px 0;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  z-index: 100;
+}
+
+.message-reactions__button:hover .reaction-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.reaction-tooltip__emoji {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.reaction-tooltip__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  font-size: 16px;
+  line-height: 1.3;
+
+  strong {
+    font-weight: 700;
   }
 }
