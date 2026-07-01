@@ -1,11 +1,45 @@
 <div class="message-input">
   @if(directMessageService.currentDmUser()){
   <textarea placeholder="Nachricht an  {{directMessageService.currentDmUser()?.name}}" [(ngModel)]="messageText"
-    (keydown.enter)="handleEnter($event);"></textarea>
+    (keydown.enter)="handleEnter($event);" (input)="handleMentionInput()"></textarea>
   } @else {
   <textarea placeholder="Nachricht an # {{ channelService.currentChannel()?.name }}" [(ngModel)]="messageText"
-    (keydown.enter)="handleEnter($event)">
+    (keydown.enter)="handleEnter($event)" (input)="handleMentionInput()">
 </textarea>
+  }
+
+  @if(showMentionDropdown()){
+  <div class="mention-dropdown">
+    @if(mentionType() === 'user'){
+      @if(filteredUsers().length > 0){
+        @for(user of filteredUsers(); track user.id){
+        <button type="button" class="mention-dropdown__item" (click)="selectUserMention(user.name)">
+          <img [src]="user.avatar" alt="">
+          <span>{{ user.name }}</span>
+        </button>
+        }
+      } @else {
+            <div class="mention-dropdown__empty">
+      Kein Mitglied gefunden.
+    </div>
+      }
+    }
+
+    @if(mentionType() === 'channel'){
+      @if(filteredChannels().length > 0){
+        @for(channel of filteredChannels(); track channel.id){
+        <button type="button" class="mention-dropdown__item" (click)="selectChannelMention(channel.name)">
+          <span>{{ channel.name }}</span>
+        </button>
+        }
+
+      } @else {
+        <div class="mention-dropdown__empty">
+          Kein Channel gefunden.
+        </div>
+      }
+    }
+  </div>
   }
 
   <div class="message-input__footer">
@@ -20,7 +54,8 @@
         </emoji-mart>
       </div>
       }
-      <button type="button">@</button>
+      <button type="button" (click)="insertMention('@')">@</button>
+      <button type="button" (click)="insertMention('#')">#</button>
     </div>
 
     <button class="message-input__send" type="button" (click)="sendMessage()">
