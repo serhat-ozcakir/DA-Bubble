@@ -2,8 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Supabase } from '../supabase/supabase.service';
 import { Auth } from './auth.service';
 import { MessageReaction } from '../models/message-reaction.model';
-import { ReactionSummary } from '../models/reaction-summary.model'
-import { last } from 'rxjs';
+import { ReactionSummary } from '../models/reaction-summary.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +14,8 @@ export class ReactionService {
   reactions = signal<MessageReaction[]>([]);
   lastUsedReactions = signal<string[]>([]);
 
-  reactionOptions = computed<string[] | undefined>(()=> {
+
+  reactionOptions = computed<string[]>(()=> {
     const lastUsed = this.lastUsedReactions();
 
     if(lastUsed.length === 0 ){
@@ -62,7 +62,6 @@ export class ReactionService {
         summary.userNames.push(reaction.profiles.name)
       }
 
-
       if (reaction.user_id === currentUser?.id) {
         summary.reactedByCurrentUser = true;
       }
@@ -87,9 +86,6 @@ export class ReactionService {
 
   private async removeReaction(reactionId: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
-
-    console.log('Deleting reaction id:', reactionId);
-    console.log('Current user id:', currentUser?.id);
 
     const { data, error } = await this.supabase.supabase
       .from('message_reactions')
@@ -146,5 +142,22 @@ export class ReactionService {
       (reaction) => reaction.messageId === messageId
     )
   }
+
+subscribeToReactions(): void {
+  this.supabase.supabase
+    .channel('message-reactions-realtime')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'message_reactions',
+      },
+      async (payload) => {
+        await this.loadReactions();
+      }
+    )
+    .subscribe();
+}
 
 }
