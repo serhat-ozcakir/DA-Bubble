@@ -1,0 +1,115 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: block;
+}
+
+.dialog-backdrop {
+  width: 100vw;
+  height: 100vh;
+ background: rgba(0, 0, 0, 0.15); // Figma'ya daha yakın
+
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dialog {
+  width: min(100% - 48px, 1076px);
+  min-height: 665px;
+  background-color: #ffffff;
+  border-radius: 30px;
+  padding: 50px;
+  position: relative;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+h2 {
+  margin: 0 0 32px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.dialog__text {
+  margin: 0 0 28px;
+  max-width: 920px;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.dialog__label {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 18px;
+  font-weight: 700;
+
+  span {
+    color: #686868;
+    font-weight: 400;
+  }
+}
+
+.dialog__input,
+.dialog__description {
+  height: 72px;
+  border: 1px solid #adb0d9;
+  border-radius: 40px;
+  padding: 0 24px;
+  margin-bottom: 28px;
+
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  &:focus-within {
+    border-color: #535af1;
+  }
+
+  span {
+    font-size: 28px;
+    color: #686868;
+  }
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 18px;
+    font-family: inherit;
+
+    &::placeholder {
+      color: #686868;
+    }
+  }
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 26px;
+}
+
+.dialog__submit {
+  border: none;
+  border-radius: 25px;
+  background-color: #444df2;
+  color: white;
+  padding: 14px 28px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dialog__close {
+  position: absolute;
+  top: 50px;
+  right: 60px;
+  border: none;
+  background: transparent;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+}
