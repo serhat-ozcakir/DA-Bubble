@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, output } from '@angular/core';
 import {Auth} from "../../../core/services/auth.service";
 import { ChannelService } from '../../../core/services/channel.service';
 import {UserService} from "../../../core/services/user.service";
@@ -6,8 +6,7 @@ import { MessageService } from '../../../core/services/message.service';
 import { Channel } from '../../../core/models/channel.model';
 import { DirectMessageService } from '../../../core/services/direct-message.service';
 import { Profile } from '../../../core/models/profile.model';
-
-
+  
 @Component({
   selector: 'app-sidebar',
   imports: [],
@@ -24,6 +23,7 @@ export class Sidebar implements OnInit {
 
   isChannelsOpen = true;
   isDirectMessagesOpen = true;
+  openCreateChannel = output<void>();
 
  constructor() {
  }
@@ -52,5 +52,10 @@ export class Sidebar implements OnInit {
     this.direktMessageService.currentDmUser.set(user);
     this.messageService.closeThread();
     await this.direktMessageService.loadDirectMessages()
+  }
+
+  openDialog():void{
+    console.log('openDialog calisti');
+    this.openCreateChannel.emit()
   }
 }
