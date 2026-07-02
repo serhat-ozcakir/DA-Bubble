@@ -5,7 +5,7 @@
    [class.sidebar-closed]="isSidebarClosed"
    [class.thread-open] = isThreadOpen
    >
-    <app-sidebar></app-sidebar>
+    <app-sidebar (openCreateChannel)="openCreateChannelDialog()"></app-sidebar>
 
     <button class="workspace__sidebar-toggle" type="button" (click)="toggleSidebar()">
       <div class="workspace__toggle-content">
@@ -26,3 +26,10 @@
     }
   </main>
 </div>
+
+@if(showCreateChannelDialog()){
+<app-channel-create-dialog (closeDialog)="closeCreateChannelDialog()"
+>
+
+</app-channel-create-dialog>
+}
