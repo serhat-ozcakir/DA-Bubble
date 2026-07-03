@@ -1,7 +1,7 @@
 <div class="dialog-backdrop" (click)="close()">
   <div class="dialog" (click)="$event.stopPropagation()">
     <button class="dialog__close" type="button" (click)="close()">
-        <img src="assets/icons/close.png" alt="close logo">
+      <img src="assets/icons/close.png" alt="close logo">
     </button>
 
     <h2>Channel erstellen</h2>
@@ -10,24 +10,32 @@
       Channels dienen deinem Team zur Kommunikation. Am besten sollten sie
       themenbezogen sein #marketing zum Beispiel.
     </p>
+    <form [formGroup]="channelForm" (ngSubmit)="createChannel()">
+      <label class="dialog__label">Channel-Name</label>
 
-    <label class="dialog__label">Channel-Name</label>
+      <div class="dialog__input">
+        <span>#</span>
+        <input type="text" placeholder="z.B. Office-Team" formControlName="channelName" />
+      </div>
+      @if(channelForm.controls.channelName.touched && channelForm.controls.channelName.hasError('maxlength')){
+      <p class="dialog__error">Channel Name darf maximal 50 Zeichen haben.</p>
+      }
 
-    <div class="dialog__input">
-      <span>#</span>
-      <input type="text" placeholder="z.B. Office-Team" />
-    </div>
+      <label class="dialog__label">
+        Beschreibung <span>(optional)</span>
+      </label>
 
-    <label class="dialog__label">
-      Beschreibung <span>(optional)</span>
-    </label>
+      <div class="dialog__description">
+        <input type="text" placeholder="Dein Text hier" formControlName="channelDescription" />
+      </div>
+      @if(channelForm.controls.channelDescription.touched &&
+      channelForm.controls.channelDescription.hasError('maxlength')){
+      <p class="dialog__error">Beschreibung darf maximal 200 Zeichen haben.</p>
+      }
 
-    <div class="dialog__description">
-        <input type="text" placeholder="Dein Text hier" />
-    </div>
-
-    <div class="dialog__actions">
-      <button class="dialog__submit" type="button">Erstellen</button>
-    </div>
+      <div class="dialog__actions">
+        <button class="dialog__submit">Erstellen</button>
+      </div>
+    </form>
   </div>
 </div>
