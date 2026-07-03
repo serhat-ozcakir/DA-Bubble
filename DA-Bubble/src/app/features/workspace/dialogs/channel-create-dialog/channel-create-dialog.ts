@@ -1,5 +1,6 @@
-import { HostListener, Component, output, Host } from '@angular/core';
+import { HostListener, Component, output, Host, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ChannelService } from '../../../../core/services/channel.service';
 
 @Component({
   selector: 'app-channel-create-dialog',
@@ -13,29 +14,49 @@ export class ChannelCreateDialog {
     channelName: new FormControl('', [Validators.required, Validators.maxLength(50)]),
     channelDescription: new FormControl('', [Validators.maxLength(200)]),
   });
+  isLoading = signal(false);
+  errorMessage = signal('');
 
-  constructor() { }
+  constructor(private channelService: ChannelService) { }
 
   close(): void {
     this.closeDialog.emit();
   }
-  
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.close();
   }
 
-  createChannel(): void {
-    if (this.channelForm.invalid) {
-      this.channelForm.markAllAsTouched();
-      return;
-    }
-    const channelData = {
-      name: this.channelForm.get('channelName')?.value?.trim(),
-      description: this.channelForm.get('channelDescription')?.value?.trim() || '',
-    };
-
-    console.log('Channel Created:', channelData);
-    this.close();
+async createChannel(): Promise<void> {
+  if (this.channelForm.invalid) {
+    this.channelForm.markAllAsTouched();
+    return;
   }
+
+  this.isLoading.set(true);
+  this.errorMessage.set('');
+
+  const { channelName, channelDescription } = this.channelForm.getRawValue();
+
+  try {
+    await this.channelService.createChannel(
+      channelName?.trim() ?? '',
+      channelDescription?.trim() ?? ''
+    );
+
+    this.close();
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === 'CHANNEL_ALREADY_EXISTS'
+    ) {
+      this.errorMessage.set('Dieser Channel existiert bereits.');
+    } else {
+      this.errorMessage.set('Channel konnte nicht erstellt werden.');
+    }
+  } finally {
+    this.isLoading.set(false);
+  }
+}
 }

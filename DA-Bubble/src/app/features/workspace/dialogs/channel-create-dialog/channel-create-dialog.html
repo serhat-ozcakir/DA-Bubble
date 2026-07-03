@@ -20,6 +20,11 @@
       @if(channelForm.controls.channelName.touched && channelForm.controls.channelName.hasError('maxlength')){
       <p class="dialog__error">Channel Name darf maximal 50 Zeichen haben.</p>
       }
+      @if(errorMessage()){
+      <p class="dialog__error">
+        {{ errorMessage() }}
+      </p>
+      }
 
       <label class="dialog__label">
         Beschreibung <span>(optional)</span>
@@ -34,7 +39,13 @@
       }
 
       <div class="dialog__actions">
-        <button class="dialog__submit">Erstellen</button>
+        <button class="dialog__submit" type="submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+          Wird erstellt...
+          } @else {
+          Erstellen
+          }
+        </button>
       </div>
     </form>
   </div>

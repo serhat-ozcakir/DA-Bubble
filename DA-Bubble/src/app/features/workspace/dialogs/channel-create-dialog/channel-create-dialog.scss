@@ -45,6 +45,11 @@ h2 {
   font-size: 14px;
 }
 
+.dialog__error--global {
+  text-align: right;
+  margin: 0 0 16px;
+}
+
 .dialog__label {
   display: block;
   margin-bottom: 18px;
@@ -107,6 +112,10 @@ h2 {
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
+    &:disabled {
+    background-color: #686868;
+    cursor: not-allowed;
+  }
 }
 
 .dialog__close {
