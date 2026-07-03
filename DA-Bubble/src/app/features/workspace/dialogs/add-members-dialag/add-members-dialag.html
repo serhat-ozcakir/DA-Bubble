@@ -1,1 +1,28 @@
-<p>add-members-dialag works!</p>
+<div class="add-members-backdrop">
+  <div class="add-members" (click)="$event.stopPropagation()">
+    <div class="add-members__header">
+      <h2>Leute hinzufügen</h2>
+
+      <button class="add-members__close" type="button">
+        <img src="assets/icons/close.png" alt="close">
+      </button>
+    </div>
+
+    <div class="add-members__channel">
+      <span>#</span>
+      <p>Entwicklerteam</p>
+    </div>
+
+    <input
+      class="add-members__input"
+      placeholder="Name eingeben"
+      type="text"
+    />
+
+    <div class="add-members__footer">
+      <button class="add-members__submit" type="button">
+        Hinzufügen
+      </button>
+    </div>
+  </div>
+</div>
