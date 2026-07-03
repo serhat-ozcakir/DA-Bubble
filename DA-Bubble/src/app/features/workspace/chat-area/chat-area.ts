@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import {ChatHeader} from "./chat-header/chat-header";
 import {MessageInput} from "./message-input/message-input";
 import {MessageList} from "./message-list/message-list";
@@ -10,5 +10,7 @@ import {MessageList} from "./message-list/message-list";
   styleUrl: './chat-area.scss',
 })
 export class ChatArea {
+
+openAddMembers = output<void>();
 
 }
