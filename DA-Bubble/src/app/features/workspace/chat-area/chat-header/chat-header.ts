@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
 import { UserService } from '../../../../core/services/user.service';
@@ -14,8 +14,13 @@ export class ChatHeader {
   channelService = inject(ChannelService);
   directMessageService = inject(DirectMessageService);
    userService = inject(UserService);
-   authService = inject(Auth)
-  
+   authService = inject(Auth);
+
+   openAddMembers = output<void>();
   constructor() {
+}
+
+openDialog(): void {
+  this.openAddMembers.emit();
 }
 }
