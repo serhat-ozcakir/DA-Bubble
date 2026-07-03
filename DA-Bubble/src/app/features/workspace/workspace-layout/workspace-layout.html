@@ -19,7 +19,12 @@
 
       </div>
     </button>
-    <app-chat-area></app-chat-area>
+    <app-chat-area (openAddMembers)="openAddMembersDialog()">
+
+    </app-chat-area>
+    @if(showAddMemberDialog()){
+      <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()"></app-add-members-dialag>
+    }
 
     @if(isThreadOpen){
     <app-thread-panel></app-thread-panel>
