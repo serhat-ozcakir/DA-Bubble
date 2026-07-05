@@ -39,9 +39,22 @@
     </div>
     }
     <div class="add-members__footer">
-      <button class="add-members__submit" type="button">
-        Hinzufügen
-      </button>
+      @if(errorMessage()){
+      <p class="add-members__error">
+        {{ errorMessage() }}
+      </p>
+      }
+
+      <div class="button__div">
+        <button class="add-members__submit" type="button" (click)="addMember()">
+          @if(isLoading()){
+          Wird hinzugefügt
+          } @else{
+          Hinzufügen
+          }
+        </button>
+
+      </div>
     </div>
   </div>
 </div>
