@@ -1,24 +1,43 @@
-<div class="add-members-backdrop">
+<div class="add-members-backdrop" (click)="close()">
   <div class="add-members" (click)="$event.stopPropagation()">
     <div class="add-members__header">
       <h2>Leute hinzufügen</h2>
 
-      <button class="add-members__close" type="button">
+      <button class="add-members__close" type="button" (click)="close()">
         <img src="assets/icons/close.png" alt="close">
       </button>
     </div>
 
     <div class="add-members__channel">
       <span>#</span>
-      <p>Entwicklerteam</p>
+      <p>{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</p>
+    </div>
+    <div class="add-members__input-wrapper">
+      @if(selectedUser()){
+      <div class="add-members__chip">
+        <img [src]="selectedUser()?.avatar" [alt]="selectedUser()?.name">
+        <span>{{selectedUser()?.name}}</span>
+        <button type="button" (click)="clearSelectedUser()">x</button>
+      </div>
+      } @else {
+      <input class="add-members__input" placeholder="Name eingeben" type="text" [value]="searchText()"
+        (input)="searchText.set($any($event.target).value)" />
+      }
     </div>
 
-    <input
-      class="add-members__input"
-      placeholder="Name eingeben"
-      type="text"
-    />
-
+    @if(!selectedUser() && filteredUsers().length > 0){
+    <div class="add-members__dropdown">
+      @for(user of filteredUsers(); track user.id){
+      <button type="button" class="add-members__users" (click)="selectUser(user)">
+        <div class="add-members__avatar">
+          <img [src]="user.avatar" [alt]="user.name">
+          <span class="add-members__status" [class.add-members__status--online]="user.status === 'online'"></span>
+        </div>
+        <span>{{ user.name }}</span>
+      </button>
+      }
+    </div>
+    }
     <div class="add-members__footer">
       <button class="add-members__submit" type="button">
         Hinzufügen
