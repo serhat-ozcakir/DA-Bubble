@@ -21,7 +21,6 @@ export class AddMembersDialag {
   errorMessage = signal('');
 
   filteredUsers = computed(() => {
-    console.log('filteredUsers:', this.searchText());
     const search = this.searchText().toLowerCase().trim();
     if (!search) {
       return [];
