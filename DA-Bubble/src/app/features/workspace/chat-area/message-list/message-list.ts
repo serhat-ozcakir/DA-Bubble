@@ -44,6 +44,7 @@ export class MessageList {
 
   async ngOnInit(): Promise<void> {
     await this.authService.loadCurrentUser();
+    await this.channelService.loadChannels();
   }
 
 }
