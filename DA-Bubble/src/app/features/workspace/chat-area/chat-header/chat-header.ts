@@ -15,7 +15,6 @@ export class ChatHeader {
   directMessageService = inject(DirectMessageService);
    userService = inject(UserService);
    authService = inject(Auth);
-
    openAddMembers = output<void>();
   constructor() {
 }

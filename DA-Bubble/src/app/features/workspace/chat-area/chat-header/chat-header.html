@@ -17,13 +17,11 @@
 
       <div class="chat-header__right">
         <div class="chat-header__members">
-          <img src="assets/img/avatar/avatar-1.png" alt="Noah Braun" />
-          <img src="assets/img/avatar/avatar-2.png" alt="Sofia Müller" />
-          <img src="assets/img/avatar/avatar-3.png" alt="Frederik Beck" />
+          @for(member of channelService.channelMembers(); track member.id){
+            <img [src]="member.avatar" [alt]="member.name">
+          }
         </div>
-    
-        <span class="chat-header__member-count">3</span>
-    
+        <span class="chat-header__member-count">{{channelService.channelMembers().length}}</span>
         <button class="chat-header__add-member" type="button" (click)="openDialog()">
           <img src="assets/logo/Add-members.png" alt="Mitglied hinzufügen" />
         </button>
