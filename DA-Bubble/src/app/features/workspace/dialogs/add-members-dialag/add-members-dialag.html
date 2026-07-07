@@ -13,19 +13,22 @@
       <p>{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</p>
     </div>
     <div class="add-members__input-wrapper">
-      @if(selectedUser()){
+      @for(user of selectedUsers(); track user.id){
       <div class="add-members__chip">
-        <img [src]="selectedUser()?.avatar" [alt]="selectedUser()?.name">
-        <span>{{selectedUser()?.name}}</span>
-        <button type="button" (click)="clearSelectedUser()">x</button>
+        <img [src]="user.avatar" [alt]="user.name">
+        <span>{{ user.name }}</span>
+
+        <button type="button" (click)="removeSelectedUser(user.id)">
+          ×
+        </button>
       </div>
-      } @else {
+      }
+
       <input class="add-members__input" placeholder="Name eingeben" type="text" [value]="searchText()"
         (input)="searchText.set($any($event.target).value)" />
-      }
     </div>
 
-    @if(!selectedUser() && filteredUsers().length > 0){
+    @if(filteredUsers().length > 0){
     <div class="add-members__dropdown">
       @for(user of filteredUsers(); track user.id){
       <button type="button" class="add-members__users" (click)="selectUser(user)">
@@ -46,7 +49,11 @@
       }
 
       <div class="button__div">
-        <button class="add-members__submit" type="button" (click)="addMember()">
+        <button class="add-members__submit" 
+        type="button" 
+        (click)="addMembers()"
+        [disabled]="selectedUsers().length === 0 || isLoading()"
+        >
           @if(isLoading()){
           Wird hinzugefügt
           } @else{

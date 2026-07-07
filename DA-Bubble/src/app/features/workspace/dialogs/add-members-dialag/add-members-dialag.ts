@@ -15,17 +15,22 @@ export class AddMembersDialag {
   channelService = inject(ChannelService);
   userService = inject(UserService);
   searchText = signal('');
-  selectedUser = signal<Profile | null>(null);
+  selectedUsers = signal<Profile[]>([]);
   users = this.userService.user;
   isLoading = signal(false);
   errorMessage = signal('');
 
   filteredUsers = computed(() => {
+    console.log('filteredUsers:', this.searchText());
     const search = this.searchText().toLowerCase().trim();
     if (!search) {
       return [];
     }
-    return this.users().filter(user => user.name.toLowerCase().includes(search.toLowerCase()));
+
+    const selectedUserIds = this.selectedUsers().map(user => user.id);
+    
+    return this.users().filter(user => user.name.toLowerCase()
+    .includes(search.toLowerCase()) && !selectedUserIds.includes(user.id));
   });
 
   async ngOnInit(): Promise<void> {
@@ -37,37 +42,47 @@ export class AddMembersDialag {
   }
 
   selectUser(user: Profile): void {
-    this.selectedUser.set(user);
-    this.searchText.set(user.name);
+    const alreadySelected = this.selectedUsers()?.some(selected => selected.id === user.id);
+    if (alreadySelected) {
+      this.errorMessage.set('User is already selected.');
+      return;
+    }
+    this.selectedUsers.update((users)=> [...users, user]);
+    this.searchText.set('');
   }
 
   clearSelectedUser(): void {
-    this.selectedUser.set(null);
+    this.selectedUsers.set([]);
     this.searchText.set('');
     this.errorMessage.set('');
   }
 
-  async addMember(): Promise<void> {
-    const selectedUser = this.selectedUser();
-    const currentChannel = this.channelService.currentChannel();
-
-    if (!selectedUser || !currentChannel) {
-      this.errorMessage.set('Please select a user and a channel.');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    try {
-      await this.channelService.addMemberToChannel(currentChannel.id, selectedUser.id);
-      this.close();
-    } catch (error) {
-      console.error('Error adding member to channel:', error);
-      this.errorMessage.set('Failed to add member to channel. Please try again.');
-    } finally {
-      this.isLoading.set(false);
-    }
-
+  removeSelectedUser(userId: string): void {
+    this.selectedUsers.update((users) => users.filter(selected => selected.id !== userId));
   }
+
+async addMembers(): Promise<void> {
+  const currentChannel = this.channelService.currentChannel();
+  const selectedUsers = this.selectedUsers();
+
+  if (!currentChannel || selectedUsers.length === 0) {
+    return;
+  }
+
+  this.isLoading.set(true);
+  this.errorMessage.set('');
+
+  try {
+    await this.channelService.addMembersToChannel(
+      currentChannel.id,
+      selectedUsers.map((user) => user.id)
+    );
+
+    this.close();
+  } catch (error) {
+    this.errorMessage.set('Benutzer konnten nicht hinzugefügt werden.');
+  } finally {
+    this.isLoading.set(false);
+  }
+}
 }
