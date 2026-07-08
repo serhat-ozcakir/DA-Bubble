@@ -16,7 +16,6 @@ export class ChannelService {
 
   async loadChannels(): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
-    console.log('loadChannels currentUser:', currentUser);
     if (!currentUser) {
       this.channels.set([]);
       this.currentChannel.set(null);
@@ -94,7 +93,6 @@ export class ChannelService {
 
   async createChannel(name: string, description: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
-
     if (!currentUser) return;
 
     const { data: existingChannel, error: checkError } = await this.supabase.supabase
@@ -106,7 +104,6 @@ export class ChannelService {
     if (existingChannel) {
       throw new Error('CHANNEL_ALREADY_EXISTS');
     }
-
 
     const { data: channel, error } = await this.supabase.supabase
       .from('channels')
