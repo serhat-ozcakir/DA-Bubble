@@ -16,7 +16,7 @@ export class ChannelService {
 
   async loadChannels(): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
-     console.log('loadChannels currentUser:', currentUser);
+    console.log('loadChannels currentUser:', currentUser);
     if (!currentUser) {
       this.channels.set([]);
       this.currentChannel.set(null);
@@ -130,21 +130,43 @@ export class ChannelService {
     this.channels.update((channels) => [...channels, channel]);
     this.currentChannel.set(channel);
   }
-  async addMemberToChannel(channelId: string, profileId: string): Promise<void> {
+  async addMembersToChannel(channelId: string, profileIds: string[]): Promise<void> {
+    const members = profileIds.map((profileId) => ({
+      channel_id: channelId,
+      profile_id: profileId,
+      role: 'member',
+    }));
+
     const { error } = await this.supabase.supabase
       .from('channel_members')
-      .insert([{
-        channel_id: channelId,
-        profile_id: profileId,
-        role: 'member'
-      }]);
+      .insert(members);
 
     if (error) {
       console.error('Error adding the member to the channel:', error);
       throw error
     }
 
-  this.loadChannelMembers(channelId);
+    this.loadChannelMembers(channelId);
+  }
+
+  subscribeToChannelMemberships(): void {
+    const currentUser = this.authService.currentUserProfile();
+    if (!currentUser) return;
+    this.supabase.supabase
+      .channel(`channel-members-${currentUser.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'channel_members',
+          filter: `profile_id=eq.${currentUser.id}`,
+        },
+      async () => {
+        await this.loadChannels();
+      }
+      )
+      .subscribe();
   }
 
 }
