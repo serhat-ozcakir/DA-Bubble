@@ -27,9 +27,10 @@ export class AddMembersDialag {
     }
 
     const selectedUserIds = this.selectedUsers().map(user => user.id);
+    const channelMembers = this.channelService.channelMembers().map(member => member.id);
     
     return this.users().filter(user => user.name.toLowerCase()
-    .includes(search.toLowerCase()) && !selectedUserIds.includes(user.id));
+    .includes(search.toLowerCase()) && !selectedUserIds.includes(user.id) && !channelMembers.includes(user.id));
   });
 
   async ngOnInit(): Promise<void> {

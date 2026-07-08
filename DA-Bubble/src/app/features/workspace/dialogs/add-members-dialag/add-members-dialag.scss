@@ -244,3 +244,17 @@
   justify-content: flex-end;
   margin-top: 28px;
 }
+
+.add-members__empty {
+  position: absolute;
+  top: 238px;
+  left: 95px;
+  width: 420px;
+  padding: 12px 18px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #adb0d9;
+  border-radius: 0 0 30px 30px;
+  color: #ed1e79;
+  font-size: 16px;
+}

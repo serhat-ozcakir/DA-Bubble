@@ -41,6 +41,11 @@
       }
     </div>
     }
+    @if(searchText() && filteredUsers().length === 0 ){
+      <p class="add-members__empty">
+        Keine passanden Benutzer gefunden
+      </p>
+    }
     <div class="add-members__footer">
       @if(errorMessage()){
       <p class="add-members__error">
