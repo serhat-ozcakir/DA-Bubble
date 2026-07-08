@@ -8,6 +8,7 @@ import { Auth } from '../../../core/services/auth.service';
 import { MessageService } from '../../../core/services/message.service';
 import {ChannelCreateDialog} from "../dialogs/channel-create-dialog/channel-create-dialog";
 import {AddMembersDialag} from "../../workspace/dialogs/add-members-dialag/add-members-dialag";
+import { ChannelService } from '../../../core/services/channel.service';
 
 
 @Component({
@@ -22,12 +23,15 @@ export class WorkspaceLayout {
   messageService = inject(MessageService);
   showCreateChannelDialog = signal(false);
   showAddMemberDialog = signal(false);
+  channelService = inject(ChannelService);
 
 
   constructor(private auth: Auth) {  }
 
   async ngOnInit() {
     await this.auth.loadCurrentUser();
+    await this.channelService.loadChannels();
+    this.channelService.subscribeToChannelMemberships();
   }
 
   toggleSidebar(): void {
