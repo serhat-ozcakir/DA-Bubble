@@ -1,5 +1,5 @@
 <div class="chat-area">
-    <app-chat-header (openAddMembers)="openAddMembers.emit()" />
+    <app-chat-header (openMemberList)="openMemberList.emit()" (openAddMembers)="openAddMembers.emit()" />
     <app-message-list />
     <app-message-input />
 </div>

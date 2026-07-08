@@ -12,5 +12,6 @@ import {MessageList} from "./message-list/message-list";
 export class ChatArea {
 
 openAddMembers = output<void>();
+openMemberList = output<void>();
 
 }
