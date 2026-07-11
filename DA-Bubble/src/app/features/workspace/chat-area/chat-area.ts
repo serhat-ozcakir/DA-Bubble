@@ -13,5 +13,7 @@ export class ChatArea {
 
 openAddMembers = output<void>();
 openMemberList = output<void>();
+openChannelSettings = output<void>();
+
 
 }
