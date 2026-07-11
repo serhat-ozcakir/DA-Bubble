@@ -1,1 +1,33 @@
-<p>add-members-list works!</p>
+<div class="members-overlay" (click)="closeAddMemberList.emit()">
+    <div class="members-dropdown" (click)="$event.stopPropagation()">
+        <div class="members-dropdown__header">
+            <h3>Mitglieder</h3>
+            <button type="button" (click)="closeAddMemberList.emit()">×</button>
+        </div>
+
+        <div class="members-dropdown__list">
+            @for(member of channelService.channelMembers(); track member.id){
+            <div class="members-dropdown__item">
+                <div class="members-dropdown__avatar-wrapper">
+                    <img [src]="member.avatar" [alt]="member.name">
+                    <span class="members-dropdown__status"></span>
+                </div>
+
+                <span>
+                    {{ member.name }}
+                    @if(member.id === authService.currentUserProfile()?.id){
+                    (Du)
+                    }
+                </span>
+            </div>
+            }
+        </div>
+
+        <button type="button" class="members-dropdown__add" (click)="openAddMembers.emit()">
+            <span class="members-dropdown__add-icon">
+                <img src="assets/logo/Add-members.png" alt="">
+            </span>
+            <span>Mitglieder hinzufügen</span>
+        </button>
+    </div>
+</div>
