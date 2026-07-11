@@ -1,10 +1,7 @@
 <div class="workspace">
   <app-header></app-header>
 
-  <main class="workspace__content"
-   [class.sidebar-closed]="isSidebarClosed"
-   [class.thread-open] = isThreadOpen
-   >
+  <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed" [class.thread-open]=isThreadOpen>
     <app-sidebar (openCreateChannel)="openCreateChannelDialog()"></app-sidebar>
 
     <button class="workspace__sidebar-toggle" type="button" (click)="toggleSidebar()">
@@ -19,12 +16,13 @@
 
       </div>
     </button>
-    <app-chat-area (openAddMembers)="openAddMembersDialog()">
+    <app-chat-area (openMemberList)="openMemberListDialog()" (openAddMembers)="openAddMembersDialog()" (openChannelSettings)="openChannelSettingsDialog()">
 
     </app-chat-area>
     @if(showAddMemberDialog()){
-      <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()"></app-add-members-dialag>
+    <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()"></app-add-members-dialag>
     }
+
 
     @if(isThreadOpen){
     <app-thread-panel></app-thread-panel>
@@ -33,8 +31,18 @@
 </div>
 
 @if(showCreateChannelDialog()){
-<app-channel-create-dialog (closeDialog)="closeCreateChannelDialog()"
->
+<app-channel-create-dialog (closeDialog)="closeCreateChannelDialog()">
 
 </app-channel-create-dialog>
+}
+
+@if(showMemberListDialog()){
+<app-add-members-list (openAddMembers)="openAddMembersFromList()" (closeAddMemberList)="closeAddMemberList()">
+</app-add-members-list>
+}
+
+@if(showChannelSettingsDialog()){
+<app-channel-detail (openChannelSettings)="openChannelSettingsDialog()"
+  (closeChannelSettings)="closeChannelSettingsDialog()">
+</app-channel-detail>
 }
