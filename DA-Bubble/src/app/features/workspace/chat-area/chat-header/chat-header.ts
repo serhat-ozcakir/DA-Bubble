@@ -17,6 +17,7 @@ export class ChatHeader {
   authService = inject(Auth);
   openAddMembers = output<void>();
   openMemberList = output<void>();
+  openChannelSettings = output<void>();
   constructor() {
   }
 
@@ -26,6 +27,11 @@ export class ChatHeader {
 
   openMemberListDialog(): void {
     this.openMemberList.emit();
+  }
+
+  openChannelSettingsDialog(): void {
+    console.log('openChannelSettingDialog calisti');
+    this.openChannelSettings.emit();
   }
 
 }

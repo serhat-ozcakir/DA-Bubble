@@ -2,29 +2,31 @@
   <div class="chat-header__left">
 
     @if (directMessageService.currentDmUser(); as dmUser){
-      <img [src]="directMessageService.currentDmUser()?.avatar" alt="User avatar" />
+    <img [src]="directMessageService.currentDmUser()?.avatar" alt="User avatar" />
     <span class="chat-header__title">{{dmUser.name}}</span>
     } @else {
-    <span class="chat-header__hash">#</span>
-    <span class="chat-header__title">{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</span>
-    <img class="chat-header__arrow" src="assets/icons/keyboard_arrow_down.png" alt="" />
+    <div (click)="openChannelSettingsDialog()">
+      <span class="chat-header__hash">#</span>
+      <span  (click)="openChannelSettingsDialog()" class="chat-header__title">{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</span>
+      <img class="chat-header__arrow" src="assets/icons/keyboard_arrow_down.png" alt="" />
+    </div>
     }
   </div>
 
-    @if (directMessageService.currentDmUser(); as dmUser){
+  @if (directMessageService.currentDmUser(); as dmUser){
 
-    } @else {
+  } @else {
 
-      <div class="chat-header__right">
-        <div class="chat-header__members" (click)="openMemberListDialog()">
-          @for(member of channelService.channelMembers(); track member.id){
-            <img [src]="member.avatar" [alt]="member.name">
-          }
-        </div>
-        <span class="chat-header__member-count">{{channelService.channelMembers().length}}</span>
-        <button class="chat-header__add-member" type="button" (click)="openDialog()">
-          <img src="assets/logo/Add-members.png" alt="Mitglied hinzufügen" />
-        </button>
-      </div>
-    }
+  <div class="chat-header__right">
+    <div class="chat-header__members" (click)="openMemberListDialog()">
+      @for(member of channelService.channelMembers(); track member.id){
+      <img [src]="member.avatar" [alt]="member.name">
+      }
+    </div>
+    <span class="chat-header__member-count">{{channelService.channelMembers().length}}</span>
+    <button class="chat-header__add-member" type="button" (click)="openDialog()">
+      <img src="assets/logo/Add-members.png" alt="Mitglied hinzufügen" />
+    </button>
+  </div>
+  }
 </div>
