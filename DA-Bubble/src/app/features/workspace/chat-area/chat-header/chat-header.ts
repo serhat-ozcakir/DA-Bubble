@@ -13,13 +13,19 @@ import { Auth } from '../../../../core/services/auth.service';
 export class ChatHeader {
   channelService = inject(ChannelService);
   directMessageService = inject(DirectMessageService);
-   userService = inject(UserService);
-   authService = inject(Auth);
-   openAddMembers = output<void>();
+  userService = inject(UserService);
+  authService = inject(Auth);
+  openAddMembers = output<void>();
+  openMemberList = output<void>();
   constructor() {
-}
+  }
 
-openDialog(): void {
-  this.openAddMembers.emit();
-}
+  openDialog(): void {
+    this.openAddMembers.emit();
+  }
+
+  openMemberListDialog(): void {
+    this.openMemberList.emit();
+  }
+
 }

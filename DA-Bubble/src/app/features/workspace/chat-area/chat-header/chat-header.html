@@ -16,7 +16,7 @@
     } @else {
 
       <div class="chat-header__right">
-        <div class="chat-header__members">
+        <div class="chat-header__members" (click)="openMemberListDialog()">
           @for(member of channelService.channelMembers(); track member.id){
             <img [src]="member.avatar" [alt]="member.name">
           }
