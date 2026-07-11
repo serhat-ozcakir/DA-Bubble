@@ -1,1 +1,68 @@
-<p>channel-detail works!</p>
+<div class="channel-detail-backdrop" (click)="close()">
+  <div class="channel-detail" (click)="$event.stopPropagation()">
+
+    <div class="channel-detail__header">
+      <h2>
+        # {{ channelService.currentChannel()?.name }}
+      </h2>
+
+      <button
+        type="button"
+        class="channel-detail__close"
+        (click)="close()">
+        <img src="assets/icons/close.png" alt="Dialog schließen">
+      </button>
+    </div>
+
+    <div class="channel-detail__section channel-detail__section--name">
+      <div class="channel-detail__section-header">
+        <h3>Channel-Name</h3>
+
+        <button type="button">
+          Bearbeiten
+        </button>
+      </div>
+
+      <div class="channel-detail__name">
+        <span>#</span>
+
+        <p>
+          {{ channelService.currentChannel()?.name }}
+        </p>
+      </div>
+    </div>
+
+    <div class="channel-detail__section">
+      <div class="channel-detail__section-header">
+        <h3>Beschreibung</h3>
+
+        <button type="button">
+          Bearbeiten
+        </button>
+      </div>
+
+      <p class="channel-detail__description">
+        {{ channelService.currentChannel()?.description }}
+      </p>
+
+      <hr class="channel-detail__divider">
+
+      <h3 class="channel-detail__creator-title">
+        Erstellt von
+      </h3>
+
+      <p class="channel-detail__creator">
+        Creator Name
+      </p>
+    </div>
+
+    <div class="channel-detail__footer">
+      <button
+        type="button"
+        class="channel-detail__leave">
+        Channel verlassen
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
+import { ChannelService } from '../../../../core/services/channel.service';
 
 @Component({
   selector: 'app-channel-detail',
@@ -7,5 +8,10 @@ import { Component } from '@angular/core';
   styleUrl: './channel-detail.scss',
 })
 export class ChannelDetail {
+   closeChannelSettings = output<void>();
+   channelService = inject(ChannelService)
 
+   close(): void {
+    this.closeChannelSettings.emit();
+  }
 }
