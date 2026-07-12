@@ -177,3 +177,18 @@
     transform: translateY(0);
   }
 }
+
+.channel-detail__error {
+  margin: 16px 0 0;
+  color: #ed1e79;
+  font-size: 14px;
+  text-align: right;
+}
+
+.channel-detail__leave {
+  &:disabled {
+    background-color: #686868;
+    cursor: not-allowed;
+    transform: none;
+  }
+}

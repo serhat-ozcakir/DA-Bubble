@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
 
 @Component({
@@ -8,10 +8,30 @@ import { ChannelService } from '../../../../core/services/channel.service';
   styleUrl: './channel-detail.scss',
 })
 export class ChannelDetail {
-   closeChannelSettings = output<void>();
-   channelService = inject(ChannelService)
+  closeChannelSettings = output<void>();
+  channelService = inject(ChannelService);
+  isLeaving = signal(false);
+  leaveErrorMessage = signal('');
 
-   close(): void {
+  close(): void {
     this.closeChannelSettings.emit();
+  }
+
+  async leaveChannel(): Promise<void> {
+    const currentChannel = this.channelService.currentChannel();
+
+    if (!currentChannel) {
+      return;
+    }
+
+    try {
+      await this.channelService.leaveChannel(currentChannel.id);
+      this.close();
+    } catch (error) {
+      console.log('Unable to leave the channel:', error);
+      this.leaveErrorMessage.set('Unable to leave the channel')
+    } finally {
+      this.isLeaving.set(false)
+    }
   }
 }

@@ -6,10 +6,7 @@
         # {{ channelService.currentChannel()?.name }}
       </h2>
 
-      <button
-        type="button"
-        class="channel-detail__close"
-        (click)="close()">
+      <button type="button" class="channel-detail__close" (click)="close()">
         <img src="assets/icons/close.png" alt="Dialog schließen">
       </button>
     </div>
@@ -57,10 +54,17 @@
     </div>
 
     <div class="channel-detail__footer">
-      <button
-        type="button"
-        class="channel-detail__leave">
+      @if (leaveErrorMessage()) {
+      <p class="channel-detail__error">
+        {{ leaveErrorMessage() }}
+      </p>
+      }
+      <button type="button" class="channel-detail__leave" [disabled]="isLeaving()" (click)="leaveChannel()">
+        @if(isLeaving()){
+        Wird verlassen
+        } @else{
         Channel verlassen
+        }
       </button>
     </div>
 
