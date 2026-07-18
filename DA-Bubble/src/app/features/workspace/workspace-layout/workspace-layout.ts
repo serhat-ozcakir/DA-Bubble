@@ -35,7 +35,8 @@ export class WorkspaceLayout {
   async ngOnInit() {
     await this.auth.loadCurrentUser();
     await this.channelService.loadChannels();
-    this.channelService.subscribeToChannelMemberships();
+    this.channelService.subscribeToCurrentChannelMembers();
+    
   }
 
   toggleSidebar(): void {
