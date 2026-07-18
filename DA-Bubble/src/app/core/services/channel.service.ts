@@ -241,4 +241,91 @@ subscribeToCurrentChannelMembers(): void {
     }
   }
 
+async updateChannelName(
+  channelId: string,
+  newName: string
+): Promise<void> {
+  const trimmedName = newName.trim();
+
+  const { data: existingChannel, error: checkError } =
+    await this.supabase.supabase
+      .from('channels')
+      .select('id')
+      .eq('name', trimmedName)
+      .neq('id', channelId)
+      .maybeSingle();
+
+  if (checkError) {
+    throw checkError;
+  }
+
+  if (existingChannel) {
+    throw new Error('CHANNEL_ALREADY_EXISTS');
+  }
+
+  const { data, error } = await this.supabase.supabase
+    .from('channels')
+    .update({ name: trimmedName })
+    .eq('id', channelId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  const updatedChannel: Channel = {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    createdBy: data.created_by,
+    createdAt: data.created_at,
+  };
+
+  this.channels.update((channels) =>
+    channels.map((channel) =>
+      channel.id === channelId ? updatedChannel : channel
+    )
+  );
+
+  this.currentChannel.set(updatedChannel);
+}
+
+async updateChannelDescription(
+  channelId: string,
+  newDescription: string
+): Promise<void> {
+  const trimmedDescription = newDescription.trim();
+
+  const { data, error } = await this.supabase.supabase
+    .from('channels')
+    .update({
+      description: trimmedDescription,
+    })
+    .eq('id', channelId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Channel description update error:', error);
+    throw error;
+  }
+
+  const updatedChannel: Channel = {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    createdBy: data.created_by,
+    createdAt: data.created_at,
+  };
+
+  this.channels.update((channels) =>
+    channels.map((channel) =>
+      channel.id === channelId ? updatedChannel : channel
+    )
+  );
+
+  this.currentChannel.set(updatedChannel);
+}
+
 }
