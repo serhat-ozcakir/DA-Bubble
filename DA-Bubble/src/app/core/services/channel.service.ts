@@ -14,6 +14,7 @@ export class ChannelService {
   channels = signal<Channel[]>([]);
   currentChannel = signal<Channel | null>(null);
   channelMembers = signal<Profile[]>([]);
+  creator =  signal<Profile | null>(null);
   private channelMembersRealtimeChannel: RealtimeChannel | null = null;
 
   async loadChannels(): Promise<void> {
@@ -59,12 +60,28 @@ export class ChannelService {
     if (loadedChannels.length > 0) {
       this.currentChannel.set(loadedChannels[0]);
       await this.loadChannelMembers(loadedChannels[0].id);
+       await this.loadChannelCreator(loadedChannels[0].createdBy);
       this.subscribeToCurrentChannelMembers();
     } else {
       this.currentChannel.set(null);
       this.channelMembers.set([]);
     }
   }
+
+async loadChannelCreator(profileId: string): Promise<void> {
+  const { data, error } = await this.supabase.supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', profileId)
+    .single();
+
+  if (error) {
+    console.error('Fehler beim Laden des Channel-Erstellers:', error);
+    return;
+  }
+
+  this.creator.set(data);
+}
 
 async loadChannelMembers(channelId: string): Promise<void> {
   const { data, error } = await this.supabase.supabase
@@ -96,6 +113,7 @@ async loadChannelMembers(channelId: string): Promise<void> {
   setCurrentChannel(channel: Channel): void {
     this.currentChannel.set(channel);
     this.loadChannelMembers(channel.id);
+    this.loadChannelCreator(channel.createdBy);
     this.subscribeToCurrentChannelMembers();
   }
 
