@@ -15,43 +15,120 @@
       <div class="channel-detail__section-header">
         <h3>Channel-Name</h3>
 
-        <button type="button">
+        @if (isEditingName()) {
+        <button type="button" [disabled]="isSavingName()" (click)="saveChannelName()">
+          @if (isSavingName()) {
+          Wird gespeichert...
+          } @else {
+          Speichern
+          }
+        </button>
+        } @else {
+        <button type="button" (click)="startEditingName()">
           Bearbeiten
         </button>
+        }
       </div>
 
-      <div class="channel-detail__name">
+      @if (isEditingName()) {
+      <div class="channel-detail__name-input">
         <span>#</span>
 
-        <p>
-          {{ channelService.currentChannel()?.name }}
-        </p>
-      </div>
-    </div>
-
-    <div class="channel-detail__section">
-      <div class="channel-detail__section-header">
-        <h3>Beschreibung</h3>
-
-        <button type="button">
-          Bearbeiten
-        </button>
+        <input type="text" [formControl]="channelEditForm.controls.name" />
       </div>
 
-      <p class="channel-detail__description">
-        {{ channelService.currentChannel()?.description }}
+      @if (
+      channelEditForm.controls.name.touched &&
+      channelEditForm.controls.name.hasError('required')
+      ) {
+      <p class="channel-detail__error">
+        Channel-Name ist erforderlich.
       </p>
+      }
 
-      <hr class="channel-detail__divider">
-
-      <h3 class="channel-detail__creator-title">
-        Erstellt von
-      </h3>
-
-      <p class="channel-detail__creator">
-         {{ channelService.creator()?.name }}
+      @if (
+      channelEditForm.controls.name.touched &&
+      channelEditForm.controls.name.hasError('maxlength')
+      ) {
+      <p class="channel-detail__error">
+        Channel-Name darf maximal 50 Zeichen haben.
       </p>
+      }
+      } @else {
+      <p class="channel-detail__name">
+        <span>#</span>
+        {{ channelService.currentChannel()?.name }}
+      </p>
+      }
+      @if (nameErrorMessage()) {
+      <p class="channel-detail__error">
+        {{ nameErrorMessage() }}
+      </p>
+      }
     </div>
+
+<div class="channel-detail__section">
+  <div class="channel-detail__section-header">
+    <h3>Beschreibung</h3>
+
+    @if (isEditingDescriptionName()) {
+      <button
+        type="button"
+        [disabled]="isSavingDescription()"
+        (click)="saveChannelDescription()"
+      >
+        @if (isSavingDescription()) {
+          Wird gespeichert...
+        } @else {
+          Speichern
+        }
+      </button>
+    } @else {
+      <button
+        type="button"
+        (click)="startEditingDescription()"
+      >
+        Bearbeiten
+      </button>
+    }
+  </div>
+
+  @if (isEditingDescriptionName()) {
+    <textarea
+      class="channel-detail__description-input"
+      [formControl]="channelEditForm.controls.description"
+    ></textarea>
+
+    @if (
+      channelEditForm.controls.description.touched &&
+      channelEditForm.controls.description.hasError('maxlength')
+    ) {
+      <p class="channel-detail__error">
+        Die Beschreibung darf maximal 200 Zeichen haben.
+      </p>
+    }
+
+    @if (descriptionErrorMessage()) {
+      <p class="channel-detail__error">
+        {{ descriptionErrorMessage() }}
+      </p>
+    }
+  } @else {
+    <p class="channel-detail__description">
+      {{ channelService.currentChannel()?.description }}
+    </p>
+  }
+
+  <hr class="channel-detail__divider">
+
+  <h3 class="channel-detail__creator-title">
+    Erstellt von
+  </h3>
+
+  <p class="channel-detail__creator">
+    {{ channelService.creator()?.name }}
+  </p>
+</div>
 
     <div class="channel-detail__footer">
       @if (leaveErrorMessage()) {
