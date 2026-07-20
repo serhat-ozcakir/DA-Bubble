@@ -4,10 +4,46 @@
       <img src="assets/img/header/header_logo.png" alt="DABubble Logo" />
     </div>
 
-    <div class="header__search">
-      <input type="text" placeholder="Devspace durchsuchen" />
-      <img src="assets/icons/search.png" alt="search icon" />
+<div class="header__search">
+  <input
+    type="text"
+    placeholder="Devspace durchsuchen"
+    [value]="searchText()"
+    (focus)="openSearch()"
+    (input)="onSearchInput($event)"
+  />
+
+  <img src="assets/icons/search.png" alt="search icon" />
+
+  @if (isSearchOpen()) {
+    <div class="header__search-dropdown">
+      @for (user of filteredUsers(); track user.id) {
+        <button
+          class="header__search-user"
+          type="button"
+          (click)="selectUser(user)"
+        >
+          <div class="header__search-avatar">
+            <img [src]="user.avatar" [alt]="user.name" />
+
+            <span
+              class="header__search-status"
+              [class.header__search-status--online]="user.status === 'online'"
+            ></span>
+          </div>
+
+          <span>{{ user.name }}</span>
+        </button>
+      }
+
+      @if (filteredUsers().length === 0) {
+        <p class="header__search-empty">
+          Keine Benutzer gefunden.
+        </p>
+      }
     </div>
+  }
+</div>
 
     <div class="header__user">
       <span class="header__username">
