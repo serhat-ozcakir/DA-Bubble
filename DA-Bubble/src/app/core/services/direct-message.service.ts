@@ -11,7 +11,6 @@ import { Auth } from './auth.service';
 export class DirectMessageService {
   currentDmUser = signal<Profile | null>(null);
   directMessages = signal<MessageView[]>([]);
-
   supabase = inject(Supabase);
   authService = inject(Auth);
 
@@ -180,5 +179,11 @@ export class DirectMessageService {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  async selectDmUSer(user:Profile):Promise<void>{
+    this.currentDmUser.set(user);
+    await this.loadDirectMessages();
+    this.listenToDirectMessages();
   }
 }
