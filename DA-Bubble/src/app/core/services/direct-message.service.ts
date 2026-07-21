@@ -13,7 +13,6 @@ export class DirectMessageService {
   directMessages = signal<MessageView[]>([]);
   supabase = inject(Supabase);
   authService = inject(Auth);
-
   private dmRealtimeChannel: RealtimeChannel | null = null;
 
   async loadDirectMessages(): Promise<void> {
