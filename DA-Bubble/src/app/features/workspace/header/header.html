@@ -4,46 +4,82 @@
       <img src="assets/img/header/header_logo.png" alt="DABubble Logo" />
     </div>
 
-<div class="header__search">
-  <input
-    type="text"
-    placeholder="Devspace durchsuchen"
-    [value]="searchText()"
-    (focus)="openSearch()"
-    (input)="onSearchInput($event)"
-  />
+    <div class="header__search">
+      <input type="text" placeholder="Devspace durchsuchen" [value]="searchText()" (focus)="openSearch()"
+        (input)="onSearchInput($event)" />
 
-  <img src="assets/icons/search.png" alt="search icon" />
+      <img src="assets/icons/search.png" alt="search icon" />
 
-  @if (isSearchOpen()) {
-    <div class="header__search-dropdown">
-      @for (user of filteredUsers(); track user.id) {
-        <button
-          class="header__search-user"
-          type="button"
-          (click)="selectUser(user)"
-        >
+      @if (isSearchOpen()) {
+      <div class="header__search-dropdown">
+
+        @if (searchMode() === 'channels') {
+        @for (channel of filteredChannels(); track channel.id) {
+        <button class="header__search-channel" type="button" (click)="selectChannel(channel)">
+          <span class="header__search-hash">#</span>
+          <span>{{ channel.name }}</span>
+        </button>
+        }
+
+        @if (filteredChannels().length === 0) {
+        <p class="header__search-empty">
+          Keine Channels gefunden.
+        </p>
+        }
+        } @else if (searchMode() === 'users') {
+        @for (user of filteredUsers(); track user.id) {
+        <button class="header__search-user" type="button" (click)="selectUser(user)">
           <div class="header__search-avatar">
-            <img [src]="user.avatar" [alt]="user.name" />
+            <img [src]="user.avatar" [alt]="user.name">
 
-            <span
-              class="header__search-status"
-              [class.header__search-status--online]="user.status === 'online'"
-            ></span>
+            <span class="header__search-status" [class.header__search-status--online]="user.status === 'online'"></span>
           </div>
 
           <span>{{ user.name }}</span>
         </button>
-      }
+        }
 
-      @if (filteredUsers().length === 0) {
+        @if (filteredUsers().length === 0) {
         <p class="header__search-empty">
           Keine Benutzer gefunden.
         </p>
+        }
+        } @else {
+        @if (searchService.isLoading()) {
+        <p class="header__search-empty">
+          Wird gesucht...
+        </p>
+        } @else if (searchService.errorMessage()) {
+        <p class="header__search-empty">
+          {{ searchService.errorMessage() }}
+        </p>
+        } @else {
+        @for (result of searchService.results(); track result.id) {
+        <button class="header__search-message" type="button" (click)="selectMessageResult(result)">
+          <img class="header__search-message-avatar" [src]="result.avatar" [alt]="result.authorName" />
+
+          <div class="header__search-message-content">
+            <strong>{{ result.authorName }}</strong>
+
+            <span>{{ result.text }}</span>
+          </div>
+        </button>
+        }
+
+        @if (
+        searchText().trim().length >= 2 &&
+        searchService.results().length === 0
+        ) {
+        <p class="header__search-empty">
+          Keine Nachrichten gefunden.
+        </p>
+        }
+        }
+        }
+
+      </div>
       }
     </div>
-  }
-</div>
 
     <div class="header__user">
       <span class="header__username">
