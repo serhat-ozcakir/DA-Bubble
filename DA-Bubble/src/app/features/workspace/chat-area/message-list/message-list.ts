@@ -1,6 +1,10 @@
-import { Component, effect, inject } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  OnDestroy,
+} from '@angular/core';
 import { MessageItemComponent } from '../message-item/message-item';
-import { MessageView } from '../../../../core/models/message-view.model';
 import { MessageService } from '../../../../core/services/message.service';
 import { Auth } from '../../../../core/services/auth.service';
 import { ChannelService } from '../../../../core/services/channel.service';
@@ -13,19 +17,22 @@ import { ReactionService } from '../../../../core/services/reaction.service';
   templateUrl: './message-list.html',
   styleUrl: './message-list.scss',
 })
-export class MessageList {
-
+export class MessageList implements OnDestroy {
   messageService = inject(MessageService);
+
   private authService = inject(Auth);
   private channelService = inject(ChannelService);
-  directMessageService = inject(DirectMessageService);
   private reactionService = inject(ReactionService);
+
+  directMessageService = inject(DirectMessageService);
 
   constructor() {
     this.reactionService.subscribeToReactions();
+
     effect(() => {
       const dmUser = this.directMessageService.currentDmUser();
       const channel = this.channelService.currentChannel();
+
       this.reactionService.loadReactions();
 
       if (dmUser) {
@@ -47,4 +54,7 @@ export class MessageList {
     await this.channelService.loadChannels();
   }
 
+  ngOnDestroy(): void {
+    this.reactionService.removeReactionsRealtimeChannel();
+  }
 }

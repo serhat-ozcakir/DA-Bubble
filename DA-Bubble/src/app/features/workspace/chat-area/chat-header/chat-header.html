@@ -6,8 +6,8 @@
     <span class="chat-header__title">{{dmUser.name}}</span>
     } @else {
     <div (click)="openChannelSettingsDialog()">
-      <span class="chat-header__hash">#</span>
-      <span  (click)="openChannelSettingsDialog()" class="chat-header__title">{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }}</span>
+      <span class="chat-header__hash"># </span>
+      <span  (click)="openChannelSettingsDialog()" class="chat-header__title">{{ channelService.currentChannel()?.name || 'Kein Kanal ausgewählt' }} </span>
       <img class="chat-header__arrow" src="assets/icons/keyboard_arrow_down.png" alt="" />
     </div>
     }
