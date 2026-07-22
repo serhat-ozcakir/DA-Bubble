@@ -28,7 +28,7 @@ export class WorkspaceLayout {
   showMemberListDialog = signal(false);
   showChannelSettingsDialog = signal(false);
   channelService = inject(ChannelService);
-
+  showNewMessage = signal(false);
 
   constructor(private auth: Auth) { }
 
@@ -36,7 +36,7 @@ export class WorkspaceLayout {
     await this.auth.loadCurrentUser();
     await this.channelService.loadChannels();
     this.channelService.subscribeToCurrentChannelMembers();
-    
+
   }
 
   toggleSidebar(): void {
@@ -82,5 +82,13 @@ export class WorkspaceLayout {
 
   closeChannelSettingsDialog(): void {
     this.showChannelSettingsDialog.set(false);
+  }
+
+  openNewMessage(): void {
+    this.showNewMessage.set(true);
+  }
+
+  closeNewMessage(): void {
+    this.showNewMessage.set(false);
   }
 }

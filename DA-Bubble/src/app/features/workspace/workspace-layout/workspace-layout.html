@@ -2,7 +2,11 @@
   <app-header></app-header>
 
   <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed" [class.thread-open]=isThreadOpen>
-    <app-sidebar (openCreateChannel)="openCreateChannelDialog()"></app-sidebar>
+    <app-sidebar 
+    (openNewMessage)="openNewMessage()" 
+    (openCreateChannel)="openCreateChannelDialog()"
+    (chatSelected)="closeNewMessage()"
+    ></app-sidebar>
 
     <button class="workspace__sidebar-toggle" type="button" (click)="toggleSidebar()">
       <div class="workspace__toggle-content">
@@ -16,7 +20,11 @@
 
       </div>
     </button>
-    <app-chat-area (openMemberList)="openMemberListDialog()" (openAddMembers)="openAddMembersDialog()" (openChannelSettings)="openChannelSettingsDialog()">
+    <app-chat-area 
+    (openMemberList)="openMemberListDialog()" 
+    (openAddMembers)="openAddMembersDialog()" 
+    (openChannelSettings)="openChannelSettingsDialog()"
+    [showNewMessage] = "showNewMessage()">
 
     </app-chat-area>
     @if(showAddMemberDialog()){
