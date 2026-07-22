@@ -1,1 +1,45 @@
-<p>new-message works!</p>
+<div class="new-message">
+  <div class="new-message__header">
+    <h2>Neue Nachricht</h2>
+
+    <div class="new-message__recipient">
+      <span class="new-message__recipient-label">An:</span>
+
+      <input
+        type="text"
+        placeholder="#channel, oder @jemand oder Mail Adresse"
+      />
+    </div>
+  </div>
+
+  <div class="new-message__content"></div>
+
+  <div class="new-message__composer">
+    <textarea
+      placeholder="Starte eine neue Nachricht"
+    ></textarea>
+
+    <div class="new-message__composer-footer">
+      <div class="new-message__actions">
+        <button type="button" aria-label="Emoji auswählen">
+          <img
+            src="assets/icons/sentiment_satisfied.png"
+            alt="Emoji"
+          />
+        </button>
+
+        <button type="button" aria-label="Benutzer erwähnen">
+          @
+        </button>
+      </div>
+
+      <button
+        class="new-message__send"
+        type="button"
+        aria-label="Nachricht senden"
+      >
+        <img src="assets/icons/send.png" alt="Senden" />
+      </button>
+    </div>
+  </div>
+</div>
