@@ -3,6 +3,7 @@ import { Supabase } from '../supabase/supabase.service';
 import { Auth } from './auth.service';
 import { MessageReaction } from '../models/message-reaction.model';
 import { ReactionSummary } from '../models/reaction-summary.model';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class ReactionService {
   readonly defaultReactionOptions = ['✅', '👍'];
   reactions = signal<MessageReaction[]>([]);
   lastUsedReactions = signal<string[]>([]);
-
+  private reactionsRealtimeChannel: RealtimeChannel | null = null;
 
   reactionOptions = computed<string[]>(()=> {
     const lastUsed = this.lastUsedReactions();
@@ -144,7 +145,9 @@ export class ReactionService {
   }
 
 subscribeToReactions(): void {
-  this.supabase.supabase
+  this.removeReactionsRealtimeChannel();
+
+  this.reactionsRealtimeChannel = this.supabase.supabase
     .channel('message-reactions-realtime')
     .on(
       'postgres_changes',
@@ -153,11 +156,23 @@ subscribeToReactions(): void {
         schema: 'public',
         table: 'message_reactions',
       },
-      async (payload) => {
+      async () => {
         await this.loadReactions();
       }
     )
     .subscribe();
+}
+
+removeReactionsRealtimeChannel(): void {
+  if (!this.reactionsRealtimeChannel) {
+    return;
+  }
+
+  this.supabase.supabase.removeChannel(
+    this.reactionsRealtimeChannel
+  );
+
+  this.reactionsRealtimeChannel = null;
 }
 
 }
