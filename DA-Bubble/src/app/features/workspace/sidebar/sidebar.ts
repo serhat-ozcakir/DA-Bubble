@@ -19,8 +19,9 @@ export class Sidebar implements OnInit {
   userService = inject(UserService);
   authService = inject(Auth);
   messageService = inject(MessageService);
-  direktMessageService = inject(DirectMessageService)
-
+  direktMessageService = inject(DirectMessageService);
+  openNewMessage = output<void>();
+  chatSelected = output<void>();
   isChannelsOpen = true;
   isDirectMessagesOpen = true;
   openCreateChannel = output<void>();
@@ -36,7 +37,8 @@ export class Sidebar implements OnInit {
   selectChannel(channel:Channel):void{
     this.channelService.setCurrentChannel(channel);
     this.direktMessageService.currentDmUser.set(null)
-    this.messageService.closeThread()
+    this.messageService.closeThread();
+    this.chatSelected.emit();
   }
 
 
@@ -51,11 +53,17 @@ export class Sidebar implements OnInit {
   async selectDmUser(user:Profile):Promise<void>{
     this.direktMessageService.currentDmUser.set(user);
     this.messageService.closeThread();
-    await this.direktMessageService.loadDirectMessages()
+    await this.direktMessageService.loadDirectMessages();
+    this.chatSelected.emit();
   }
 
   openDialog():void{
     console.log('openDialog calisti');
     this.openCreateChannel.emit()
   }
+
+  openNewMessageView():void{
+    this.openNewMessage.emit();
+  }
+
 }
