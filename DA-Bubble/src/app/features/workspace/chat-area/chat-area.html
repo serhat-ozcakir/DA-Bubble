@@ -1,8 +1,12 @@
 <div class="chat-area">
-    <app-chat-header (openMemberList)="openMemberList.emit()" 
-    (openAddMembers)="openAddMembers.emit()"
-    (openChannelSettings)="openChannelSettings.emit()" 
-    />
-    <app-message-list />
-    <app-message-input />
+    @if(showNewMessage()){
+    <app-new-message></app-new-message>
+    } @else {
+        <app-chat-header (openMemberList)="openMemberList.emit()" 
+        (openAddMembers)="openAddMembers.emit()"
+        (openChannelSettings)="openChannelSettings.emit()" 
+        />
+        <app-message-list />
+        <app-message-input />
+    }
 </div>
