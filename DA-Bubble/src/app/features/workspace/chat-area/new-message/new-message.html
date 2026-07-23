@@ -1,15 +1,90 @@
 <div class="new-message">
   <div class="new-message__header">
     <h2>Neue Nachricht</h2>
+    
+<div class="new-message__recipient-wrapper">
+  <div class="new-message__recipient">
+    <span class="new-message__recipient-label">An:</span>
 
-    <div class="new-message__recipient">
-      <span class="new-message__recipient-label">An:</span>
+    @if (selectedUser(); as user) {
+      <div class="new-message__recipient-chip">
+        <img [src]="user.avatar" [alt]="user.name" />
+        <span>@ {{ user.name }}</span>
 
+        <button type="button" (click)="clearRecipient()">
+          ×
+        </button>
+      </div>
+    } @else if (selectedChannel(); as channel) {
+      <div class="new-message__recipient-chip">
+        <span class="new-message__recipient-hash">#</span>
+        <span>{{ channel.name }}</span>
+
+        <button type="button" (click)="clearRecipient()">
+          ×
+        </button>
+      </div>
+    } @else {
       <input
         type="text"
         placeholder="#channel, oder @jemand oder Mail Adresse"
+        [value]="recipientSearchText()"
+        (focus)="openRecipientDropdown()"
+        (input)="onRecipientInput($event)"
       />
+    }
+  </div>
+
+  @if (isRecipientDropdownOpen()) {
+    <div class="new-message__recipient-dropdown">
+      @if (recipientMode() === 'channels') {
+        @for (channel of filteredChannels(); track channel.id) {
+          <button
+            class="new-message__recipient-option"
+            type="button"
+            (click)="selectChannel(channel)"
+          >
+            <span class="new-message__recipient-hash">#</span>
+            <span>{{ channel.name }}</span>
+          </button>
+        }
+
+        @if (filteredChannels().length === 0) {
+          <p class="new-message__recipient-empty">
+            Keine Channels gefunden.
+          </p>
+        }
+      } @else {
+        @for (user of filteredUsers(); track user.id) {
+          <button
+            class="new-message__recipient-option"
+            type="button"
+            (click)="selectUser(user)"
+          >
+            <div class="new-message__recipient-avatar">
+              <img [src]="user.avatar" [alt]="user.name" />
+
+              <span
+                class="new-message__recipient-status"
+                [class.new-message__recipient-status--online]="
+                  user.status === 'online'
+                "
+              ></span>
+            </div>
+
+            <span>{{ user.name }}</span>
+          </button>
+        }
+
+        @if (filteredUsers().length === 0) {
+          <p class="new-message__recipient-empty">
+            Keine Benutzer gefunden.
+          </p>
+        }
+      }
     </div>
+  }
+</div>
   </div>
 
   <div class="new-message__content"></div>
