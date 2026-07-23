@@ -18,7 +18,9 @@
   <section class="sidebar__section">
     <div class="sidebar__section-title">
       <div class="sidebar__section-left">
-        <span class="sidebar__chevron" [class.sidebar__chevron--closed]="!isChannelsOpen" (click)="toggleSection('channels')">⌄</span>
+        <span class="sidebar__chevron" [class.sidebar__chevron--closed]="!isChannelsOpen" (click)="toggleSection('channels')">
+          <img class="chat-header__arrow" src="assets/icons/keyboard_arrow_down.png" alt="" />
+        </span>
         <img src="assets\icons\workspaces.png" alt="workspaces icon" />
         <strong>Channels</strong>
       </div>
@@ -50,7 +52,9 @@
   <section class="sidebar__section">
     <div class="sidebar__section-title">
       <div class="sidebar__section-left">
-        <span class="sidebar__chevron" [class.sidebar__chevron--closed]="!isDirectMessagesOpen" (click)="toggleSection('directMessages')">⌄</span>
+        <span class="sidebar__chevron" [class.sidebar__chevron--closed]="!isDirectMessagesOpen" (click)="toggleSection('directMessages')">
+          <img class="chat-header__arrow" src="assets/icons/keyboard_arrow_down.png" alt="" />
+        </span>
         <img src="assets/logo/account_circle.png" alt="account circle logo" />
         <strong>Direktnachrichten</strong>
       </div>

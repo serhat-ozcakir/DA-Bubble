@@ -90,6 +90,11 @@
   cursor: pointer;
   transition: transform 0.2s ease;
 
+  > img{
+    width: 10px;
+    height: auto;
+  }
+
   &--closed {
     transform: rotate(-90deg);
   }
