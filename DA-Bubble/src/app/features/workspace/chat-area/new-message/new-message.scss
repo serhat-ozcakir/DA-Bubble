@@ -274,6 +274,12 @@
   }
 }
 
+.new-message__error {
+  margin: 10px 0 0;
+  color: #ed1e79;
+  font-size: 14px;
+}
+
 @media (max-width: 991px) {
   .new-message {
     border-radius: 0;

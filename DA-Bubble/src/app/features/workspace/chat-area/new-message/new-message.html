@@ -92,6 +92,8 @@
   <div class="new-message__composer">
     <textarea
       placeholder="Starte eine neue Nachricht"
+      [value] = "messageText()"
+      (input)="onMessageInput($event)"
     ></textarea>
 
     <div class="new-message__composer-footer">
@@ -112,9 +114,17 @@
         class="new-message__send"
         type="button"
         aria-label="Nachricht senden"
+        [disabled]="isSending() || !messageText().trim() || (!selectedUser() && !selectedChannel())"
+        (click)="sendMessage()"
       >
         <img src="assets/icons/send.png" alt="Senden" />
       </button>
     </div>
   </div>
 </div>
+
+@if(isErrorMessage()){
+  <p class="new-message__error">
+    {{isErrorMessage()}}
+  </p>
+}
