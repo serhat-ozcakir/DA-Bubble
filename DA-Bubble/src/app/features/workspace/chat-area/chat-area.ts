@@ -16,5 +16,9 @@ openAddMembers = output<void>();
 openMemberList = output<void>();
 openChannelSettings = output<void>();
 showNewMessage = input(false);
+closeNewMessage = output<void>();
 
+closeNewMessageEmit():void{
+  this.closeNewMessage.emit()
+}
 }
