@@ -1,92 +1,192 @@
-<div class="message-wrapper" [class.message-wrapper--own]="message().isOwnMessage">
-  <div class="message-actions-container" [class.message-actions-container--own]="message().isOwnMessage">
+<div
+  class="message-wrapper"
+  [class.message-wrapper--own]="message().isOwnMessage"
+>
+  <div
+    class="message-actions-container"
+    [class.message-actions-container--own]="message().isOwnMessage"
+  >
     <div class="message-actions">
-      @for(emoji of reactionService.reactionOptions(); track emoji){
-      <button type="button" class="message-actions__button" (click)="reactionService.addReaction(message().id, emoji)">
-        {{ emoji }}
-      </button>
-      }
-      <button type="button" class="message-actions__button" (click)="toggleEmojiPicker()">
-        <img src="assets/icons/add_reaction.png" alt="Thread-icon">
-      </button>
-      @if(isShowEmojiPicker()){
-      <div class="emoji-picker">
-        <emoji-mart set="apple" [showPreview]="false" [isNative]="true" [emojiSize]="20" [perLine]="6"
-          [exclude]="['flags']" (emojiClick)="addEmojiReaction($event)">
-        </emoji-mart>
-      </div>
-      }
-      <button type="button" class="message-actions__button" (click)="openThread()">
-        <img src="assets/icons/comment.png" alt="Thread-icon">
-      </button>
-      @if(message().isOwnMessage){
-      <button type="button" class="message-actions__button" (click)="toggleMessageEdited($event)">
-        <img src="assets/icons/more_vert.png" alt="Thread-icon">
-      </button>
-      @if(isMessageEdited()){
-      <div class="message-edit">
-        <button type="button" class="message-edit__button" (click)="startEditingMessage($event)">
-          Nachricht bearbeiten
+      @for (emoji of reactionService.reactionOptions(); track emoji) {
+        <button
+          type="button"
+          class="message-actions__button"
+          (click)="toggleQuickReaction(emoji)"
+        >
+          {{ emoji }}
         </button>
-      </div>
       }
+
+      <button
+        type="button"
+        class="message-actions__button"
+        (click)="toggleEmojiPicker()"
+      >
+        <img
+          src="assets/icons/add_reaction.png"
+          alt="Reaction hinzufügen"
+        />
+      </button>
+
+      @if (isShowEmojiPicker()) {
+        <div class="emoji-picker">
+          <emoji-mart
+            set="apple"
+            [showPreview]="false"
+            [isNative]="true"
+            [emojiSize]="20"
+            [perLine]="6"
+            [exclude]="['flags']"
+            (emojiClick)="addEmojiReaction($event)"
+          >
+          </emoji-mart>
+        </div>
+      }
+
+      @if (!directMessageService.currentDmUser()) {
+        <button
+          type="button"
+          class="message-actions__button"
+          (click)="openThread()"
+        >
+          <img
+            src="assets/icons/comment.png"
+            alt="Thread öffnen"
+          />
+        </button>
+      }
+
+      @if (message().isOwnMessage) {
+        <button
+          type="button"
+          class="message-actions__button"
+          (click)="toggleMessageEdited($event)"
+        >
+          <img
+            src="assets/icons/more_vert.png"
+            alt="Weitere Optionen"
+          />
+        </button>
+
+        @if (isMessageEdited()) {
+          <div class="message-edit">
+            <button
+              type="button"
+              class="message-edit__button"
+              (click)="startEditingMessage($event)"
+            >
+              Nachricht bearbeiten
+            </button>
+          </div>
+        }
       }
     </div>
   </div>
 
-  <div class="message" [class.message--own]="message().isOwnMessage">
-    <img class="message__avatar" [src]="message().avatar" [alt]="message().authorName" />
+  <div
+    class="message"
+    [class.message--own]="message().isOwnMessage"
+  >
+    <img
+      class="message__avatar"
+      [src]="message().avatar"
+      [alt]="message().authorName"
+    />
 
     <div class="message__content">
       <div class="message__meta">
-        <span class="message__author">{{ message().authorName }}</span>
-        <span class="message__time">{{ message().time }}</span>
+        <span class="message__author">
+          {{ message().authorName }}
+        </span>
+
+        <span class="message__time">
+          {{ message().time }}
+        </span>
       </div>
 
       @if (editingMessageID() === message().id) {
-      <div class="message-edit-form">
-        <textarea autofocus #editTextarea class="message-edit-form__textarea" [value]="editingText()"
-          (input)="editingText.set($any($event.target).value)" (keydown.enter)="saveOnEnter($any($event))">
-    </textarea>
+        <div class="message-edit-form">
+          <textarea
+            autofocus
+            #editTextarea
+            class="message-edit-form__textarea"
+            [value]="editingText()"
+            (input)="editingText.set($any($event.target).value)"
+            (keydown.enter)="saveOnEnter($any($event))"
+          ></textarea>
 
-        <div class="message-edit-form__actions">
-          <button type="button" class="message-edit-form__button" (click)="cancelEditMessage()">
-            Abbrechen
-          </button>
+          <div class="message-edit-form__actions">
+            <button
+              type="button"
+              class="message-edit-form__button"
+              (click)="cancelEditMessage()"
+            >
+              Abbrechen
+            </button>
 
-          <button type="button" class="message-edit-form__button message-edit-form__button--save"
-            (click)="saveEditedMessage()">
-            Speichern
-          </button>
-        </div>
-      </div>
-      } @else {
-      <div class="message__bubble" (click)="openThread()">
-        {{ message().text }}
-      </div>
-      }
-      @if (message().threadCount) {
-      <button class="message__thread" (click)="openThread()">
-        {{ message().threadCount }} Antworten
-      </button>
-      }
-      <div class="message-reactions">
-        @for(reaction of reactionService.getReactionForMessage(message().id); track reaction.emoji){
-        <button type="button" class="message-reactions__button"
-          [class.message-reactions__button--active]="reaction.reactedByCurrentUser">
-          <span>{{ reaction.emoji }}</span>
-          <span>{{ reaction.count }}</span>
-          <div class="reaction-tooltip">
-            <div class="reaction-tooltip__emoji">
-              {{ reaction.emoji }}
-            </div>
-
-            <div class="reaction-tooltip__text">
-              <strong>{{getReactionUsersNames(reaction.userNames)}}</strong>
-              <span>{{getReactionVerb(reaction.userNames)}}</span>
-            </div>
+            <button
+              type="button"
+              class="message-edit-form__button message-edit-form__button--save"
+              (click)="saveEditedMessage()"
+            >
+              Speichern
+            </button>
           </div>
+        </div>
+      } @else {
+        <div
+          class="message__bubble"
+          (click)="openThread()"
+        >
+          {{ message().text }}
+        </div>
+      }
+
+      @if (
+        !directMessageService.currentDmUser() &&
+        message().threadCount
+      ) {
+        <button
+          type="button"
+          class="message__thread"
+          (click)="openThread()"
+        >
+          {{ message().threadCount }} Antworten
         </button>
+      }
+
+      <div class="message-reactions">
+        @for (
+          reaction of reactionService.getReactionForMessage(message().id);
+          track reaction.emoji
+        ) {
+          <button
+            type="button"
+            class="message-reactions__button"
+            [class.message-reactions__button--active]="
+              reaction.reactedByCurrentUser
+            "
+            (click)="toggleQuickReaction(reaction.emoji)"
+          >
+            <span>{{ reaction.emoji }}</span>
+            <span>{{ reaction.count }}</span>
+
+            <div class="reaction-tooltip">
+              <div class="reaction-tooltip__emoji">
+                {{ reaction.emoji }}
+              </div>
+
+              <div class="reaction-tooltip__text">
+                <strong>
+                  {{ getReactionUsersNames(reaction.userNames) }}
+                </strong>
+
+                <span>
+                  {{ getReactionVerb(reaction.userNames) }}
+                </span>
+              </div>
+            </div>
+          </button>
         }
       </div>
     </div>

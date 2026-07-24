@@ -24,7 +24,9 @@
     (openMemberList)="openMemberListDialog()" 
     (openAddMembers)="openAddMembersDialog()" 
     (openChannelSettings)="openChannelSettingsDialog()"
-    [showNewMessage] = "showNewMessage()">
+    [showNewMessage] = "showNewMessage()"
+    (closeNewMessage)="closeNewMessage()"
+    >
 
     </app-chat-area>
     @if(showAddMemberDialog()){
