@@ -92,7 +92,9 @@
           [class.offline]="auth.currentUserProfile()?.status === 'offline'"></span>
       </div>
 
-      <span class="header__arrow" (click)="toggleUserMenu()">⌄</span>
+      <span class="header__arrow" (click)="toggleUserMenu()">
+        <img class="header__arrow" src="assets/icons/keyboard_arrow_down.png" alt="" />
+      </span>
 
       @if (isUserMenuOpen) {
       <app-user-menu (ProfileClick)="openProfileMenu()" (LogoutClick)="logout()" />

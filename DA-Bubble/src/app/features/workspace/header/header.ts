@@ -165,7 +165,7 @@ export class Header {
   }
 
   selectUser(user: Profile): void {
-    this.directMessageService.selectDmUSer(user);
+    this.directMessageService.selectDmUser(user);
     this.closeSearch();
   }
 
@@ -215,7 +215,7 @@ export class Header {
     if(!user){
       return;
     }
-    await this.directMessageService.selectDmUSer(user);
+    await this.directMessageService.selectDmUser(user);
     this.closeSearch();
   }
 
