@@ -44,6 +44,47 @@ export class DirectMessageService {
     this.directMessages.set(loadedMessages);
   }
 
+async updateDirectMessage(
+  messageId: string,
+  newText: string
+): Promise<void> {
+  const currentUser = this.authService.currentUserProfile();
+  const trimmedText = newText.trim();
+
+  if (!currentUser || !trimmedText) {
+    return;
+  }
+
+  const { data, error } = await this.supabase.supabase
+    .from('direct_messages')
+    .update({
+      text: trimmedText,
+    })
+    .eq('id', messageId)
+    .eq('sender_id', currentUser.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(
+      'Fehler beim Bearbeiten der Direktnachricht:',
+      error
+    );
+    throw error;
+  }
+
+  this.directMessages.update((messages) =>
+    messages.map((message) =>
+      message.id === messageId
+        ? {
+            ...message,
+            text: data.text,
+          }
+        : message
+    )
+  );
+}
+
   async sendDirectMessage(text: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
     const selectedUser = this.currentDmUser();
@@ -82,52 +123,71 @@ export class DirectMessageService {
     });
   }
 
-  listenToDirectMessages(): void {
-    const currentUser = this.authService.currentUserProfile();
-    const selectedUser = this.currentDmUser();
+listenToDirectMessages(): void {
+  const currentUser = this.authService.currentUserProfile();
+  const selectedUser = this.currentDmUser();
 
-    if (!currentUser || !selectedUser) {
-      return;
-    }
+  if (!currentUser || !selectedUser) {
+    return;
+  }
 
-    this.removeDmRealtimeChannel();
+  this.removeDmRealtimeChannel();
 
-    this.dmRealtimeChannel = this.supabase.supabase
-      .channel(`direct-messages-${currentUser.id}-${selectedUser.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'direct_messages',
-        },
-        (payload) => {
-          const newMessage = payload.new as any;
+  this.dmRealtimeChannel = this.supabase.supabase
+    .channel(`direct-messages-${currentUser.id}-${selectedUser.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'direct_messages',
+      },
+      (payload) => {
+        const changedMessage = payload.new as any;
 
-          if (!this.belongsToCurrentConversation(newMessage)) {
-            return;
-          }
+        if (!changedMessage?.id) {
+          return;
+        }
 
+        if (!this.belongsToCurrentConversation(changedMessage)) {
+          return;
+        }
+
+        const mappedMessage = this.mapDirectMessage(
+          changedMessage,
+          currentUser,
+          selectedUser
+        );
+
+        if (payload.eventType === 'INSERT') {
           this.directMessages.update((messages) => {
             const alreadyExists = messages.some(
-              (message) => message.id === newMessage.id
+              (message) => message.id === mappedMessage.id
             );
 
             if (alreadyExists) {
               return messages;
             }
 
-            return [
-              ...messages,
-              this.mapDirectMessage(newMessage, currentUser, selectedUser),
-            ];
+            return [...messages, mappedMessage];
           });
+
+          return;
         }
-      )
-      .subscribe((status) => {
-        console.log('DM realtime status:', status);
-      });
-  }
+
+        if (payload.eventType === 'UPDATE') {
+          this.directMessages.update((messages) =>
+            messages.map((message) =>
+              message.id === mappedMessage.id
+                ? mappedMessage
+                : message
+            )
+          );
+        }
+      }
+    )
+    .subscribe();
+}
 
   removeDmRealtimeChannel(): void {
     if (this.dmRealtimeChannel) {
@@ -180,7 +240,7 @@ export class DirectMessageService {
     });
   }
 
-  async selectDmUSer(user:Profile):Promise<void>{
+  async selectDmUser(user:Profile):Promise<void>{
     this.currentDmUser.set(user);
     await this.loadDirectMessages();
     this.listenToDirectMessages();
