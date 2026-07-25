@@ -27,11 +27,20 @@ export class ThreadPanel {
       currentID === messageId ? null : messageId)
   }
 
-  addThreadEmojiReaction(event: any, messageId: string): void {
-    const emoji = event.emoji.native;
-    this.reactionService.addReaction(messageId, emoji);
-    this.openedReactionPickerId.set(null)
-  }
+async addThreadEmojiReaction(
+  event: any,
+  messageId: string
+): Promise<void> {
+  const emoji = event.emoji.native;
+
+  await this.reactionService.addReaction(
+    messageId,
+    emoji,
+    false
+  );
+
+  this.openedReactionPickerId.set(null);
+}
 
   @HostListener('document:click', ['$event'])
   closeEmojiPickerOnOutsideClick(event: Event): void {

@@ -5,6 +5,7 @@ import { ReactionService } from '../../../../core/services/reaction.service';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { FormsModule } from '@angular/forms';
 import { ReactionSummary } from '../../../../core/models/reaction-summary.model';
+import { DirectMessageService } from '../../../../core/services/direct-message.service';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class MessageItemComponent {
 
   message = input.required<MessageView>();
   private messageService = inject(MessageService);
+  directMessageService = inject(DirectMessageService);
   reactionService = inject(ReactionService);
   isShowEmojiPicker = signal(false);
   private elementRef = inject(ElementRef);
@@ -43,18 +45,30 @@ export class MessageItemComponent {
   }
 
   openThread(): void {
+    const isDirectMessage = this.directMessageService.currentDmUser() !== null;
+    if(isDirectMessage){
+      return;
+    }
     this.messageService.openThread(this.message())
   }
 
   toggleEmojiPicker(): void {
     this.isShowEmojiPicker.update(value => !value)
   }
-  addEmojiReaction(event: any): void {
-    const emoji = event.emoji.native;
+async addEmojiReaction(event: any): Promise<void> {
+  const emoji = event.emoji.native;
 
-    this.reactionService.addReaction(this.message().id, emoji);
-    this.isShowEmojiPicker.set(false);
-  }
+  const isDirectMessage =
+    this.directMessageService.currentDmUser() !== null;
+
+  await this.reactionService.addReaction(
+    this.message().id,
+    emoji,
+    isDirectMessage
+  );
+
+  this.isShowEmojiPicker.set(false);
+}
 
   toggleMessageEdited(event: Event): void {
     event.stopPropagation();
@@ -74,18 +88,36 @@ export class MessageItemComponent {
     this.editingText.set('');
   }
 
-  async saveEditedMessage(): Promise<void> {
-    await this.messageService.updateMessage(this.message().id, this.editingText());
+async saveEditedMessage(): Promise<void> {
+  const newText = this.editingText().trim();
+  const currentMessage = this.message();
 
-    this.editingMessageID.set(null);
-    this.editingText.set('');
+  if (!newText || newText === currentMessage.text) {
+    this.cancelEditMessage();
+    return;
   }
+
+  if (this.directMessageService.currentDmUser()) {
+    await this.directMessageService.updateDirectMessage(
+      currentMessage.id,
+      newText
+    );
+  } else {
+    await this.messageService.updateMessage(
+      currentMessage.id,
+      newText
+    );
+  }
+
+  this.cancelEditMessage();
+}
   
   async saveOnEnter(event: KeyboardEvent): Promise<void> {
     if (event.shiftKey) {
       return;
     }
-    await this.saveEditedMessage()
+    event.preventDefault();
+    await this.saveEditedMessage();
   }
 
   getReactionUsersNames(userNames:string[]):string{
@@ -101,4 +133,15 @@ export class MessageItemComponent {
   getReactionVerb(userNames:string[]):string{
     return userNames.length === 1 ? 'hat reagiert' : 'haben reagiert'
   }
+
+  async toggleQuickReaction(emoji: string): Promise<void> {
+  const isDirectMessage =
+    this.directMessageService.currentDmUser() !== null;
+
+  await this.reactionService.addReaction(
+    this.message().id,
+    emoji,
+    isDirectMessage
+  );
+}
 }
