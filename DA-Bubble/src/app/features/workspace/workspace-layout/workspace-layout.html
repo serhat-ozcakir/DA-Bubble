@@ -21,6 +21,7 @@
       </div>
     </button>
     <app-chat-area 
+    (openShowProfil)="openShowProfilDialog()"
     (openMemberList)="openMemberListDialog()" 
     (openAddMembers)="openAddMembersDialog()" 
     (openChannelSettings)="openChannelSettingsDialog()"
@@ -33,6 +34,9 @@
     <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()"></app-add-members-dialag>
     }
 
+    @if(showProfilDialog()){
+      <app-show-profil-dialog (closeProfilDialogEvent)="closeShowProfilDialog()"/>
+    }
 
     @if(isThreadOpen){
     <app-thread-panel></app-thread-panel>

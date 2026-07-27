@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { HostListener, Component, inject, signal } from '@angular/core';
 import { Header } from '../header/header';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
@@ -11,11 +11,13 @@ import { AddMembersDialag } from "../../workspace/dialogs/add-members-dialag/add
 import { ChannelService } from '../../../core/services/channel.service';
 import { AddMembersList } from '../dialogs/add-members-list/add-members-list';
 import { ChannelDetail } from "../dialogs/channel-detail/channel-detail";
+import { ShowProfilDialog } from '../dialogs/show-profil-dialog/show-profil-dialog';
 
 
 @Component({
   selector: 'app-workspace-layout',
-  imports: [Header, Sidebar, ChatArea, ThreadPanel, ChannelCreateDialog, AddMembersDialag, AddMembersList, ChannelDetail],
+  imports: [Header, Sidebar, ChatArea, ThreadPanel, 
+  ChannelCreateDialog, AddMembersDialag, AddMembersList, ChannelDetail, ShowProfilDialog],
   templateUrl: './workspace-layout.html',
   styleUrl: './workspace-layout.scss',
 })
@@ -29,6 +31,7 @@ export class WorkspaceLayout {
   showChannelSettingsDialog = signal(false);
   channelService = inject(ChannelService);
   showNewMessage = signal(false);
+  showProfilDialog = signal(false); 
 
   constructor(private auth: Auth) { }
 
@@ -90,5 +93,17 @@ export class WorkspaceLayout {
 
   closeNewMessage(): void {
     this.showNewMessage.set(false);
+  }
+
+  openShowProfilDialog():void{
+    this.showProfilDialog.set(true)
+  }
+  closeShowProfilDialog():void{
+    this.showProfilDialog.set(false);
+  }
+
+  @HostListener('document:keydown.esc')
+  closeEscShowDialog():void{
+    this.showProfilDialog.set(false);
   }
 }
