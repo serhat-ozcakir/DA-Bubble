@@ -1,122 +1,158 @@
 <div class="new-message">
   <div class="new-message__header">
     <h2>Neue Nachricht</h2>
-    
-<div class="new-message__recipient-wrapper">
-  <div class="new-message__recipient">
-    <span class="new-message__recipient-label">An:</span>
 
-    @if (selectedUser(); as user) {
-      <div class="new-message__recipient-chip">
-        <img [src]="user.avatar" [alt]="user.name" />
-        <span>@ {{ user.name }}</span>
+    <div class="new-message__recipient-wrapper">
+      <div class="new-message__recipient">
+        <span class="new-message__recipient-label">An:</span>
 
-        <button type="button" (click)="clearRecipient()">
-          ×
-        </button>
-      </div>
-    } @else if (selectedChannel(); as channel) {
-      <div class="new-message__recipient-chip">
-        <span class="new-message__recipient-hash">#</span>
-        <span>{{ channel.name }}</span>
+        @if (selectedUser(); as user) {
+        <div class="new-message__recipient-chip">
+          <img [src]="user.avatar" [alt]="user.name" />
+          <span>@ {{ user.name }}</span>
 
-        <button type="button" (click)="clearRecipient()">
-          ×
-        </button>
-      </div>
-    } @else {
-      <input
-        type="text"
-        placeholder="#channel, oder @jemand oder Mail Adresse"
-        [value]="recipientSearchText()"
-        (focus)="openRecipientDropdown()"
-        (input)="onRecipientInput($event)"
-      />
-    }
-  </div>
-
-  @if (isRecipientDropdownOpen()) {
-    <div class="new-message__recipient-dropdown">
-      @if (recipientMode() === 'channels') {
-        @for (channel of filteredChannels(); track channel.id) {
-          <button
-            class="new-message__recipient-option"
-            type="button"
-            (click)="selectChannel(channel)"
-          >
-            <span class="new-message__recipient-hash">#</span>
-            <span>{{ channel.name }}</span>
+          <button type="button" (click)="clearRecipient()">
+            ×
           </button>
+        </div>
+        } @else if (selectedChannel(); as channel) {
+        <div class="new-message__recipient-chip">
+          <span class="new-message__recipient-hash">#</span>
+          <span>{{ channel.name }}</span>
+
+          <button type="button" (click)="clearRecipient()">
+            ×
+          </button>
+        </div>
+        } @else {
+        <input type="text" placeholder="#channel, oder @jemand oder Mail Adresse" [value]="recipientSearchText()"
+          (focus)="openRecipientDropdown()" (input)="onRecipientInput($event)" />
+        }
+      </div>
+
+      @if (isRecipientDropdownOpen()) {
+      <div class="new-message__recipient-dropdown">
+        @if (recipientMode() === 'channels') {
+        @for (channel of filteredChannels(); track channel.id) {
+        <button class="new-message__recipient-option" type="button" (click)="selectChannel(channel)">
+          <span class="new-message__recipient-hash">#</span>
+          <span>{{ channel.name }}</span>
+        </button>
         }
 
         @if (filteredChannels().length === 0) {
-          <p class="new-message__recipient-empty">
-            Keine Channels gefunden.
-          </p>
+        <p class="new-message__recipient-empty">
+          Keine Channels gefunden.
+        </p>
         }
-      } @else {
+        } @else {
         @for (user of filteredUsers(); track user.id) {
-          <button
-            class="new-message__recipient-option"
-            type="button"
-            (click)="selectUser(user)"
-          >
-            <div class="new-message__recipient-avatar">
-              <img [src]="user.avatar" [alt]="user.name" />
+        <button class="new-message__recipient-option" type="button" (click)="selectUser(user)">
+          <div class="new-message__recipient-avatar">
+            <img [src]="user.avatar" [alt]="user.name" />
 
-              <span
-                class="new-message__recipient-status"
-                [class.new-message__recipient-status--online]="
+            <span class="new-message__recipient-status" [class.new-message__recipient-status--online]="
                   user.status === 'online'
-                "
-              ></span>
-            </div>
+                "></span>
+          </div>
 
-            <span>{{ user.name }}</span>
-          </button>
+          <span>{{ user.name }}</span>
+        </button>
         }
 
         @if (filteredUsers().length === 0) {
-          <p class="new-message__recipient-empty">
-            Keine Benutzer gefunden.
-          </p>
+        <p class="new-message__recipient-empty">
+          Keine Benutzer gefunden.
+        </p>
         }
+        }
+      </div>
       }
     </div>
-  }
-</div>
   </div>
 
   <div class="new-message__content"></div>
 
   <div class="new-message__composer">
-    <textarea
-      placeholder="Starte eine neue Nachricht"
-      [value] = "messageText()"
-      (input)="onMessageInput($event)"
-    ></textarea>
+    <textarea placeholder="Starte eine neue Nachricht" [value]="messageText()"
+      (input)="onMessageInput($event)"></textarea>
+
+      @if (mentionType()) {
+  <div
+    class="new-message__mention-dropdown"
+    (click)="$event.stopPropagation()"
+  >
+    @if (mentionType() === 'users') {
+      @for (user of filteredMentionUsers(); track user.id) {
+        <button
+          type="button"
+          class="new-message__mention-option"
+          (click)="selectMentionUser(user)"
+        >
+          <div class="new-message__mention-avatar">
+            <img [src]="user.avatar" [alt]="user.name">
+
+            <span
+              class="new-message__mention-status"
+              [class.new-message__mention-status--online]="
+                user.status === 'online'
+              "
+            ></span>
+          </div>
+
+          <span>{{ user.name }}</span>
+        </button>
+      }
+
+      @if (filteredMentionUsers().length === 0) {
+        <p class="new-message__mention-empty">
+          Keine Benutzer gefunden.
+        </p>
+      }
+    } @else {
+      @for (channel of filteredMentionChannels(); track channel.id) {
+        <button
+          type="button"
+          class="new-message__mention-option"
+          (click)="selectMentionChannel(channel)"
+        >
+          <span class="new-message__mention-hash">#</span>
+          <span>{{ channel.name }}</span>
+        </button>
+      }
+
+      @if (filteredMentionChannels().length === 0) {
+        <p class="new-message__mention-empty">
+          Keine Channels gefunden.
+        </p>
+      }
+    }
+  </div>
+}
 
     <div class="new-message__composer-footer">
       <div class="new-message__actions">
-        <button type="button" aria-label="Emoji auswählen">
-          <img
-            src="assets/icons/sentiment_satisfied.png"
-            alt="Emoji"
-          />
+        <button type="button" aria-label="Emoji auswählen" (click)="toggleEmojiPicker($event)">
+          <img src="assets/icons/sentiment_satisfied.png" alt="Emoji" />
         </button>
-
-        <button type="button" aria-label="Benutzer erwähnen">
+        @if (showEmojiPicker()) {
+        <div class="emoji-picker" (click)="$event.stopPropagation()">
+          <emoji-mart set="apple" [showPreview]="false" [isNative]="true" [emojiSize]="20" [perLine]="8"
+            [exclude]="['flags']" (emojiClick)="addEmoji($event)">
+          </emoji-mart>
+        </div>
+        }
+        <button type="button" 
+        aria-label="Benutzer oder Channel erwähnen"
+         (click)="toggleMentionButton($event)"
+        >
           @
         </button>
       </div>
 
-      <button
-        class="new-message__send"
-        type="button"
-        aria-label="Nachricht senden"
+      <button class="new-message__send" type="button" aria-label="Nachricht senden"
         [disabled]="isSending() || !messageText().trim() || (!selectedUser() && !selectedChannel())"
-        (click)="sendMessage()"
-      >
+        (click)="sendMessage()">
         <img src="assets/icons/send.png" alt="Senden" />
       </button>
     </div>
@@ -124,7 +160,7 @@
 </div>
 
 @if(isErrorMessage()){
-  <p class="new-message__error">
-    {{isErrorMessage()}}
-  </p>
+<p class="new-message__error">
+  {{isErrorMessage()}}
+</p>
 }
