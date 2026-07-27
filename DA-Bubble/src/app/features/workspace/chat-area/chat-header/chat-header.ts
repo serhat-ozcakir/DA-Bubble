@@ -18,6 +18,7 @@ export class ChatHeader {
   openAddMembers = output<void>();
   openMemberList = output<void>();
   openChannelSettings = output<void>();
+  openShowProfil = output<void>();
   constructor() {
   }
 
@@ -30,8 +31,11 @@ export class ChatHeader {
   }
 
   openChannelSettingsDialog(): void {
-    console.log('openChannelSettingDialog calisti');
     this.openChannelSettings.emit();
+  }
+
+  openShowProfilDialog():void{
+    this.openShowProfil.emit();
   }
 
 }
