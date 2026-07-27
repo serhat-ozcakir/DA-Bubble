@@ -1,1 +1,82 @@
-<p>show-profil-dialog works!</p>
+@if (directMessageService.currentDmUser(); as user) {
+  <div
+    class="profile-dialog-backdrop"
+    (click)="closeDialog()"
+  >
+    <div
+      class="profile-dialog"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="profile-dialog__header">
+        <h2>Profil</h2>
+
+        <button
+          type="button"
+          class="profile-dialog__close"
+          (click)="closeDialog()"
+        >
+          <img src="assets/icons/close.png" alt="Schließen">
+        </button>
+      </div>
+
+      <div class="profile-dialog__avatar-wrapper">
+        <img
+          class="profile-dialog__avatar"
+          [src]="user.avatar"
+          [alt]="user.name"
+        >
+      </div>
+
+      <div class="profile-dialog__content">
+        <h3 class="profile-dialog__name">
+          {{ user.name }}
+        </h3>
+
+        <div class="profile-dialog__status">
+          <span
+            class="profile-dialog__status-dot"
+            [class.profile-dialog__status-dot--online]="
+              user.status === 'online'
+            "
+          ></span>
+
+          <span
+            class="profile-dialog__status-text"
+            [class.profile-dialog__status-text--online]="
+              user.status === 'online'
+            "
+          >
+            {{ user.status === 'online' ? 'Aktiv' : 'Abwesend' }}
+          </span>
+        </div>
+
+        <div class="profile-dialog__email-section">
+          <div class="profile-dialog__email-title">
+            <img src="assets\logo\mail-1.png" alt="E-Mail">
+
+            <h4>E-Mail-Adresse</h4>
+          </div>
+
+          <a
+            class="profile-dialog__email"
+            [href]="'mailto:' + user.email"
+          >
+            {{ user.email }}
+          </a>
+        </div>
+      </div>
+
+      <div class="profile-dialog__footer">
+        <button
+          type="button"
+          class="profile-dialog__message-button"
+          (click)="openDirectMessage()"
+        >
+          <img src="assets/icons/comment.png" alt="Nachricht">
+
+          <span>Nachricht</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
