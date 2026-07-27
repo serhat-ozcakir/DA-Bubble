@@ -2,7 +2,9 @@
     @if(showNewMessage()){
     <app-new-message (messageSent)="closeNewMessageEmit()"></app-new-message>
     } @else {
-        <app-chat-header (openMemberList)="openMemberList.emit()" 
+        <app-chat-header 
+        (openShowProfil)="openShowProfil.emit()"
+        (openMemberList)="openMemberList.emit()" 
         (openAddMembers)="openAddMembers.emit()"
         (openChannelSettings)="openChannelSettings.emit()" 
         />
