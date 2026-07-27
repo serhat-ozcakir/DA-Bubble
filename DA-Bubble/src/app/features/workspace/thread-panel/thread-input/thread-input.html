@@ -1,34 +1,121 @@
 <div class="thread-input">
-  <textarea 
-  [(ngModel)]="replyText"
+  <textarea
+    [(ngModel)]="replyText"
     placeholder="Antworten..."
-    (keydown.enter)="handleEnter($event)"
+    (input)="onReplyInput()"
+     (keydown.enter)="handleEnter($any($event))"
   ></textarea>
+
+  @if (mentionType()) {
+    <div
+      class="thread-input__mention-dropdown"
+      (click)="$event.stopPropagation()"
+    >
+      @if (mentionType() === 'users') {
+        @for (user of filteredMentionUsers(); track user.id) {
+          <button
+            type="button"
+            class="thread-input__mention-option"
+            (click)="selectMentionUser(user)"
+          >
+            <div class="thread-input__mention-avatar">
+              <img
+                [src]="user.avatar"
+                [alt]="user.name"
+              />
+
+              <span
+                class="thread-input__mention-status"
+                [class.thread-input__mention-status--online]="
+                  user.status === 'online'
+                "
+              ></span>
+            </div>
+
+            <span>{{ user.name }}</span>
+          </button>
+        }
+
+        @if (filteredMentionUsers().length === 0) {
+          <p class="thread-input__mention-empty">
+            Keine Benutzer gefunden.
+          </p>
+        }
+      } @else {
+        @for (channel of filteredMentionChannels(); track channel.id) {
+          <button
+            type="button"
+            class="thread-input__mention-option"
+            (click)="selectMentionChannel(channel)"
+          >
+            <span class="thread-input__mention-hash">
+              #
+            </span>
+
+            <span>{{ channel.name }}</span>
+          </button>
+        }
+
+        @if (filteredMentionChannels().length === 0) {
+          <p class="thread-input__mention-empty">
+            Keine Channels gefunden.
+          </p>
+        }
+      }
+    </div>
+  }
 
   <div class="thread-input__footer">
     <div class="thread-input__actions">
-      <button type="button" (click)="toggleEmojiPicker()">
-        <img src="assets/icons/sentiment_satisfied.png" alt="emoji">
+      <button
+        type="button"
+        (click)="toggleEmojiPicker()"
+      >
+        <img
+          src="assets/icons/sentiment_satisfied.png"
+          alt="emoji"
+        />
       </button>
-      @if(showEmojiPicker){
-      <div class="emoji-picker">
-        <emoji-mart 
-        set="apple" [showPreview]="false" 
-        [isNative]="true" 
-        [emojiSize]="22" 
-        [perLine]="6"
-        [exclude]="['flags']" 
-        (emojiClick)="addEmoji($event)">
-        </emoji-mart>
-      </div>
+
+      @if (showEmojiPicker) {
+        <div
+          class="emoji-picker"
+          (click)="$event.stopPropagation()"
+        >
+          <emoji-mart
+            set="apple"
+            [showPreview]="false"
+            [isNative]="true"
+            [emojiSize]="22"
+            [perLine]="6"
+            [exclude]="['flags']"
+            (emojiClick)="addEmoji($event)"
+          >
+          </emoji-mart>
+        </div>
       }
-      <button type="button">
-        <img src="assets\icons\alternate_email.png" alt="mention">
+
+      <button
+        type="button"
+        (click)="toggleMentionButton($event)"
+      >
+        <img
+          src="assets/icons/alternate_email.png"
+          alt="mention"
+        />
       </button>
     </div>
 
-    <button class="thread-input__send" type="button" (click)="sendReply()">
-      <img src="assets/icons/send.png" alt="send">
+    <button
+      class="thread-input__send"
+      type="button"
+      [disabled]="!replyText.trim()"
+      (click)="sendReply()"
+    >
+      <img
+        src="assets/icons/send.png"
+        alt="send"
+      />
     </button>
   </div>
 </div>
