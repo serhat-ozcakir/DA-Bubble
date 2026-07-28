@@ -1,16 +1,14 @@
 <div class="message-list">
-  <div class="message-list__date-line">
-    <span>Dienstag, 14. Januar</span>
-  </div>
-@if(directMessageService.currentDmUser()){
-  @for(message of directMessageService.directMessages(); track message.id){
-    <app-message-item [message]="message"></app-message-item>
-
+  @for (message of getMessages(); track message.id; let index = $index) {
+    @if (shouldShowDate(getMessages(), index)) {
+      <div class="message-list__date-line">
+        <span>
+          {{ formatMessageDate(message.createdAt) }}
+        </span>
+      </div>
+    }
+    <app-message-item
+      [message]="message"
+    ></app-message-item>
   }
-} @else {
-  @for(message of messageService.messages(); track message.id){
-    <app-message-item [message]="message"></app-message-item>
-
-  }
-}
 </div>

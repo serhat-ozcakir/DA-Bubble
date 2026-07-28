@@ -4,6 +4,7 @@ export interface MessageView {
   avatar: string;
   text: string;
   time: string;
+  createdAt: string;
   isOwnMessage: boolean;
   threadCount?: number;
 }
