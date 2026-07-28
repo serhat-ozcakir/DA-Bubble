@@ -57,15 +57,16 @@ export class MessageService {
         (reply) => reply.parent_message_id === message.id
       ).length;
 
-      return {
-        id: message.id,
-        authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
-        avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
-        text: message.text,
-        time: this.formatTime(message.created_at),
-        isOwnMessage: message.author_id === currentUserProfile.id,
-        threadCount,
-      };
+return {
+  id: message.id,
+  authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
+  avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
+  text: message.text,
+  time: this.formatTime(message.created_at),
+  createdAt: message.created_at,
+  isOwnMessage: message.author_id === currentUserProfile.id,
+  threadCount,
+};
     });
     this.messages.set(loadedMessages);
 
@@ -191,17 +192,18 @@ export class MessageService {
             .user()
             .find((user) => user.id === newMessage.author_id);
 
-          const realtimeMessage: MessageView = {
-            id: newMessage.id,
-            authorName: author?.name ?? 'Unbekannter Benutzer',
-            avatar:
-              author?.avatar || 'assets/img/avatar/avatar-3.png',
-            text: newMessage.text,
-            time: this.formatTime(newMessage.created_at),
-            isOwnMessage:
-              newMessage.author_id === currentUserProfile.id,
-            threadCount: 0,
-          };
+const realtimeMessage: MessageView = {
+  id: newMessage.id,
+  authorName: author?.name ?? 'Unbekannter Benutzer',
+  avatar:
+    author?.avatar || 'assets/img/avatar/avatar-3.png',
+  text: newMessage.text,
+  time: this.formatTime(newMessage.created_at),
+  createdAt: newMessage.created_at,
+  isOwnMessage:
+    newMessage.author_id === currentUserProfile.id,
+  threadCount: 0,
+};
 
           this.messages.update((messages) => [
             ...messages,
@@ -240,15 +242,16 @@ export class MessageService {
       return;
     }
 
-    const loadedThreadMessages: MessageView[] = data.map((message) => ({
-      id: message.id,
-      authorName: message.profiles?.name || 'Unbekannter Benutzer',
-      avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
-      text: message.text,
-      time: this.formatTime(message.created_at),
-      isOwnMessage: message.author_id === currentUserProfile.id
-    }));
-    console.log('Thread messages:', loadedThreadMessages);
+const loadedThreadMessages: MessageView[] = data.map((message) => ({
+  id: message.id,
+  authorName: message.profiles?.name || 'Unbekannter Benutzer',
+  avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
+  text: message.text,
+  time: this.formatTime(message.created_at),
+  createdAt: message.created_at,
+  isOwnMessage: message.author_id === currentUserProfile.id,
+}));
+
     this.threadMessages.set(loadedThreadMessages)
   }
 

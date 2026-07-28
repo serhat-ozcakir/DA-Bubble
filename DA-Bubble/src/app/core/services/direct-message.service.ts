@@ -229,6 +229,7 @@ listenToDirectMessages(): void {
           : selectedUser.avatar || 'assets/img/avatar/avatar-3.png',
       text: message.text,
       time: this.formatTime(message.created_at),
+       createdAt: message.created_at,
       isOwnMessage: message.sender_id === currentUser.id,
     };
   }
