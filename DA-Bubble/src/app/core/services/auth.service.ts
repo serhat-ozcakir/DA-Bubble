@@ -26,6 +26,20 @@ export class Auth {
 
   }
 
+  async signInWithGoogle(): Promise<void> {
+  const { error } =
+    await this.supabase.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+  if (error) {
+    throw error;
+  }
+}
+
   setRegisterData(data: RegisterData): void {
     this.RegisterData = data;
   }
