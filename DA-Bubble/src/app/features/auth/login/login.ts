@@ -45,4 +45,16 @@ export class Login {
     this.loginForm.reset();
 
   }
+
+  async onGoogleLogin(): Promise<void> {
+  try {
+    await this.authService.signInWithGoogle();
+  } catch (error) {
+    console.error('Google login error:', error);
+
+    this.toastService.show(
+      'Google-Anmeldung konnte nicht gestartet werden.'
+    );
+  }
+}
 }
