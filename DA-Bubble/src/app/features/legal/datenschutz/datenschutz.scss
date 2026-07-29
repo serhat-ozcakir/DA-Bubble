@@ -1,0 +1,138 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.legal-page {
+  position: relative;
+
+  min-height: 100dvh;
+  padding: 32px 48px 56px;
+  box-sizing: border-box;
+
+  background-color: #eceefe;
+
+  &__logo {
+    position: absolute;
+    top: 28px;
+    left: 40px;
+
+    display: inline-flex;
+
+    img {
+      width: 130px;
+      height: auto;
+      display: block;
+    }
+  }
+
+  &__content {
+    width: min(100%, 980px);
+
+    margin: 70px auto 0;
+    box-sizing: border-box;
+
+    color: #000000;
+
+    &--wide {
+      padding: 28px 12px 48px;
+    }
+
+    h1 {
+      margin: 12px 0 28px;
+
+      color: #444df2;
+      font-size: 40px;
+      line-height: 1.15;
+    }
+
+    h2 {
+      margin: 28px 0 10px;
+
+      color: #444df2;
+      font-size: 22px;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+
+      font-size: 17px;
+    }
+
+    p {
+      margin: 0 0 16px;
+
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    a {
+      color: #444df2;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+    &__back-button {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        transition: background-color .2s ease;
+
+        .legal-page__back-icon {
+            width: 24px;
+            height: 24px;
+            fill: #000;
+            transition: fill .2s ease;
+        }
+
+        &:hover {
+            background-color: #ECEEFE;
+
+            .legal-page__back-icon {
+                fill: #535AF1;
+            }
+        }
+    }
+}
+
+@media (max-width: 700px) {
+  .legal-page {
+    padding: 92px 20px 36px;
+
+    &__logo {
+      top: 24px;
+      left: 20px;
+
+      img {
+        width: 118px;
+      }
+    }
+
+    &__content {
+      margin-top: 0;
+      padding: 0;
+
+      h1 {
+        font-size: 32px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+    }
+  }
+}

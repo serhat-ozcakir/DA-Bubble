@@ -7,5 +7,7 @@ import { Component } from '@angular/core';
   styleUrl: './datenschutz.scss',
 })
 export class Datenschutz {
-
+ goBack():void{
+  window.history.back();
+ }
 }
