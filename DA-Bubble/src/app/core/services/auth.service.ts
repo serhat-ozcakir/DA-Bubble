@@ -26,6 +26,67 @@ export class Auth {
 
   }
 
+async ensureGoogleProfile(): Promise<boolean> {
+  const { data, error } =
+    await this.supabase.supabase.auth.getUser();
+
+  if (error) {
+    throw error;
+  }
+
+  const user = data.user;
+
+  if (!user) {
+    throw new Error('Google user could not be loaded.');
+  }
+
+  const { data: existingProfile, error: profileError } =
+    await this.supabase.supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (existingProfile) {
+    this.currentUser.set(user);
+    this.currentUserProfile.set(existingProfile);
+
+    return false;
+  }
+
+  const googleName =
+    user.user_metadata?.['full_name'] ??
+    user.user_metadata?.['name'] ??
+    user.email?.split('@')[0] ??
+    'User';
+
+  const { data: newProfile, error: insertError } =
+    await this.supabase.supabase
+      .from('profiles')
+      .insert({
+        id: user.id,
+        email: user.email ?? '',
+        name: googleName,
+        avatar: 'assets/logo/Profile.png',
+        status: 'offline',
+      })
+      .select()
+      .single();
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  this.currentUser.set(user);
+  this.currentUserProfile.set(newProfile);
+
+  return true;
+}
+
   async signInWithGoogle(): Promise<void> {
   const { error } =
     await this.supabase.supabase.auth.signInWithOAuth({
@@ -39,6 +100,8 @@ export class Auth {
     throw error;
   }
 }
+
+
 
   setRegisterData(data: RegisterData): void {
     this.RegisterData = data;
@@ -201,5 +264,38 @@ async login(email: string, password: string) {
     this.currentUserProfile.set(data);
     return data;
   }
+
+  async updateCurrentUserAvatar(avatar: string): Promise<void> {
+  const {
+    data: { user },
+    error: userError,
+  } = await this.supabase.supabase.auth.getUser();
+
+  if (userError) {
+    throw userError;
+  }
+
+  if (!user) {
+    throw new Error('No authenticated user found.');
+  }
+
+  const { data: updatedProfile, error: updateError } =
+    await this.supabase.supabase
+      .from('profiles')
+      .update({
+        avatar,
+        status: 'online',
+      })
+      .eq('id', user.id)
+      .select()
+      .single();
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  this.currentUser.set(user);
+  this.currentUserProfile.set(updatedProfile);
+}
 
 }
