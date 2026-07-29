@@ -1,8 +1,8 @@
 <footer class="auth-footer">
     @if(!showLogo){
         <div class="footer-links">
-            <a [ngStyle]="{ 'text-decoration': 'none', 'cursor': 'pointer' }">Impressum </a>
-            <a [ngStyle]="{ 'text-decoration': 'none' , 'cursor': 'pointer'}" >Datenschutz</a>
+            <a routerLink="/impressum"   [ngStyle]="{ 'text-decoration': 'none', 'cursor': 'pointer' }">Impressum </a>
+            <a routerLink="/datenschutz" [ngStyle]="{ 'text-decoration': 'none' , 'cursor': 'pointer'}" >Datenschutz</a>
         </div>
     }   
 </footer>
