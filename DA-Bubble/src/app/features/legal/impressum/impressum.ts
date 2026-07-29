@@ -7,5 +7,7 @@ import { Component } from '@angular/core';
   styleUrl: './impressum.scss',
 })
 export class Impressum {
-
+ goBack():void{
+  window.history.back();
+ }
 }
