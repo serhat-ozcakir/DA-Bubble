@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.auth-callback {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background-color: #eceefe;
+
+  p {
+    margin: 0;
+    color: #444df2;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  &__loader {
+    width: 46px;
+    height: 46px;
+    border: 5px solid #d9dcff;
+    border-top-color: #444df2;
+    border-radius: 50%;
+    animation: rotate 0.8s linear infinite;
+  }
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
