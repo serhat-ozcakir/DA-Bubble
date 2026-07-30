@@ -1,31 +1,60 @@
 <section class="choose_avatar-section">
-<div class="choose_avatar-card">
+  <div class="choose_avatar-card">
+
     <div class="choose_avatar-header">
-        <img (click)="goBack()" src="assets/logo/arrow_back.png" alt="Back Logo" class="logo" />
-        <h1 >Wähle deinen Avatar</h1>
+      <img
+        (click)="goBack()"
+        src="assets/logo/arrow_back.png"
+        alt="Zurück"
+        class="logo"
+      />
+
+      <h1>Wähle deinen Avatar</h1>
     </div>
 
-  <div class="choose_avatar-form">
-    <div class="form_content">
-        <img [src]="selectedAvatar" alt="Avatar Logo">
-        <p>{{ userName }}</p>
-    </div>
-    <div class="form_image">
+    <div class="choose_avatar-form">
+
+      <div class="form_content">
+        <img
+          [src]="selectedAvatar()"
+          alt="Ausgewählter Avatar"
+        />
+
+        <p>{{ userName() }}</p>
+      </div>
+
+      <div class="form_image">
         <p>Aus der Liste wählen</p>
+
         <div class="choose_avatar-avatar-list">
-          @for(avatar of avatars; track avatar) {
-            <img [src]="avatar" [alt]="'Avatar ' + $index" (click)="selectAvatar(avatar)" [class.selected]="selectedAvatar === avatar"/>
+          @for (avatar of avatars; track avatar) {
+            <img
+              [src]="avatar"
+              [alt]="'Avatar ' + ($index + 1)"
+              (click)="selectAvatar(avatar)"
+              [class.selected]="selectedAvatar() === avatar"
+            />
           }
         </div>
-    </div>
+      </div>
 
-    <div class="actions">
-      <button type="submit" class="primary-button" (click)="onChooseAvatar()">
-        Weiter
-      </button>
+      @if (errorMessage()) {
+        <p class="error-message">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <div class="actions">
+        <button
+          type="button"
+          class="primary-button"
+          (click)="onChooseAvatar()"
+          [disabled]="loading()"
+        >
+          {{ loading() ? 'Wird gespeichert...' : 'Weiter' }}
+        </button>
+      </div>
+
     </div>
   </div>
-</div>
 </section>
-
-
