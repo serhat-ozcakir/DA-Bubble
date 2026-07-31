@@ -103,7 +103,7 @@ export class NewMessage {
     }
     return users.filter((user) =>
       user.name.toLowerCase().includes(search) ||
-      user.email.toLowerCase().includes(search)
+      (user.email?.toLowerCase().includes(search) ?? false)
     )
   })
 

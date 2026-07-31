@@ -26,80 +26,80 @@ export class Auth {
 
   }
 
-async ensureGoogleProfile(): Promise<boolean> {
-  const { data, error } =
-    await this.supabase.supabase.auth.getUser();
+  async ensureGoogleProfile(): Promise<boolean> {
+    const { data, error } =
+      await this.supabase.supabase.auth.getUser();
 
-  if (error) {
-    throw error;
-  }
+    if (error) {
+      throw error;
+    }
 
-  const user = data.user;
+    const user = data.user;
 
-  if (!user) {
-    throw new Error('Google user could not be loaded.');
-  }
+    if (!user) {
+      throw new Error('Google user could not be loaded.');
+    }
 
-  const { data: existingProfile, error: profileError } =
-    await this.supabase.supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle();
+    const { data: existingProfile, error: profileError } =
+      await this.supabase.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
 
-  if (profileError) {
-    throw profileError;
-  }
+    if (profileError) {
+      throw profileError;
+    }
 
-  if (existingProfile) {
+    if (existingProfile) {
+      this.currentUser.set(user);
+      this.currentUserProfile.set(existingProfile);
+
+      return false;
+    }
+
+    const googleName =
+      user.user_metadata?.['full_name'] ??
+      user.user_metadata?.['name'] ??
+      user.email?.split('@')[0] ??
+      'User';
+
+    const { data: newProfile, error: insertError } =
+      await this.supabase.supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email ?? '',
+          name: googleName,
+          avatar: 'assets/logo/Profile.png',
+          status: 'offline',
+        })
+        .select()
+        .single();
+
+    if (insertError) {
+      throw insertError;
+    }
+
     this.currentUser.set(user);
-    this.currentUserProfile.set(existingProfile);
+    this.currentUserProfile.set(newProfile);
 
-    return false;
+    return true;
   }
-
-  const googleName =
-    user.user_metadata?.['full_name'] ??
-    user.user_metadata?.['name'] ??
-    user.email?.split('@')[0] ??
-    'User';
-
-  const { data: newProfile, error: insertError } =
-    await this.supabase.supabase
-      .from('profiles')
-      .insert({
-        id: user.id,
-        email: user.email ?? '',
-        name: googleName,
-        avatar: 'assets/logo/Profile.png',
-        status: 'offline',
-      })
-      .select()
-      .single();
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  this.currentUser.set(user);
-  this.currentUserProfile.set(newProfile);
-
-  return true;
-}
 
   async signInWithGoogle(): Promise<void> {
-  const { error } =
-    await this.supabase.supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    const { error } =
+      await this.supabase.supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw error;
+    }
   }
-}
 
 
 
@@ -178,25 +178,25 @@ async ensureGoogleProfile(): Promise<boolean> {
     return data;
   }
 
-async login(email: string, password: string) {
-  this.currentUser.set(null);
-  this.currentUserProfile.set(null);
+  async login(email: string, password: string) {
+    this.currentUser.set(null);
+    this.currentUserProfile.set(null);
 
-  const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+    const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw error;
+    }
+
+    await this.loadCurrentUser();
+    await this.updateStatus('online');
+    await this.loadCurrentUser();
+
+    return data;
   }
-
-  await this.loadCurrentUser();
-  await this.updateStatus('online');
-  await this.loadCurrentUser();
-
-  return data;
-}
 
   async logout() {
     await this.updateStatus('offline');
@@ -239,12 +239,12 @@ async login(email: string, password: string) {
       .eq('id', user.id)
       .select()
       .maybeSingle();
-      
-      if (error) {
-        throw error;
-      }
-      this.currentUserProfile.set(data);
-      return data;
+
+    if (error) {
+      throw error;
+    }
+    this.currentUserProfile.set(data);
+    return data;
   }
 
   async updateStatus(status: 'online' | 'offline') {
@@ -266,36 +266,126 @@ async login(email: string, password: string) {
   }
 
   async updateCurrentUserAvatar(avatar: string): Promise<void> {
-  const {
-    data: { user },
-    error: userError,
-  } = await this.supabase.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await this.supabase.supabase.auth.getUser();
 
-  if (userError) {
-    throw userError;
+    if (userError) {
+      throw userError;
+    }
+
+    if (!user) {
+      throw new Error('No authenticated user found.');
+    }
+
+    const { data: updatedProfile, error: updateError } =
+      await this.supabase.supabase
+        .from('profiles')
+        .update({
+          avatar,
+          status: 'online',
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    this.currentUser.set(user);
+    this.currentUserProfile.set(updatedProfile);
   }
 
-  if (!user) {
-    throw new Error('No authenticated user found.');
+  async guestLogin(): Promise<void> {
+    this.currentUser.set(null);
+    this.currentUserProfile.set(null);
+
+    const { data, error } =
+      await this.supabase.supabase.auth.signInAnonymously();
+
+    if (error) {
+      throw error;
+    }
+
+    const guestUser = data.user;
+
+    if (!guestUser) {
+      throw new Error(
+        'Gastbenutzer konnte nicht erstellt werden.'
+      );
+    }
+
+    const guestName = `Gast ${guestUser.id.slice(-4)}`;
+
+    const { data: guestProfile, error: profileError } =
+      await this.supabase.supabase
+        .from('profiles')
+        .insert({
+          id: guestUser.id,
+          email: null,
+          name: guestName,
+          avatar: 'assets/img/avatar/avatar-3.png',
+          status: 'online',
+          is_guest: true,
+        })
+        .select()
+        .single();
+
+    if (profileError) {
+      await this.supabase.supabase.auth.signOut();
+      throw profileError;
+    }
+
+    await this.addGuestToWelcomeChannel(guestUser.id);
+
+    this.currentUser.set(guestUser);
+    this.currentUserProfile.set(guestProfile);
+    await this.loadCurrentUser();
+
+    if (!this.currentUserProfile()) {
+      throw new Error('Das Gastprofil konnte nicht geladen werden.');
+    }
   }
 
-  const { data: updatedProfile, error: updateError } =
+private async addGuestToWelcomeChannel(
+  guestUserId: string
+): Promise<void> {
+  const { data: welcomeChannel, error: channelError } =
     await this.supabase.supabase
-      .from('profiles')
-      .update({
-        avatar,
-        status: 'online',
-      })
-      .eq('id', user.id)
-      .select()
-      .single();
+      .from('channels')
+      .select('id')
+      .eq('name', 'Willkommen')
+      .maybeSingle();
 
-  if (updateError) {
-    throw updateError;
+  if (channelError) {
+    throw channelError;
   }
 
-  this.currentUser.set(user);
-  this.currentUserProfile.set(updatedProfile);
+  if (!welcomeChannel) {
+    throw new Error(
+      'Der Channel "Willkommen" wurde nicht gefunden.'
+    );
+  }
+
+  const { error: membershipError } =
+    await this.supabase.supabase
+      .from('channel_members')
+      .insert({
+        channel_id: welcomeChannel.id,
+        profile_id: guestUserId,
+        role: 'member',
+      });
+
+  if (membershipError) {
+    console.error(
+      'Fehler beim Hinzufügen zum Willkommen-Channel:',
+      membershipError
+    );
+
+    throw membershipError;
+  }
 }
 
 }
