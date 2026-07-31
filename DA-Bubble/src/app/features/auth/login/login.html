@@ -47,8 +47,8 @@
         Anmelden
       </button>
 
-      <button type="button" class="secondary-button" >
-        Gäste-Login
+      <button type="button" class="secondary-button" (click)="onGuestLogin()">
+        {{isGuestLoading() ? 'Wird angemeldet...' : 'Gäste-Login'}}
       </button>
     </div>
   </form>

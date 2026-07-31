@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { RouterLink, RouterEvent, Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth.service';
@@ -12,6 +12,7 @@ import { ToastService } from '../../../core/services/toast.service';
 })
 export class Login {
   loginForm: FormGroup;
+  isGuestLoading = signal(false);
 
   constructor(
     private authService: Auth,
@@ -55,6 +56,28 @@ export class Login {
     this.toastService.show(
       'Google-Anmeldung konnte nicht gestartet werden.'
     );
+  }
+}
+
+async onGuestLogin(): Promise<void> {
+  if (this.isGuestLoading()) {
+    return;
+  }
+
+  this.isGuestLoading.set(true);
+
+  try {
+    await this.authService.guestLogin();
+
+    this.toastService.show('Erfolgreich als Gast angemeldet!');
+
+    await this.router.navigateByUrl('/workspace');
+  } catch (error) {
+    console.error('Guest login error:', error);
+
+    this.toastService.show('Gast-Anmeldung fehlgeschlagen.');
+  } finally {
+    this.isGuestLoading.set(false);
   }
 }
 }
