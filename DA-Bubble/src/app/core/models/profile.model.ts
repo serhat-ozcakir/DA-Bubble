@@ -1,8 +1,8 @@
 export interface Profile {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
-  avatar?: string;
+  avatar: string;
   status: 'online' | 'offline';
-  created_at?: string;
+  is_guest: boolean;
 }
