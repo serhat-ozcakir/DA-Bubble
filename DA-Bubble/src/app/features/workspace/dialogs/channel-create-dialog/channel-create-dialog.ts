@@ -28,36 +28,36 @@ export class ChannelCreateDialog {
     this.close();
   }
 
-async createChannel(): Promise<void> {
-  if (this.channelForm.invalid) {
-    this.channelForm.markAllAsTouched();
-    return;
-  }
-
-  this.isLoading.set(true);
-  this.errorMessage.set('');
-
-  const { channelName, channelDescription } = this.channelForm.getRawValue();
-
-  try {
-    await this.channelService.createChannel(
-      channelName?.trim() ?? '',
-      channelDescription?.trim() ?? ''
-    );
-
-    this.close();
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === 'CHANNEL_ALREADY_EXISTS'
-    ) {
-      this.errorMessage.set('Dieser Channel existiert bereits.');
-    } else {
-      this.errorMessage.set('Channel konnte nicht erstellt werden.');
+  async createChannel(): Promise<void> {
+    if (this.channelForm.invalid) {
+      this.channelForm.markAllAsTouched();
+      return;
     }
-  } finally {
-    this.isLoading.set(false);
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    const { channelName, channelDescription } = this.channelForm.getRawValue();
+
+    try {
+      await this.channelService.createChannel(
+        channelName?.trim() ?? '',
+        channelDescription?.trim() ?? ''
+      );
+
+      this.close();
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'CHANNEL_ALREADY_EXISTS'
+      ) {
+        this.errorMessage.set('Dieser Channel existiert bereits.');
+      } else {
+        this.errorMessage.set('Channel konnte nicht erstellt werden.');
+      }
+    } finally {
+      this.isLoading.set(false);
+    }
   }
-}
 
 }

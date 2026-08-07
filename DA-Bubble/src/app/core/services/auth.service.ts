@@ -230,6 +230,11 @@ export class Auth {
   }
 
   async updateProfileName(name: string) {
+    if (this.isGuestUser()) {
+      throw new Error(
+        'Gastbenutzer können ihr Profil nicht bearbeiten.'
+      );
+    }
     const user = this.currentUser();
     if (!user) {
       throw new Error('No user is currently logged in.');
@@ -319,6 +324,20 @@ export class Auth {
 
     const guestName = `Gast ${guestUser.id.slice(-4)}`;
 
+    const guestAvatars = [
+      'assets/img/avatar/avatar-1.png',
+      'assets/img/avatar/avatar-2.png',
+      'assets/img/avatar/avatar-3.png',
+      'assets/img/avatar/avatar-4.png',
+      'assets/img/avatar/avatar-5.png',
+      'assets/img/avatar/avatar-6.png',
+    ];
+
+    const randomAvatar =
+      guestAvatars[
+      Math.floor(Math.random() * guestAvatars.length)
+      ];
+
     const { data: guestProfile, error: profileError } =
       await this.supabase.supabase
         .from('profiles')
@@ -326,7 +345,7 @@ export class Auth {
           id: guestUser.id,
           email: null,
           name: guestName,
-          avatar: 'assets/img/avatar/avatar-3.png',
+          avatar: randomAvatar,
           status: 'online',
           is_guest: true,
         })
@@ -349,43 +368,48 @@ export class Auth {
     }
   }
 
-private async addGuestToWelcomeChannel(
-  guestUserId: string
-): Promise<void> {
-  const { data: welcomeChannel, error: channelError } =
-    await this.supabase.supabase
-      .from('channels')
-      .select('id')
-      .eq('name', 'Willkommen')
-      .maybeSingle();
+  private async addGuestToWelcomeChannel(
+    guestUserId: string
+  ): Promise<void> {
+    const { data: welcomeChannel, error: channelError } =
+      await this.supabase.supabase
+        .from('channels')
+        .select('id')
+        .eq('name', 'Willkommen')
+        .maybeSingle();
 
-  if (channelError) {
-    throw channelError;
+    if (channelError) {
+      throw channelError;
+    }
+
+    if (!welcomeChannel) {
+      throw new Error(
+        'Der Channel "Willkommen" wurde nicht gefunden.'
+      );
+    }
+
+    const { error: membershipError } =
+      await this.supabase.supabase
+        .from('channel_members')
+        .insert({
+          channel_id: welcomeChannel.id,
+          profile_id: guestUserId,
+          role: 'member',
+        });
+
+    if (membershipError) {
+      console.error(
+        'Fehler beim Hinzufügen zum Willkommen-Channel:',
+        membershipError
+      );
+
+      throw membershipError;
+    }
   }
 
-  if (!welcomeChannel) {
-    throw new Error(
-      'Der Channel "Willkommen" wurde nicht gefunden.'
-    );
+  isGuestUser(): boolean {
+    const profile = this.currentUserProfile();
+    return profile?.is_guest === true;
   }
-
-  const { error: membershipError } =
-    await this.supabase.supabase
-      .from('channel_members')
-      .insert({
-        channel_id: welcomeChannel.id,
-        profile_id: guestUserId,
-        role: 'member',
-      });
-
-  if (membershipError) {
-    console.error(
-      'Fehler beim Hinzufügen zum Willkommen-Channel:',
-      membershipError
-    );
-
-    throw membershipError;
-  }
-}
 
 }
