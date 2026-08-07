@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { Auth } from '../../../../core/services/auth.service';
 
 @Component({
@@ -9,7 +9,7 @@ import { Auth } from '../../../../core/services/auth.service';
 })
 export class ProfileDialog {
   constructor(public auth: Auth) { }
-
+  authService = inject(Auth);
   @Output() closeDialog = new EventEmitter<void>();
   @Output() openEditProfileDialogEvent = new EventEmitter<void>();
 
