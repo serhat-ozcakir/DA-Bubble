@@ -22,6 +22,7 @@
             </div>
             }
         </div>
+    @if(!authService.isGuestUser()){
 
         <button type="button" class="members-dropdown__add" (click)="openAddMembers.emit()">
             <span class="members-dropdown__add-icon">
@@ -29,5 +30,6 @@
             </span>
             <span>Mitglieder hinzufügen</span>
         </button>
+    }
     </div>
 </div>

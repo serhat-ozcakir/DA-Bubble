@@ -24,8 +24,10 @@
         <img src="assets\icons\workspaces.png" alt="workspaces icon" />
         <strong>Channels</strong>
       </div>
+        @if(!authService.isGuestUser()){
 
-      <button class="sidebar__add-btn" (click)="openDialog()" type="button">+</button>
+          <button class="sidebar__add-btn" (click)="openDialog()" type="button">+</button>
+        }
     </div>
 
     @if (isChannelsOpen) {
@@ -41,10 +43,15 @@
       }
 
 
-      <li class="sidebar__add-channel" (click)="openDialog()">
-        <span>⊕</span>
-        Channel hinzufügen
-      </li>
+  @if (!authService.isGuestUser()) {
+    <li
+      class="sidebar__add-channel"
+      (click)="openDialog()"
+    >
+      <span>⊕</span>
+      Channel hinzufügen
+    </li>
+  }
     </ul>
   }
   </section>
