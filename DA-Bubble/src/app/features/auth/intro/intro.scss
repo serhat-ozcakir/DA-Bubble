@@ -1,0 +1,80 @@
+.intro {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    #797ef3,
+    #313ae5
+  );
+  overflow: hidden;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    animation:moveBrandToCorner 1s ease-in-out 1.8s forwards;
+  }
+
+  &__logo {
+    width: 96px;
+    height: auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  &__name-wrapper {
+    overflow: hidden;
+    width: 0;
+    animation: openName 0.8s ease-out 0.6s forwards;
+  }
+
+  &__name {
+    display: block;
+    white-space: nowrap;
+    font-size: 48px;
+    font-weight: 700;
+    color: #ffffff;
+    transform: translateX(-100%);
+    animation:slideName 0.8s ease-out 0.6s forwards;
+  }
+}
+
+@keyframes openName {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 230px;
+  }
+}
+
+@keyframes slideName {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes moveBrandToCorner {
+  from {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  to {
+    transform:
+      translate(
+        calc(-50vw + 115px),
+        calc(-50vh + 55px)
+      )
+      scale(0.5);
+  }
+}

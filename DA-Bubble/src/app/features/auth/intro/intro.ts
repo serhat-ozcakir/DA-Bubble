@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-intro',
@@ -6,6 +7,12 @@ import { Component } from '@angular/core';
   templateUrl: './intro.html',
   styleUrl: './intro.scss',
 })
-export class Intro {
+export class Intro implements OnInit {
+  constructor(private router: Router) {}
 
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.router.navigate(['login']);
+    }, 4000);
+  }
 }
