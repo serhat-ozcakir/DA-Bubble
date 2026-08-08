@@ -1,4 +1,4 @@
-import { Component,effect,inject, OnDestroy,} from '@angular/core';
+import { Component,effect,inject, OnDestroy, output,} from '@angular/core';
 import { MessageItemComponent } from '../message-item/message-item';
 import { MessageService } from '../../../../core/services/message.service';
 import { Auth } from '../../../../core/services/auth.service';
@@ -19,8 +19,8 @@ export class MessageList implements OnDestroy {
   private authService = inject(Auth);
   private channelService = inject(ChannelService);
   private reactionService = inject(ReactionService);
-
   directMessageService = inject(DirectMessageService);
+  openProfile = output<void>();
 
   constructor() {
     this.reactionService.subscribeToReactions();
@@ -119,4 +119,9 @@ private isSameDay(
     firstDate.getDate() === secondDate.getDate()
   );
 }
+
+openUserProfile(): void {
+  this.openProfile.emit()
+};
+
 }
