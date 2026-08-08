@@ -1,11 +1,30 @@
-.auth-footer{
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
+.auth-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
 }
 
-.footer-links{
-    display: flex;
-    gap: 1rem;
-    color: #797EF3;
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  a {
+    padding: 10px 18px;
+    color: #797ef3;
+    font-size: 18px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 30px;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease;
+
+    &:hover {
+      font-weight: 600;
+      color: #444df2;
+      border-color: #adb0d9;
+    }
+  }
 }

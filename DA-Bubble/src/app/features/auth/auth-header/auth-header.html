@@ -1,14 +1,14 @@
 <header class="auth-header">
     @if(!showLogo){
-        <div class="logo">
-            <img src="assets/img/header/header_logo.png" alt="DA Bubble Logo" />
-        </div>
+    <div class="logo">
+        <img src="assets/img/header/header_logo.png" alt="DA Bubble Logo" />
+    </div>
     }
 
-    <div>
-        @if(showRegisterLinks){
-            <p>Neu bei DABubble?</p>
-            <a [ngStyle]="{ 'text-decoration': 'none' }" routerLink="/sign-up">Konto erstellen</a>
+    <div class="auth-header__right">
+        @if (showRegisterLinks) {
+        <p>Neu bei DABubble?</p>
+        <a routerLink="/sign-up">Konto erstellen</a>
         }
     </div>
 </header>

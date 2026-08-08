@@ -8,7 +8,7 @@
 
   <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onLogin()">
     <div class="input-wrapper">
-      <span class="input-icon">✉</span>
+      <img src="assets/logo/mail.png" alt="Mail Logo" />
       <input type="email" placeholder="beispielname@email.com" formControlName="email" />
     </div>
         @if(loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
@@ -18,7 +18,7 @@
       } 
 
     <div class="input-wrapper">
-      <span class="input-icon">🔒</span>
+      <img src="assets/logo/lock.png" alt="Lock Logo" />
       <input type="password" placeholder="Passwort" formControlName="password" />
     </div>
         @if(loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {

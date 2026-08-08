@@ -4,7 +4,22 @@
 html,
 body {
   margin: 0;
-  height: 100%;
-  box-sizing: border-box;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
 }
 
+body {
+  background-color: #eceefe;
+}
+
+app-root {
+  display: block;
+  min-height: 100dvh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
