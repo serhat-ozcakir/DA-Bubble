@@ -1,8 +1,11 @@
-<div class="profile-dialog">
+<div class="profile-dialog__backdrop" (click)="close()">
+<div class="profile-dialog" (click)="$event.stopPropagation()">
     <div class="profile-dialog__content-wrapper">
         <div class="profile-dialog__header">
             <h2>Profil</h2>
-            <button type="button" class="close-button" (click)="close()">X</button>
+            <button type="button" class="close-button" (click)="close()">
+                <img src="assets/icons/close.png" alt="close logo">
+            </button>
         </div>
         <div class="profile-dialog__content">
             <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" class="profile-dialog__avatar" />
@@ -41,4 +44,5 @@
     }
 </div>
     </div>
+</div>
 </div>

@@ -2,21 +2,17 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   background: rgba(0, 0, 0, 0.35);
 
   &__content-wrapper {
     width: 100%;
     max-width: 500px;
-
     background: white;
     border-radius: 30px;
     padding: 40px;
-
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   }
 
@@ -24,13 +20,34 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     margin-bottom: 40px;
 
     h2 {
       margin: 0;
       font-size: 32px;
       font-weight: 700;
+    }
+
+        button {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #eceefe;
+      }
+
+      &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
+      }
     }
 
     .close-button {

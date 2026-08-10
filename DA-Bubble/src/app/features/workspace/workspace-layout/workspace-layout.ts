@@ -1,4 +1,4 @@
-import { HostListener, Component, inject, signal } from '@angular/core';
+import { HostListener, Component, inject, signal, input } from '@angular/core';
 import { Header } from '../header/header';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';

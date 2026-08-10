@@ -1,5 +1,6 @@
 <div class="workspace">
-  <app-header></app-header>
+  <app-header
+     [threadOpen]="isThreadOpen"></app-header>
 
   <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed" [class.thread-open]=isThreadOpen>
     <app-sidebar 

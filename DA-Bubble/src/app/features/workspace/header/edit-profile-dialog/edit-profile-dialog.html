@@ -2,7 +2,9 @@
     <div class="edit-profile-dialog__content-wrapper">
         <div class="edit-profile-dialog__header">
             <h2>Dein Profil bearbeiten</h2>
-            <button type="button" class="close-button" (click)="close()">X</button>
+            <button type="button" class="close-button" (click)="close()">
+                <img src="assets/icons/close.png" alt="close logo">
+            </button>
         </div>
         <div class="edit-profile-dialog__content">
             <img [src]="auth.currentUserProfile()?.avatar" alt="User avatar" class="edit-profile-dialog__avatar" />

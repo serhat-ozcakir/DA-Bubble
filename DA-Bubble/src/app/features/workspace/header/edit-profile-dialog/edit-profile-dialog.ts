@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { HostListener, Component, EventEmitter, Output } from '@angular/core';
 import { Auth } from '../../../../core/services/auth.service';
 import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
-import {ToastService} from '../../../../core/services/toast.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-edit-profile-dialog',
@@ -14,21 +14,26 @@ export class EditProfileDialog {
 
   nameControl: FormControl<string>;
 
-  constructor(public auth: Auth, private toastService: ToastService) { 
-  this.nameControl = new FormControl(this.auth.currentUserProfile()?.name ?? '', 
-  {validators: [Validators.required, Validators.minLength(3)],
-    nonNullable: true,
+  constructor(public auth: Auth, private toastService: ToastService) {
+    this.nameControl = new FormControl(this.auth.currentUserProfile()?.name ?? '',
+      {
+        validators: [Validators.required, Validators.minLength(3)],
+        nonNullable: true,
 
-  });
+      });
 
+  }
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.close();
   }
 
   close(): void {
     this.closeDialogEvent.emit();
   }
 
-  async onProfileName(){
-    if(this.nameControl.invalid){
+  async onProfileName() {
+    if (this.nameControl.invalid) {
       this.nameControl.markAsTouched();
       return;
     }
