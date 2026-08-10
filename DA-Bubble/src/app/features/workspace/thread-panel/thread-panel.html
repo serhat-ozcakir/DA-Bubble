@@ -29,7 +29,6 @@
       <div class="thread-actions-container" [class.thread-actions-container--own]="reply.isOwnMessage">
 
         <div class="thread-actions">
-
           <button type="button" class="thread-actions__button" (click)="toggleThreadEmojiPicker(reply.id, $event)">
             <img src="assets/icons/add_reaction.png" alt="Add reaction">
           </button>
@@ -63,7 +62,6 @@
         }
 
         <div class="thread-panel__body">
-
           <div class="thread-panel__meta">
             <strong>{{ reply.authorName }}</strong>
             <span>{{ reply.time }}</span>
@@ -73,7 +71,6 @@
           <div class="message-edit-form">
             <textarea autofocus class="message-edit-form__textarea" [value]="editingThreadText()"
               (input)="editingThreadText.set($any($event.target).value)" (keydown.enter)="saveOnEnter($any($event))">
-
             </textarea>
 
             <div class="message-edit-form__actions">
