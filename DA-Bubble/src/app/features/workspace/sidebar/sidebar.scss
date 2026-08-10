@@ -17,6 +17,12 @@
     padding: 8px 8px 0;
   }
 
+  &__item--active {
+  background: #eceefe;
+  color: #535af1;
+  font-weight: 700;
+}
+
   &__workspace-info {
     display: flex;
     align-items: center;
@@ -101,6 +107,9 @@
   }
 
   &__add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 28px;
     height: 28px;
     border: none;
@@ -145,6 +154,8 @@
       background: #eceefe;
       color: #535af1;
     }
+
+
   }
 
   &__add-channel {

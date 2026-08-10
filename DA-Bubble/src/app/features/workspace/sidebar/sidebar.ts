@@ -51,6 +51,7 @@ export class Sidebar implements OnInit {
   }
 
   async selectDmUser(user:Profile):Promise<void>{
+    this.channelService.currentChannel.set(null);
     this.direktMessageService.currentDmUser.set(user);
     this.messageService.closeThread();
     await this.direktMessageService.loadDirectMessages();
