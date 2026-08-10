@@ -1,4 +1,4 @@
-import { Component, HostListener, ElementRef, inject, computed, signal, } from '@angular/core';
+import { Component, HostListener, ElementRef, inject, computed, signal, input, } from '@angular/core';
 import { Auth } from '../../../core/services/auth.service';
 import { UserMenu } from './user-menu/user-menu';
 import { ProfileDialog } from './profile-dialog/profile-dialog';
@@ -19,6 +19,7 @@ import { SearchResult } from '../../../core/models/search-result.model';
   styleUrl: './header.scss',
 })
 export class Header {
+  threadOpen = input(false);
   private elementRef = inject(ElementRef);
   userService = inject(UserService);
   channelService = inject(ChannelService);
