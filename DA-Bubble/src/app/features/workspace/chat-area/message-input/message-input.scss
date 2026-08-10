@@ -40,6 +40,21 @@
       background: transparent;
       cursor: pointer;
       font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+          &:hover {
+      background-color: #eceefe;
+    }
+    &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%)
+    hue-rotate(222deg) brightness(96%) contrast(96%);
+    }
     }
   }
 
@@ -118,5 +133,5 @@
   max-height: 360px;
   overflow: hidden;
   cursor: pointer;
-  
+
 }

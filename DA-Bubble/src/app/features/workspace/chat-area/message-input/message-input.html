@@ -54,8 +54,12 @@
         </emoji-mart>
       </div>
       }
-      <button type="button" (click)="insertMention('@')">@</button>
-      <button type="button" (click)="insertMention('#')">#</button>
+      <button type="button" (click)="insertMention('@')">
+         <img src="assets/icons/alternate_email.png" alt="emoji">
+      </button>
+      <button type="button" (click)="insertMention('#')">
+         <img src="assets/icons/tag.png" alt="emoji">
+      </button>
     </div>
 
     <button class="message-input__send" type="button" (click)="sendMessage()">
