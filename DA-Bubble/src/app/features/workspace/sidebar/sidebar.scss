@@ -7,7 +7,7 @@
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
 
   &__header {
     display: flex;
@@ -15,13 +15,14 @@
     justify-content: space-between;
     margin-bottom: 32px;
     padding: 8px 8px 0;
+    flex-shrink: 0;
   }
 
   &__item--active {
-  background: #eceefe;
-  color: #535af1;
-  font-weight: 700;
-}
+    background: #eceefe;
+    color: #535af1;
+    font-weight: 700;
+  }
 
   &__workspace-info {
     display: flex;
@@ -42,28 +43,32 @@
   }
 
   &__edit-btn {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: transparent;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      width: 20px;
-      height: 20px;
-    }
-
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
     &:hover {
-      background: #eceefe;
+      background-color: #eceefe;
+    }
+    &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%)
+    hue-rotate(222deg) brightness(96%) contrast(96%);
     }
   }
 
   &__section {
     margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   &__section-title {
@@ -72,56 +77,75 @@
     justify-content: space-between;
     margin-bottom: 16px;
     padding: 0 8px;
+    flex-shrink: 0;
   }
 
   &__section-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  cursor: pointer;
+
+  img {
+    width: 20px;
+    height: 20px;
+    transition: filter 0.2s ease;
+  }
+
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000000;
+    transition: color 0.2s ease;
+  }
+
+  &:hover {
+    strong {
+      color: #535af1;
+    }
 
     img {
-      width: 20px;
-      height: 20px;
+      filter: invert(38%) sepia(93%) saturate(2113%)
+        hue-rotate(222deg) brightness(96%) contrast(96%);
     }
-
-    strong {
-      font-size: 16px;
-      font-weight: 700;
-      color: #000000;
-    }
+  }
   }
 
   &__chevron {
-  display: inline-block;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s ease;
 
-  > img{
-    width: 10px;
-    height: auto;
-  }
+    > img {
+      width: 10px;
+      height: auto;
+    }
 
-  &--closed {
-    transform: rotate(-90deg);
-  }
+    &--closed {
+      transform: rotate(-90deg);
+    }
   }
 
   &__add-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: transparent;
-    border-radius: 50%;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
     &:hover {
-      background: #eceefe;
-      color: #535af1;
+      background-color: #eceefe;
+    }
+    &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%)
+    hue-rotate(222deg) brightness(96%) contrast(96%);
     }
   }
 
@@ -130,6 +154,28 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #adb0d9 transparent;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #adb0d9;
+      border-radius: 10px;
+    }
+  }
+
+  &__list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 4px;
   }
 
   &__channel {
@@ -138,10 +184,10 @@
     align-items: center;
     gap: 8px;
     margin-left: 20px;
+    margin-top: 8px;
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 15px;
-    margin-top: 8px;
     cursor: pointer;
 
     &--active {
@@ -154,8 +200,6 @@
       background: #eceefe;
       color: #535af1;
     }
-
-
   }
 
   &__add-channel {
@@ -166,16 +210,18 @@
     font-size: 14px;
     color: #535af1;
     cursor: pointer;
-
     &:hover {
       font-weight: 700;
     }
   }
 
   &__dm-list {
+    max-height: 360px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
   }
 
   &__dm-item {
@@ -231,5 +277,13 @@
 @media (max-width: 991px) {
   .sidebar {
     display: block;
+
+    &__list {
+      max-height: 260px;
+    }
+
+    &__dm-list {
+      max-height: 320px;
+    }
   }
-} 
+}

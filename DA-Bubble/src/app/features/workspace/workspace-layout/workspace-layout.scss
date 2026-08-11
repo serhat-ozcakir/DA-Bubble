@@ -84,6 +84,24 @@ app-thread-panel {
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  span {
+    transition: color 0.2s ease;
+  }
+
+  img {
+    transition: filter 0.2s ease;
+  }
+
+  &:hover {
+    span {
+      color: #535af1;
+    }
+
+    img {
+      filter: invert(38%) sepia(93%) saturate(2113%)
+        hue-rotate(222deg) brightness(96%) contrast(96%);
+    }
+  }
 }
 
 .workspace__toggle-content {

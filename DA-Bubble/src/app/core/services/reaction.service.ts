@@ -181,6 +181,10 @@ async addReaction(
     )
   }
 
+  getLimitedReactionsForMessage(messageId: string,limit: number): ReactionSummary[] {
+  return this.getReactionForMessage(messageId).slice(0, limit);
+}
+
 subscribeToReactions(): void {
   this.removeReactionsRealtimeChannel();
   this.reactionsRealtimeChannel = this.supabase.supabase
