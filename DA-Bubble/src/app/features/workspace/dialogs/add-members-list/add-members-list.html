@@ -2,7 +2,9 @@
     <div class="members-dropdown" (click)="$event.stopPropagation()">
         <div class="members-dropdown__header">
             <h3>Mitglieder</h3>
-            <button type="button" (click)="closeAddMemberList.emit()">×</button>
+            <button type="button" (click)="closeAddMemberList.emit()">
+                 <img src="assets/icons/close.png" alt="close logo">
+            </button>
         </div>
 
         <div class="members-dropdown__list">

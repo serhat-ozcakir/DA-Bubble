@@ -120,6 +120,9 @@
     border-radius: 30px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+            &:hover {
+     color: #535af1;
+    }
 
     img {
       width: 40px;
@@ -142,27 +145,43 @@
     margin-left: 6px;
     font-size: 16px;
     font-weight: 600;
+
   }
 
   &__add-member {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 50%;
-    background-color: #eceefe;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  width: 40px;
+  height: 40px;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background-color: #eceefe;
+
+  cursor: pointer;
+
+  img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+
+    transition:
+      filter 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  &:hover {
     img {
-      width: 28px;
-      height: 28px;
-    }
+      filter: invert(38%) sepia(93%) saturate(2113%)
+        hue-rotate(222deg) brightness(96%) contrast(96%);
 
-    &:hover {
-      background-color: #d9dcff;
+      transform: scale(1.05);
     }
+  }
   }
 }
