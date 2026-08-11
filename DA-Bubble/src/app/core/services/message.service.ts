@@ -311,12 +311,16 @@ const loadedThreadMessages: MessageView[] = data.map((message) => ({
       });
   }
 
-  async updateMessage(messageId: string, newText: string): Promise<void> {
-    const text = newText.trim();
+async updateMessage(
+  messageId: string,
+  newText: string
+): Promise<void> {
+  const text = newText.trim();
 
-    if (!text) return
+  if (!text) return;
 
-    const {data, error } = await this.supabase.supabase
+  const { error } =
+    await this.supabase.supabase
       .from('messages')
       .update({
         text: text,
@@ -324,19 +328,36 @@ const loadedThreadMessages: MessageView[] = data.map((message) => ({
       .eq('id', messageId)
       .select('*');
 
-    if (error) {
-      console.log('error:', error);
-    }
-    this.messages.update((messages) =>
-      messages.map((message) =>
-        message.id === messageId ?
-          { ...message, text: text } : message)
-    )
-    this.threadMessages.update((messages)=>
-    messages.map((message)=>
-    message.id === messageId ?
-    {...message, text} : message
-  ))
+  if (error) {
+    console.log('error:', error);
+    return;
   }
+
+  this.messages.update((messages) =>
+    messages.map((message) =>
+      message.id === messageId
+        ? { ...message, text }
+        : message
+    )
+  );
+
+  this.threadMessages.update((messages) =>
+    messages.map((message) =>
+      message.id === messageId
+        ? { ...message, text }
+        : message
+    )
+  );
+
+  const selectedMessage =
+    this.selectedThreadMessage();
+
+  if (selectedMessage?.id === messageId) {
+    this.selectedThreadMessage.set({
+      ...selectedMessage,
+      text,
+    });
+  }
+}
 
 }
