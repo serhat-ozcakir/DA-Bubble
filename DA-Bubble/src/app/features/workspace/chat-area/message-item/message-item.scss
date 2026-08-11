@@ -22,13 +22,21 @@
   }
 }
 
+
+/* =========================
+   MESSAGE ACTIONS CONTAINER
+   ========================= */
+
 .message-actions-container {
   position: absolute;
   top: -20px;
   right: 48px;
+
   display: flex;
   justify-content: flex-end;
+
   z-index: 20;
+
   &--own {
     left: 48px;
     right: auto;
@@ -39,18 +47,31 @@
   }
 }
 
+
+/* =========================
+   EMOJI PICKER
+   ========================= */
+
 .emoji-picker {
   position: absolute;
   top: 58px;
   right: 0;
+
   z-index: 30;
+
   max-height: 250px;
+
   background: white;
+
   border: 1px solid #adb0d9;
   border-radius: 24px;
+
   padding: 8px;
+
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
   overflow: hidden;
+
   cursor: pointer;
 }
 
@@ -59,12 +80,21 @@
   width: 100%;
 }
 
+
+/* =========================
+   MESSAGE
+   ========================= */
+
 .message {
   display: flex;
   width: 100%;
+
   align-items: flex-start;
+
   gap: 16px;
-  padding: 10px 0px;
+
+  padding: 10px 0;
+
   &--own {
     flex-direction: row-reverse;
 
@@ -83,32 +113,51 @@
     .message__bubble {
       background: #797ef3;
       color: white;
+
       border-radius: 20px 0 20px 20px;
     }
 
     .message-reactions {
       justify-content: flex-end;
     }
+
+    /*
+      Kendi mesajımız sağ tarafta olduğu için
+      tooltip sola doğru açılsın.
+    */
+    .reaction-tooltip {
+      left: auto;
+      right: 0;
+
+      border-radius: 30px 30px 0 30px;
+    }
   }
 
   &__avatar {
     width: 70px;
     height: 70px;
+
     border-radius: 50%;
+
     object-fit: cover;
+
     flex-shrink: 0;
   }
 
   &__content {
     display: flex;
     flex-direction: column;
+
     gap: 8px;
+
     max-width: 540px;
+    min-width: 0;
   }
 
   &__meta {
     display: flex;
     align-items: center;
+
     gap: 16px;
   }
 
@@ -123,20 +172,32 @@
   }
 
   &__bubble {
-    background: #eceefe;
+    width: fit-content;
+
     padding: 16px 20px;
+
+    background: #eceefe;
+
     border-radius: 0 20px 20px 20px;
+
     font-size: 18px;
     line-height: 1.4;
-    width: fit-content;
+
+    word-break: break-word;
+
     cursor: pointer;
   }
-    &__thread {
-    background: transparent;
-    border: none;
-    color: #535af1;
-    cursor: pointer;
+
+  &__thread {
     width: fit-content;
+
+    background: transparent;
+
+    border: none;
+
+    color: #535af1;
+
+    cursor: pointer;
 
     &:hover {
       text-decoration: underline;
@@ -144,205 +205,167 @@
   }
 }
 
+
+/* =========================
+   MESSAGE ACTIONS
+   ========================= */
+
 .message-actions {
   position: relative;
+
   display: flex;
   align-items: center;
+
   gap: 12px;
+
   padding: 10px 18px;
+
   background: white;
+
   border: 1px solid #adb0d9;
   border-radius: 28px 28px 0 28px;
+
   opacity: 0;
   visibility: hidden;
+
   z-index: 10;
+
   > button {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s ease;
+
     &:hover {
       background-color: #eceefe;
     }
+
     &:hover img {
-        filter: invert(38%) sepia(93%) saturate(2113%)
-    hue-rotate(222deg) brightness(96%) contrast(96%);
+      filter: invert(38%) sepia(93%) saturate(2113%)
+        hue-rotate(222deg) brightness(96%) contrast(96%);
     }
-  }
-}
-
-.message-edit {
-  position: absolute;
-  top: 52px;
-  right: -190px;
-
-  min-width: 260px;
-  padding: 10px 15px;
-
-  background: white;
-  border-radius: 0 30px 30px 30px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-
-  z-index: 100;
-  
-}
-
-.message-edit__button {
-    display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  padding: 10px 20px;
-
-  border: none;
-  border-radius: 100px;
-
-  background: transparent;
-
-  font-size: 20px;
-  font-weight: 400;
-  color: #000;
-
-  cursor: pointer;
-  transition: all .15s ease;
-
-  &:hover {
-    background: #ECEEFE;
-    color: #535AF1;
-    font-weight: 700;
   }
 }
 
 .message-actions__button {
   border: none;
+
   background: transparent;
+
   cursor: pointer;
+
   font-size: 22px;
-  &:hover{
-    background-color:#ECEEFE;
+
+  &:hover {
+    background-color: #eceefe;
+
     border-radius: 20px;
   }
 }
 
+
+/* =========================
+   REACTIONS
+   ========================= */
+
 .message-reactions {
+  width: 100%;
+  max-width: 100%;
+
   display: flex;
+  align-items: center;
+
+  /*
+    Reaction sayısı arttığında
+    sağa taşmak yerine alt satıra geçer.
+  */
+  flex-wrap: wrap;
+
   gap: 8px;
+
   margin-top: 8px;
 }
 
 .message-reactions__button {
   position: relative;
+
   display: flex;
   align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
   gap: 6px;
-  border: 1px solid #adb0d9;
-  background: white;
-  border-radius: 20px;
+
+  min-width: 42px;
+  height: 34px;
+
   padding: 4px 10px;
+
+  border: 1px solid #adb0d9;
+
+  background: white;
+
+  border-radius: 20px;
+
   cursor: pointer;
 }
 
 .message-reactions__button--active {
   background: #eceefe;
+
   border-color: #444df2;
 }
 
-.message-edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
 
-  &__textarea {
-    width: 100%;
-    min-height: 110px;
-    resize: vertical;
+/* =========================
+   REACTION TOOLTIP
+   ========================= */
 
-    padding: 16px 20px;
-
-    border: 1px solid #ADB0D9;
-    border-radius: 20px;
-
-    background: #FFFFFF;
-
-    font-size: 18px;
-    line-height: 1.5;
-    font-family: inherit;
-
-    outline: none;
-    transition: border-color .2s ease;
-
-    &:focus {
-      border-color: #535AF1;
-    }
-  }
-
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-  }
-
-  &__button {
-    padding: 12px 22px;
-
-    border-radius: 30px;
-    border: 1px solid #535AF1;
-
-    background: white;
-    color: #535AF1;
-
-    font-size: 18px;
-    font-weight: 600;
-
-    cursor: pointer;
-    transition: all .2s ease;
-
-    &:hover {
-      background: #535AF1;
-      color: white;
-    }
-
-    &--save {
-      background: #535AF1;
-      color: white;
-
-      &:hover {
-        background: #444DF2;
-        border-color: #444DF2;
-      }
-    }
-  }
-}
-
-.reaction-tooltip{
-  display: flex;
-  flex-direction: column;
+.reaction-tooltip {
   position: absolute;
-  bottom: 38px;
-  left: 140%;
-  transform: translateX(-25%);
 
-  min-width: 190px;
-  padding: 8px 15px;
+  bottom: 38px;
+
+  /*
+    Normal mesaj solda olduğu için
+    tooltip sağa doğru açılır.
+  */
+  left: 0;
+  right: auto;
+
+  z-index: 100;
+
+  min-width: 170px;
+
+  padding: 6px 12px;
+
+  display: flex;
+  flex-direction: column;
 
   background: #444df2;
+
   color: white;
+
   border-radius: 30px 30px 30px 0;
 
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
 
-  z-index: 100;
+  pointer-events: none;
 }
 
 .message-reactions__button:hover .reaction-tooltip {
@@ -352,12 +375,14 @@
 
 .reaction-tooltip__emoji {
   font-size: 32px;
+
   margin-bottom: 8px;
 }
 
 .reaction-tooltip__text {
   display: flex;
   flex-direction: column;
+
   gap: 4px;
 
   font-size: 16px;
@@ -365,5 +390,169 @@
 
   strong {
     font-weight: 700;
+  }
+}
+
+
+/* =========================
+   MESSAGE EDIT DROPDOWN
+   ========================= */
+
+.message-edit {
+  position: absolute;
+
+  top: 52px;
+  right: -190px;
+
+  min-width: 260px;
+
+  padding: 10px 15px;
+
+  background: white;
+
+  border-radius: 0 30px 30px 30px;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+  z-index: 100;
+}
+
+.message-edit__button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+
+  padding: 10px 20px;
+
+  border: none;
+  border-radius: 100px;
+
+  background: transparent;
+
+  font-size: 20px;
+  font-weight: 400;
+
+  color: #000;
+
+  cursor: pointer;
+
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #eceefe;
+
+    color: #535af1;
+
+    font-weight: 700;
+  }
+}
+
+
+/* =========================
+   MESSAGE EDIT FORM
+   ========================= */
+
+.message-edit-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+
+  width: 100%;
+
+  &__textarea {
+    width: 100%;
+    min-height: 110px;
+
+    resize: vertical;
+
+    padding: 16px 20px;
+
+    border: 1px solid #adb0d9;
+    border-radius: 20px;
+
+    background: #ffffff;
+
+    font-size: 18px;
+    line-height: 1.5;
+    font-family: inherit;
+
+    outline: none;
+
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      border-color: #535af1;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 12px;
+  }
+
+  &__button {
+    padding: 12px 22px;
+
+    border-radius: 30px;
+    border: 1px solid #535af1;
+
+    background: white;
+
+    color: #535af1;
+
+    font-size: 18px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #535af1;
+
+      color: white;
+    }
+
+    &--save {
+      background: #535af1;
+
+      color: white;
+
+      &:hover {
+        background: #444df2;
+
+        border-color: #444df2;
+      }
+    }
+  }
+}
+
+.message-reactions__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #adb0d9;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #535af1;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  > img {
+    width: 10px;
+    height: auto;
+  }
+
+  &:hover {
+    background: #eceefe;
   }
 }

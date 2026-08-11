@@ -157,7 +157,7 @@
 
       <div class="message-reactions">
         @for (
-          reaction of reactionService.getReactionForMessage(message().id);
+          reaction of getVisibleReactions(message().id);
           track reaction.emoji
         ) {
           <button
@@ -188,6 +188,20 @@
             </div>
           </button>
         }
+@if (isReactionExpanded(message().id)) {
+  <button
+    type="button"
+    class="message-reactions__more"
+    (click)="toggleAllReactions(message().id)"
+  >
+    Weniger
+  </button>
+} @else if (getHiddenReactionCount(message().id) > 0) {
+  <button type="button"class="message-reactions__more"
+    (click)="toggleAllReactions(message().id)">
+    <img src="assets\icons\add-blue.png" alt=""> <span> {{ getHiddenReactionCount(message().id) }}</span> 
+  </button>
+}
       </div>
     </div>
   </div>
