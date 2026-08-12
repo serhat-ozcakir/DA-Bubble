@@ -65,6 +65,7 @@ export class Sidebar implements OnInit {
 
   openNewMessageView():void{
     this.openNewMessage.emit();
+    this.messageService.closeThread();
   }
 
 }
