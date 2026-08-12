@@ -91,7 +91,7 @@
           }
 
           <div class="thread-reactions">
-            @for(reaction of reactionService.getReactionForMessage(reply.id); track reaction.emoji){
+            @for(reaction of getVisibleThreadReactions(reply.id); track reaction.emoji){
             <button type="button" class="thread-reactions__button"
               [class.thread-reactions__button--active]="reaction.reactedByCurrentUser">
               <span>{{ reaction.emoji }}</span>
@@ -100,12 +100,21 @@
                 <div class="reaction-tooltip__emoji">
                   {{ reaction.emoji }}
                 </div>
-  
+
                 <div class="reaction-tooltip__text">
                   <strong>{{getReactionUsersNames(reaction.userNames)}}</strong>
                   <span>{{getReactionVerb(reaction.userNames)}}</span>
                 </div>
               </div>
+            </button>
+            }
+            @if (isThreadReactionExpanded(reply.id)) {
+            <button type="button" class="thread-reactions__more" (click)="toggleAllThreadReactions(reply.id)">
+              Weniger
+            </button>
+            } @else if (getHiddenThreadReactionCount(reply.id) > 0) {
+            <button type="button" class="thread-reactions__more" (click)="toggleAllThreadReactions(reply.id)">
+              +{{ getHiddenThreadReactionCount(reply.id) }} weitere
             </button>
             }
 

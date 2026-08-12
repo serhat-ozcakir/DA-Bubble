@@ -126,20 +126,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: none;
-  background: transparent;
   border-radius: 50%;
+  background: transparent;
   cursor: pointer;
-
-  &:hover {
-    background-color: #eceefe;
-  }
-
-  img {
-    width: 19px;
-    height: 19px;
-    object-fit: contain;
-  }
+  transition: background-color 0.2s ease;
+  
+    &:hover {
+      background-color: #eceefe;
+    }
+    &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%)
+    hue-rotate(222deg) brightness(96%) contrast(96%);
+    }
 }
 
 /* Reply row */
@@ -254,7 +254,28 @@
   margin-top: 8px;
 }
 
-.thread-reactions__button,
+.thread-reactions__button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 5px;
+  min-width: 42px;
+  height: 34px;
+  padding: 0 5px;
+  border: 1px solid #adb0d9;
+  background: #ffffff;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 15px;
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+}
 .thread-reactions__add {
   position: relative;
   display: flex;
@@ -268,20 +289,33 @@
   border: 1px solid #adb0d9;
   background: #ffffff;
   border-radius: 20px;
-  cursor: pointer;
   font-size: 18px;
-
-  img {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-  }
+  background: transparent;
+  transition: background-color 0.2s ease;
+  
+    &:hover {
+      background-color: #eceefe;
+    }
+    &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%)
+    hue-rotate(222deg) brightness(96%) contrast(96%);
+    }
 }
 
 .thread-reactions__add {
   width: 34px;
   min-width: 34px;
   padding: 0;
+  background: transparent;
+  transition: background-color 0.2s ease;
+  
+    &:hover {
+      background-color: #eceefe;
+    }
+    &:hover img {
+        filter: invert(38%) sepia(93%) saturate(2113%)
+    hue-rotate(222deg) brightness(96%) contrast(96%);
+    }
 }
 
 .thread-reactions__button--active {
@@ -346,6 +380,13 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   cursor: pointer;
+}
+
+.thread-reply-wrapper--own {
+  .thread-emoji-picker {
+    left: 0;
+    right: auto;
+  }
 }
 
 .thread-emoji-picker emoji-mart {
@@ -447,5 +488,23 @@
         border-color: #444df2;
       }
     }
+  }
+}
+
+.thread-reactions__more {
+  min-width: 42px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #adb0d9;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #535af1;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #eceefe;
   }
 }

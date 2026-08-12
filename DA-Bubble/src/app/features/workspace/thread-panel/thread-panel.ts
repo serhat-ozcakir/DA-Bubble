@@ -6,6 +6,7 @@ import { ThreadMessages } from '../../../features/workspace/thread-panel/thread-
 import { ReactionService } from '../../../core/services/reaction.service';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { MessageView } from '../../../core/models/message-view.model';
+import { ReactionSummary } from '../../../core/models/reaction-summary.model';
 
 @Component({
   selector: 'app-thread-panel',
@@ -21,6 +22,51 @@ export class ThreadPanel {
   isMessageEdited = signal(false);
   editingThreadMessageId = signal<string | null>(null);
   editingThreadText = signal<string>('');
+  readonly threadReactionLimit = 7;
+  expandedThreadReactionMessageIds = signal<Set<string>>(new Set());
+
+
+  toggleAllThreadReactions(messageId: string): void {
+  this.expandedThreadReactionMessageIds.update((current) => {
+    const updated = new Set(current);
+
+    if (updated.has(messageId)) {
+      updated.delete(messageId);
+    } else {
+      updated.add(messageId);
+    }
+
+    return updated;
+  });
+}
+
+isThreadReactionExpanded(messageId: string): boolean {
+  return this.expandedThreadReactionMessageIds().has(messageId);
+}
+
+getVisibleThreadReactions(messageId: string): ReactionSummary[] {
+  const reactions =
+    this.reactionService.getReactionForMessage(messageId);
+
+  if (this.isThreadReactionExpanded(messageId)) {
+    return reactions;
+  }
+
+  return reactions.slice(0, this.threadReactionLimit);
+}
+
+getHiddenThreadReactionCount(messageId: string): number {
+  if (this.isThreadReactionExpanded(messageId)) {
+    return 0;
+  }
+
+  const total =this.reactionService.getReactionForMessage(messageId).length;
+
+  return Math.max(
+    0,
+    total - this.threadReactionLimit
+  );
+}
 
   toggleThreadEmojiPicker(messageId: string, event: Event): void {
     this.openedReactionPickerId.update((currentID) =>
