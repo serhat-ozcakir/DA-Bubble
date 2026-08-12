@@ -1,5 +1,6 @@
 <div class="members-overlay" (click)="closeAddMemberList.emit()">
-    <div class="members-dropdown" (click)="$event.stopPropagation()">
+    <div class="members-dropdown" [class.members-dropdown--thread-open]="threadOpen()"
+    (click)="$event.stopPropagation()">
         <div class="members-dropdown__header">
             <h3>Mitglieder</h3>
             <button type="button" (click)="closeAddMemberList.emit()">

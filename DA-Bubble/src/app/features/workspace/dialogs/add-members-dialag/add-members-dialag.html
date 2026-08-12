@@ -1,5 +1,6 @@
 <div class="add-members-backdrop" (click)="close()">
-  <div class="add-members" (click)="$event.stopPropagation()">
+  <div class="add-members" [class.add-members--thread-open]="threadOpen()"
+  (click)="$event.stopPropagation()">
     <div class="add-members__header">
       <h2>Leute hinzufügen</h2>
 

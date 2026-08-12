@@ -33,7 +33,10 @@
 
     </app-chat-area>
     @if(showAddMemberDialog()){
-    <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()"></app-add-members-dialag>
+    <app-add-members-dialag 
+    (closeAddMemberDialog)="closeAddMembersDialog()"
+    [threadOpen] = "isThreadOpen">
+    </app-add-members-dialag>
     }
 
     @if(showProfilDialog()){
@@ -53,7 +56,11 @@
 }
 
 @if(showMemberListDialog()){
-<app-add-members-list (openAddMembers)="openAddMembersFromList()" (closeAddMemberList)="closeAddMemberList()">
+<app-add-members-list 
+(openAddMembers)="openAddMembersFromList()" 
+(closeAddMemberList)="closeAddMemberList()" 
+[threadOpen] = "isThreadOpen">
+
 </app-add-members-list>
 }
 

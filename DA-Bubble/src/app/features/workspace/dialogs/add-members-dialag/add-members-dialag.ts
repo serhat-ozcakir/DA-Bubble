@@ -1,4 +1,4 @@
-import { Component, computed, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChannelService } from "../../../../core/services/channel.service";
 import { UserService } from "../../../../core/services/user.service";
@@ -19,6 +19,7 @@ export class AddMembersDialag {
   users = this.userService.user;
   isLoading = signal(false);
   errorMessage = signal('');
+  threadOpen = input<boolean>(false);
 
   filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase().trim();
