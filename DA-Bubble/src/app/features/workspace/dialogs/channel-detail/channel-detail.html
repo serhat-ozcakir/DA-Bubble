@@ -1,5 +1,7 @@
 <div class="channel-detail-backdrop" (click)="close()">
-  <div class="channel-detail" (click)="$event.stopPropagation()">
+  <div class="channel-detail" 
+  (click)="$event.stopPropagation()"
+  [class.channel-detail--sidebar-close]="SidebarClosed()">
 
     <div class="channel-detail__header">
       <h2>

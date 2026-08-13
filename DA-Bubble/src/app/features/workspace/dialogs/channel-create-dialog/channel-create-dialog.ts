@@ -1,4 +1,4 @@
-import { HostListener, Component, output, Host, signal } from '@angular/core';
+import { HostListener, Component, output, Host, signal, input } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ChannelService } from '../../../../core/services/channel.service';
 
@@ -16,6 +16,7 @@ export class ChannelCreateDialog {
   });
   isLoading = signal(false);
   errorMessage = signal('');
+  SidebarClosed = input<boolean>(false);
 
   constructor(private channelService: ChannelService) { }
 

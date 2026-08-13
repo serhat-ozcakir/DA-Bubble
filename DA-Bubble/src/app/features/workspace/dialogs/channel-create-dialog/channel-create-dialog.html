@@ -1,5 +1,7 @@
 <div class="dialog-backdrop" (click)="close()">
-  <div class="dialog" (click)="$event.stopPropagation()">
+  <div class="dialog" 
+  (click)="$event.stopPropagation()" 
+  [class.dialog--sidebar-close]="SidebarClosed()">
     <button class="dialog__close" type="button" (click)="close()">
      <img src="assets/icons/close.png" alt="close logo">
     </button>

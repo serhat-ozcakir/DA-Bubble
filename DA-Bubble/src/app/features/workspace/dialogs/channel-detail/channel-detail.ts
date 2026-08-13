@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators, } from '@angular/forms';
 
@@ -19,6 +19,7 @@ export class ChannelDetail {
   isSavingName = signal(false);
   isSavingDescription = signal(false);
   descriptionErrorMessage = signal('');
+  SidebarClosed = input<boolean>(false);
 
   channelEditForm = new FormGroup({
     name: new FormControl('', {
