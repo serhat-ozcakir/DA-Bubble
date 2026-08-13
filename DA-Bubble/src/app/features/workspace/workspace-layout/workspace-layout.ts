@@ -38,6 +38,10 @@ export class WorkspaceLayout {
   async ngOnInit() {
     await this.auth.loadCurrentUser();
     await this.channelService.loadChannels();
+    const channels = this.channelService.channels();
+    if (channels.length > 0) {
+       this.channelService.setCurrentChannel(channels[0]);
+    }
     this.channelService.subscribeToCurrentChannelMembers();
 
   }

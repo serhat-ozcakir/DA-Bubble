@@ -31,7 +31,6 @@ export class Sidebar implements OnInit {
 
  async ngOnInit(): Promise<void> {
    await this.userService.loadUsers();
-   await this.channelService.loadChannels();
   }
 
   selectChannel(channel:Channel):void{
@@ -64,8 +63,10 @@ export class Sidebar implements OnInit {
   }
 
   openNewMessageView():void{
-    this.openNewMessage.emit();
-    this.messageService.closeThread();
+  this.messageService.closeThread();
+  this.channelService.currentChannel.set(null);
+  this.direktMessageService.currentDmUser.set(null);
+  this.openNewMessage.emit();
   }
 
 }

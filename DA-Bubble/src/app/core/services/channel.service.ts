@@ -14,7 +14,7 @@ export class ChannelService {
   channels = signal<Channel[]>([]);
   currentChannel = signal<Channel | null>(null);
   channelMembers = signal<Profile[]>([]);
-  creator =  signal<Profile | null>(null);
+  creator = signal<Profile | null>(null);
   private channelMembersRealtimeChannel: RealtimeChannel | null = null;
 
   async loadChannels(): Promise<void> {
@@ -57,36 +57,31 @@ export class ChannelService {
 
     this.channels.set(loadedChannels);
 
-    if (loadedChannels.length > 0) {
-      this.currentChannel.set(loadedChannels[0]);
-      await this.loadChannelMembers(loadedChannels[0].id);
-       await this.loadChannelCreator(loadedChannels[0].createdBy);
-      this.subscribeToCurrentChannelMembers();
-    } else {
+    if (loadedChannels.length === 0) {
       this.currentChannel.set(null);
       this.channelMembers.set([]);
     }
   }
 
-async loadChannelCreator(profileId: string): Promise<void> {
-  const { data, error } = await this.supabase.supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', profileId)
-    .single();
+  async loadChannelCreator(profileId: string): Promise<void> {
+    const { data, error } = await this.supabase.supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', profileId)
+      .single();
 
-  if (error) {
-    console.error('Fehler beim Laden des Channel-Erstellers:', error);
-    return;
+    if (error) {
+      console.error('Fehler beim Laden des Channel-Erstellers:', error);
+      return;
+    }
+
+    this.creator.set(data);
   }
 
-  this.creator.set(data);
-}
-
-async loadChannelMembers(channelId: string): Promise<void> {
-  const { data, error } = await this.supabase.supabase
-    .from('channel_members')
-    .select(`
+  async loadChannelMembers(channelId: string): Promise<void> {
+    const { data, error } = await this.supabase.supabase
+      .from('channel_members')
+      .select(`
       profiles (
         id,
         name,
@@ -96,19 +91,19 @@ async loadChannelMembers(channelId: string): Promise<void> {
         created_at
       )
     `)
-    .eq('channel_id', channelId);
+      .eq('channel_id', channelId);
 
-  if (error) {
-    console.error('Fehler beim Laden der Kanalmitglieder:', error);
-    return;
+    if (error) {
+      console.error('Fehler beim Laden der Kanalmitglieder:', error);
+      return;
+    }
+
+    const members: Profile[] = data
+      .map((member: any) => member.profiles)
+      .filter((profile) => profile !== null);
+
+    this.channelMembers.set(members);
   }
-
-  const members: Profile[] = data
-    .map((member: any) => member.profiles)
-    .filter((profile) => profile !== null);
-
-  this.channelMembers.set(members);
-}
 
   setCurrentChannel(channel: Channel): void {
     this.currentChannel.set(channel);
@@ -172,40 +167,40 @@ async loadChannelMembers(channelId: string): Promise<void> {
     this.loadChannelMembers(channelId);
   }
 
-subscribeToCurrentChannelMembers(): void {
-  const currentChannel = this.currentChannel();
+  subscribeToCurrentChannelMembers(): void {
+    const currentChannel = this.currentChannel();
 
-  if (!currentChannel) {
-    return;
-  }
+    if (!currentChannel) {
+      return;
+    }
 
-  if (this.channelMembersRealtimeChannel) {
-    this.supabase.supabase.removeChannel(
-      this.channelMembersRealtimeChannel
-    );
-  }
+    if (this.channelMembersRealtimeChannel) {
+      this.supabase.supabase.removeChannel(
+        this.channelMembersRealtimeChannel
+      );
+    }
 
-  this.channelMembersRealtimeChannel = this.supabase.supabase
-    .channel(`channel-members-live-${currentChannel.id}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'channel_members',
-      },
-      async () => {
-        const activeChannel = this.currentChannel();
+    this.channelMembersRealtimeChannel = this.supabase.supabase
+      .channel(`channel-members-live-${currentChannel.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'channel_members',
+        },
+        async () => {
+          const activeChannel = this.currentChannel();
 
-        if (!activeChannel) {
-          return;
+          if (!activeChannel) {
+            return;
+          }
+
+          await this.loadChannelMembers(activeChannel.id);
         }
-
-        await this.loadChannelMembers(activeChannel.id);
-      }
-    )
-    .subscribe();
-}
+      )
+      .subscribe();
+  }
 
   async leaveChannel(channelId: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
@@ -241,91 +236,91 @@ subscribeToCurrentChannelMembers(): void {
     }
   }
 
-async updateChannelName(
-  channelId: string,
-  newName: string
-): Promise<void> {
-  const trimmedName = newName.trim();
+  async updateChannelName(
+    channelId: string,
+    newName: string
+  ): Promise<void> {
+    const trimmedName = newName.trim();
 
-  const { data: existingChannel, error: checkError } =
-    await this.supabase.supabase
+    const { data: existingChannel, error: checkError } =
+      await this.supabase.supabase
+        .from('channels')
+        .select('id')
+        .eq('name', trimmedName)
+        .neq('id', channelId)
+        .maybeSingle();
+
+    if (checkError) {
+      throw checkError;
+    }
+
+    if (existingChannel) {
+      throw new Error('CHANNEL_ALREADY_EXISTS');
+    }
+
+    const { data, error } = await this.supabase.supabase
       .from('channels')
-      .select('id')
-      .eq('name', trimmedName)
-      .neq('id', channelId)
-      .maybeSingle();
+      .update({ name: trimmedName })
+      .eq('id', channelId)
+      .select()
+      .single();
 
-  if (checkError) {
-    throw checkError;
+    if (error) {
+      throw error;
+    }
+
+    const updatedChannel: Channel = {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      createdBy: data.created_by,
+      createdAt: data.created_at,
+    };
+
+    this.channels.update((channels) =>
+      channels.map((channel) =>
+        channel.id === channelId ? updatedChannel : channel
+      )
+    );
+
+    this.currentChannel.set(updatedChannel);
   }
 
-  if (existingChannel) {
-    throw new Error('CHANNEL_ALREADY_EXISTS');
+  async updateChannelDescription(
+    channelId: string,
+    newDescription: string
+  ): Promise<void> {
+    const trimmedDescription = newDescription.trim();
+
+    const { data, error } = await this.supabase.supabase
+      .from('channels')
+      .update({
+        description: trimmedDescription,
+      })
+      .eq('id', channelId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Channel description update error:', error);
+      throw error;
+    }
+
+    const updatedChannel: Channel = {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      createdBy: data.created_by,
+      createdAt: data.created_at,
+    };
+
+    this.channels.update((channels) =>
+      channels.map((channel) =>
+        channel.id === channelId ? updatedChannel : channel
+      )
+    );
+
+    this.currentChannel.set(updatedChannel);
   }
-
-  const { data, error } = await this.supabase.supabase
-    .from('channels')
-    .update({ name: trimmedName })
-    .eq('id', channelId)
-    .select()
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  const updatedChannel: Channel = {
-    id: data.id,
-    name: data.name,
-    description: data.description,
-    createdBy: data.created_by,
-    createdAt: data.created_at,
-  };
-
-  this.channels.update((channels) =>
-    channels.map((channel) =>
-      channel.id === channelId ? updatedChannel : channel
-    )
-  );
-
-  this.currentChannel.set(updatedChannel);
-}
-
-async updateChannelDescription(
-  channelId: string,
-  newDescription: string
-): Promise<void> {
-  const trimmedDescription = newDescription.trim();
-
-  const { data, error } = await this.supabase.supabase
-    .from('channels')
-    .update({
-      description: trimmedDescription,
-    })
-    .eq('id', channelId)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Channel description update error:', error);
-    throw error;
-  }
-
-  const updatedChannel: Channel = {
-    id: data.id,
-    name: data.name,
-    description: data.description,
-    createdBy: data.created_by,
-    createdAt: data.created_at,
-  };
-
-  this.channels.update((channels) =>
-    channels.map((channel) =>
-      channel.id === channelId ? updatedChannel : channel
-    )
-  );
-
-  this.currentChannel.set(updatedChannel);
-}
 
 }

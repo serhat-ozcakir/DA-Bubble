@@ -19,10 +19,16 @@
   padding: 25px 30px;
   box-sizing: border-box;
   background-color: #ffffff;
-  border-radius: 30px 0 30px 30px;
+  border-radius: 0 30px 30px 30px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
     &--sidebar-close {
     left: max(80px, calc((100vw - 1520px) / 2 + 80px));
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
   }
 
   &__close {
@@ -57,15 +63,15 @@
 
 
 h2 {
-  margin: 0 0 32px;
+  margin: 0 0 20px;
   font-size: 24px;
   font-weight: 700;
 }
 
 .dialog__text {
-  margin: 0 0 28px;
+  margin: 0 0 20px;
   max-width: 920px;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1.4;
 }
 
@@ -94,12 +100,11 @@ h2 {
 
 .dialog__input,
 .dialog__description {
-  height: 72px;
+  height: 60px;
   border: 1px solid #adb0d9;
   border-radius: 40px;
   padding: 0 24px;
-  margin-bottom: 28px;
-
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
   gap: 20px;

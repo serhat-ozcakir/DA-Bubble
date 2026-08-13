@@ -1,13 +1,11 @@
 <div class="dialog-backdrop" (click)="close()">
-  <div class="dialog" 
-  (click)="$event.stopPropagation()" 
-  [class.dialog--sidebar-close]="SidebarClosed()">
-    <button class="dialog__close" type="button" (click)="close()">
-     <img src="assets/icons/close.png" alt="close logo">
-    </button>
-
-    <h2>Channel erstellen</h2>
-
+  <div class="dialog" (click)="$event.stopPropagation()" [class.dialog--sidebar-close]="SidebarClosed()">
+    <div class="dialog__header">
+      <h2>Channel erstellen</h2>
+      <button class="dialog__close" type="button" (click)="close()">
+        <img src="assets/icons/close.png" alt="close logo">
+      </button>
+    </div>
     <p class="dialog__text">
       Channels dienen deinem Team zur Kommunikation. Am besten sollten sie
       themenbezogen sein #marketing zum Beispiel.
