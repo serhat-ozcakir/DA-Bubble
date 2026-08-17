@@ -1,4 +1,4 @@
-import { ElementRef, HostListener, Component, inject, signal } from '@angular/core';
+import {ElementRef, HostListener, Component, inject, signal} from '@angular/core';
 import { MessageService } from '../../../../core/services/message.service';
 import { FormsModule } from '@angular/forms';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
@@ -7,8 +7,6 @@ import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { UserService } from '../../../../core/services/user.service';
 import { Channel } from '../../../../core/models/channel.model';
 import { Profile } from '../../../../core/models/profile.model';
-
-
 
 @Component({
   selector: 'app-message-input',
@@ -20,13 +18,12 @@ export class MessageInput {
   private elementRef = inject(ElementRef);
   messageService = inject(MessageService);
   directMessageService = inject(DirectMessageService);
-  channelService = inject(ChannelService)
-  messageText: string = '';
-  showEmojiPicker = false;
+  channelService = inject(ChannelService);
   userService = inject(UserService);
-  showMentionDropdown = signal(false);
-  mentionType = signal<'user' | 'channel' | null>(null);
-  mentionSearch = signal('');
+  messageText = '';
+  showEmojiPicker = false;
+  mentionType = signal<'users' | 'channels' | null>(null);
+  mentionSearchText = signal('');
 
   handleEnter(event: Event): void {
     event.preventDefault();
@@ -36,7 +33,10 @@ export class MessageInput {
   async sendMessage(): Promise<void> {
     const text = this.messageText.trim();
 
-    if (!text) return;
+    if (!text) {
+      return;
+    }
+
     this.messageText = '';
 
     try {
@@ -45,112 +45,196 @@ export class MessageInput {
       } else {
         await this.messageService.sendMessage(text);
       }
+
+      this.closeMentionDropdown();
     } catch (error) {
-      console.error('Message could not be sent:', error);
+      console.error(
+        'Message could not be sent:',
+        error
+      );
+
       this.messageText = text;
     }
   }
 
-  @HostListener('document:click', ['$event'])
-  closeEmojiPickerOnOutsideClick(event: MouseEvent): void {
-    const clickedInside = this.elementRef.nativeElement.contains(event.target);
-    if (!clickedInside) {
-      this.showEmojiPicker = false;
-      this.showMentionDropdown.set(false);
-    }
-  }
-
-  @HostListener('document:keydown.escape')
-  closeEmojiPickerOnEscape(): void {
-    this.showEmojiPicker = false;
-    this.showMentionDropdown.set(false);
-  }
-
   toggleEmojiPicker(): void {
-    this.showEmojiPicker = !this.showEmojiPicker
+    this.showEmojiPicker = !this.showEmojiPicker;
+    this.closeMentionDropdown();
   }
 
   addEmoji(event: any): void {
-    const emoji = event.emoji.native || event.emoji.colons || '';
+    const emoji =
+      event.emoji.native ||
+      event.emoji.colons ||
+      '';
+
     this.messageText += emoji;
     this.showEmojiPicker = false;
   }
 
-handleMentionInput(): void {
-  const text = this.messageText;
+  onMessageInput(): void {
+    const lastWord =
+      this.messageText.split(' ').pop() ?? '';
 
-  const lastAt = text.lastIndexOf('@');
-  const lastHash = text.lastIndexOf('#');
-
-  const isUserMention = lastAt > lastHash;
-  const mentionStartIndex = isUserMention ? lastAt : lastHash;
-
-  if (mentionStartIndex === -1) {
-    this.closeMentionDropdown();
-    return;
-  }
-
-  const trigger = text[mentionStartIndex];
-  const searchText = text.slice(mentionStartIndex + 1);
-
-  if (searchText.includes(' ')) {
-    this.closeMentionDropdown();
-    return;
-  }
-
-  this.mentionType.set(trigger === '@' ? 'user' : 'channel');
-  this.mentionSearch.set(searchText.toLowerCase());
-  this.showMentionDropdown.set(true);
-}
-
-closeMentionDropdown(): void {
-  this.showMentionDropdown.set(false);
-  this.mentionType.set(null);
-  this.mentionSearch.set('');
-}
-
-filteredUsers(): Profile[] {
-  const search = this.mentionSearch();
-
-  return this.userService.user().filter(user =>
-    user.name.toLowerCase().includes(search)
-  );
-}
-
-filteredChannels(): Channel[] {
-  const search = this.mentionSearch();
-
-  return this.channelService.channels().filter(channel =>
-    channel.name.toLowerCase().includes(search)
-  );
-}
-
-  insertMention(type:'@' | '#'):void{
-    this.messageText += type;
-
-    if(type === '@'){
-      this.mentionType.set('user');
-    } else{
-      this.mentionType.set('channel');
+    if (lastWord.startsWith('@')) {
+      this.mentionType.set('users');
+      this.mentionSearchText.set(
+        lastWord.slice(1).toLowerCase()
+      );
+      return;
     }
-    this.showMentionDropdown.set(true);
+
+    if (lastWord.startsWith('#')) {
+      this.mentionType.set('channels');
+      this.mentionSearchText.set(
+        lastWord.slice(1).toLowerCase()
+      );
+      return;
+    }
+
+    this.closeMentionDropdown();
   }
 
-selectUserMention(name: string): void {
-  const lastAt = this.messageText.lastIndexOf('@');
-  if (lastAt === -1) return;
-  this.messageText =
-    this.messageText.slice(0, lastAt) + `@${name} `;
+  toggleMentionButton(): void {
+    if (this.mentionType() === 'users') {
+      this.switchToChannelMention();
+      return;
+    }
 
-  this.closeMentionDropdown();
-}
-selectChannelMention(name: string): void {
-  const lastHash = this.messageText.lastIndexOf('#');
-  if (lastHash === -1) return;
-  this.messageText =
-    this.messageText.slice(0, lastHash) + `#${name} `;
+    this.switchToUserMention();
+  }
 
-  this.closeMentionDropdown();
-}
+  private switchToUserMention(): void {
+    this.replaceOrAddMentionCharacter('@');
 
+    this.mentionType.set('users');
+    this.mentionSearchText.set('');
+  }
+
+  private switchToChannelMention(): void {
+    this.replaceOrAddMentionCharacter('#');
+
+    this.mentionType.set('channels');
+    this.mentionSearchText.set('');
+  }
+
+  private replaceOrAddMentionCharacter(
+    character: '@' | '#'
+  ): void {
+    const currentText = this.messageText;
+    const lastCharacter = currentText.at(-1);
+
+    if (
+      lastCharacter === '@' ||
+      lastCharacter === '#'
+    ) {
+      this.messageText =
+        currentText.slice(0, -1) +
+        character;
+
+      return;
+    }
+
+    const separator =
+      currentText.length > 0 &&
+      !currentText.endsWith(' ')
+        ? ' '
+        : '';
+
+    this.messageText =
+      `${currentText}${separator}${character}`;
+  }
+
+  filteredUsers(): Profile[] {
+    const search =
+      this.mentionSearchText();
+
+    const users =
+      this.userService.user();
+
+    if (!search) {
+      return users;
+    }
+
+    return users.filter((user) =>
+      user.name
+        .toLowerCase()
+        .includes(search)
+    );
+  }
+
+  filteredChannels(): Channel[] {
+    const search =
+      this.mentionSearchText();
+
+    const channels =
+      this.channelService.channels();
+
+    if (!search) {
+      return channels;
+    }
+
+    return channels.filter((channel) =>
+      channel.name
+        .toLowerCase()
+        .includes(search)
+    );
+  }
+
+  selectUserMention(user: Profile): void {
+    this.replaceCurrentMention(
+      `@${user.name} `
+    );
+  }
+
+  selectChannelMention(channel: Channel): void {
+    this.replaceCurrentMention(
+      `#${channel.name} `
+    );
+  }
+
+  private replaceCurrentMention(
+    replacement: string
+  ): void {
+    const words =
+      this.messageText.split(' ');
+
+    words[words.length - 1] =
+      replacement.trimEnd();
+
+    this.messageText =
+      `${words.join(' ')} `;
+
+    this.closeMentionDropdown();
+  }
+
+  closeMentionDropdown(): void {
+    this.mentionType.set(null);
+    this.mentionSearchText.set('');
+  }
+
+  @HostListener(
+    'document:click',
+    ['$event']
+  )
+  closePickersOnOutsideClick(
+    event: MouseEvent
+  ): void {
+    const clickedInside =
+      this.elementRef.nativeElement
+        .contains(event.target);
+
+    if (!clickedInside) {
+      this.showEmojiPicker = false;
+      this.closeMentionDropdown();
+    }
+  }
+
+  @HostListener(
+    'document:keydown.escape'
+  )
+  closePickersOnEscape(): void {
+    this.showEmojiPicker = false;
+    this.closeMentionDropdown();
+  }
 }

@@ -7,4 +7,5 @@ export interface MessageView {
   createdAt: string;
   isOwnMessage: boolean;
   threadCount?: number;
+  lastThreadReplyTime?: string | null;
 }

@@ -1,18 +1,9 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  HostListener,
-  inject,
-  signal,
-} from '@angular/core';
+import {Component, computed, ElementRef, HostListener, inject, signal} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
-
 import { MessageService } from '../../../../core/services/message.service';
 import { UserService } from '../../../../core/services/user.service';
 import { ChannelService } from '../../../../core/services/channel.service';
-
 import { Profile } from '../../../../core/models/profile.model';
 import { Channel } from '../../../../core/models/channel.model';
 
@@ -25,13 +16,10 @@ import { Channel } from '../../../../core/models/channel.model';
 export class ThreadInput {
   private messsageServis = inject(MessageService);
   private elementRef = inject(ElementRef);
-
   userService = inject(UserService);
   channelService = inject(ChannelService);
-
   replyText = '';
   showEmojiPicker = false;
-
   mentionType = signal<'users' | 'channels' | null>(null);
   mentionSearchText = signal('');
 

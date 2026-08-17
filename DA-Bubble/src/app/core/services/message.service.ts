@@ -51,11 +51,14 @@ export class MessageService {
 
     const mainMessages = data.filter((message) => !message.parent_message_id)
     const replies = data.filter((message) => message.parent_message_id)
-
     const loadedMessages: MessageView[] = mainMessages.map((message) => {
-      const threadCount = replies.filter(
+      const messageReplies = replies.filter(
         (reply) => reply.parent_message_id === message.id
-      ).length;
+      );
+
+      const threadCount = messageReplies.length;
+      const lastThreadReply = messageReplies.length > 0 ?
+        messageReplies[messageReplies.length - 1] : null
 
       return {
         id: message.id,
@@ -66,6 +69,9 @@ export class MessageService {
         createdAt: message.created_at,
         isOwnMessage: message.author_id === currentUserProfile.id,
         threadCount,
+        lastThreadReplyTime: lastThreadReply
+          ? this.formatTime(lastThreadReply.created_at)
+          : null,
       };
     });
     this.messages.set(loadedMessages);
