@@ -41,25 +41,32 @@
 }
 
 .channel-detail__close {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 
-  img {
-    width: 22px;
-    height: 22px;
-  }
+    img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      transition: filter 0.2s ease;
+    }
 
-  &:hover {
-    background: #eceefe;
-  }
+    &:hover {
+      background-color: #eceefe;
+
+      img {
+        filter: invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
+      }
+    }
 }
 
 .channel-detail__section {

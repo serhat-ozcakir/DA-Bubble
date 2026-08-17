@@ -67,6 +67,15 @@
   gap: 16px;
   padding: 10px 0;
 
+  &:hover {
+    cursor: pointer;
+
+    .message__last-reply {
+      font-weight: 600;
+      color: #000;
+    }
+  }
+
   &--own {
     flex-direction: row-reverse;
 
@@ -154,6 +163,18 @@
       font-weight: 600;
     }
   }
+
+  &__thread-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  &__last-reply {
+    font-size: 14px;
+    color: #686868;
+    white-space: nowrap;
+  }
 }
 
 .message-actions {
@@ -169,7 +190,7 @@
   visibility: hidden;
   z-index: 10;
 
-  > button {
+  >button {
     width: 40px;
     height: 40px;
     display: flex;
@@ -187,8 +208,7 @@
     }
 
     &:hover img {
-      filter: invert(38%) sepia(93%) saturate(2113%)
-        hue-rotate(222deg) brightness(96%) contrast(96%);
+      filter: invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
     }
   }
 }
@@ -384,7 +404,7 @@
   font-weight: 600;
   cursor: pointer;
 
-  > img {
+  >img {
     width: 10px;
     height: auto;
   }

@@ -83,10 +83,7 @@
     </div>
   </div>
 
-  <div
-    class="message"
-    [class.message--own]="message().isOwnMessage"
-  >
+  <div class="message" [class.message--own]="message().isOwnMessage">
     <img
       class="message__avatar"
       [src]="message().avatar"
@@ -142,18 +139,28 @@
         </div>
       }
 
-      @if (
-        !directMessageService.currentDmUser() &&
-        message().threadCount
-      ) {
-        <button
-          type="button"
-          class="message__thread"
-          (click)="openThread()"
-        >
-          {{ message().threadCount }} Antworten
-        </button>
-      }
+@if (
+  !directMessageService.currentDmUser() &&
+  message().threadCount
+) {
+  <div class="message__thread-info">
+
+    <button
+      type="button"
+      class="message__thread"
+      (click)="openThread()"
+    >
+      {{ message().threadCount }} Antworten
+    </button>
+
+    @if (message().lastThreadReplyTime) {
+      <span class="message__last-reply">
+        Letzte Antwort {{ message().lastThreadReplyTime }}
+      </span>
+    }
+
+  </div>
+}
 
       <div class="message-reactions">
         @for (
