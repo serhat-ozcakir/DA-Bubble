@@ -38,3 +38,22 @@
     }
   }
 }
+
+@media (max-width: 1024px) {
+  .auth-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 20px 10px;
+  }
+
+  .auth-header__right{
+    display:none
+  }
+
+  .logo{
+    > img{
+      width: 170px;
+    }
+  }
+}
