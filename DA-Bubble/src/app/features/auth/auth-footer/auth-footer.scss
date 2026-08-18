@@ -1,7 +1,8 @@
 .auth-footer {
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
-  padding: 1rem;
+  padding:8px 16px  calc(8px + env(safe-area-inset-bottom));
 }
 
 .footer-links {
@@ -17,14 +18,26 @@
     border: 1px solid transparent;
     border-radius: 30px;
     cursor: pointer;
-    transition:
-      border-color 0.2s ease,
-      color 0.2s ease;
 
     &:hover {
       font-weight: 600;
       color: #444df2;
       border-color: #adb0d9;
+    }
+  }
+}
+
+@media (max-width: 540px) {
+  .auth-footer {
+    padding: 0 12px calc(2px + env(safe-area-inset-bottom));
+  }
+
+  .footer-links {
+    gap: 12px;
+
+    a {
+      padding: 6px 10px;
+      font-size: 14px;
     }
   }
 }

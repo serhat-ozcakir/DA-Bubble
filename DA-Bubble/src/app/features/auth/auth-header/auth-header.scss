@@ -1,8 +1,12 @@
 .auth-header {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding:
+    calc(10px + env(safe-area-inset-top))
+    20px
+    10px;
 
   &__right {
     display: flex;
@@ -21,14 +25,10 @@
       padding: 8px 16px;
       color: #797ef3;
       font-size: 18px;
-      font-weight: 400;
       text-decoration: none;
       border: 1px solid transparent;
       border-radius: 25px;
       cursor: pointer;
-      transition:
-        color 0.2s ease,
-        border-color 0.2s ease;
 
       &:hover {
         font-weight: 600;
@@ -41,19 +41,16 @@
 
 @media (max-width: 1024px) {
   .auth-header {
-    display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 20px 20px 10px;
+    padding:calc(16px + env(safe-area-inset-top)) 20px 8px;
   }
 
-  .auth-header__right{
-    display:none
+  .auth-header__right {
+    display: none;
   }
 
-  .logo{
-    > img{
-      width: 170px;
-    }
+  .logo img {
+    width: 170px;
+    height: auto;
   }
 }
