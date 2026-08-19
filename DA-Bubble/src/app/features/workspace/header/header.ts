@@ -22,6 +22,7 @@ export class Header {
   threadOpen = input(false);
   mobileBack = output<void>();
   mobileChatOpen = input(false);
+  mobileSearchOpen = output<void>();
   private elementRef = inject(ElementRef);
   userService = inject(UserService);
   channelService = inject(ChannelService);
@@ -164,9 +165,14 @@ export class Header {
     }
   }
 
-  openSearch(): void {
-    this.isSearchOpen.set(true);
+openSearch(): void {
+  if (window.matchMedia('(max-width: 1024px)').matches) {
+    this.mobileSearchOpen.emit();
+    return;
   }
+
+  this.isSearchOpen.set(true);
+}
 
   closeSearch(): void {
     this.isSearchOpen.set(false);

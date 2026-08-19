@@ -2,7 +2,8 @@
   <app-header
     [threadOpen]="isThreadOpen"
     [mobileChatOpen]="mobileView() === 'chat'"
-    (mobileBack) = "showMobileSidebar()">
+    (mobileBack) = "showMobileSidebar()"
+    (mobileSearchOpen)="openMobileSearch()">
   </app-header>
 
   <main
@@ -12,7 +13,7 @@
     [class.mobile-sidebar-view]="mobileView() === 'sidebar'"
     [class.mobile-chat-view]="mobileView() === 'chat'"
     [class.mobile-thread-view]="mobileView() === 'thread'"
-  >
+    [class.mobile-search-view]="mobileView() === 'search'">
 
     <app-sidebar
       (openNewMessage)="openNewMessage()"
@@ -35,7 +36,82 @@
         }
       </div>
     </button>
+<section class="workspace__mobile-search">
+  <div class="workspace__mobile-search-header">
+    <strong>Search</strong>
+    <button
+      type="button"
+      class="workspace__mobile-search-close"
+      (click)="closeMobileSearch()">
+      ✕
+    </button>
+  </div>
 
+  <div class="workspace__mobile-search-input-wrapper">
+    <input
+      type="text"
+      placeholder="@ oder # eingeben"
+      [value]="mobileSearchText()"
+      (input)="onMobileSearchInput($event)"
+      autofocus
+    />
+
+    <img
+      src="assets/icons/search.png"
+      alt="search icon"
+    />
+  </div>
+
+  <div class="workspace__mobile-search-results">
+
+    @if (mobileSearchMode() === 'users') {
+
+      @for (user of filteredMobileUsers(); track user.id) {
+        <button
+          type="button"
+          class="workspace__mobile-search-user"
+          (click)="selectMobileUser(user)">
+
+          <div class="workspace__mobile-search-avatar">
+            <img
+              [src]="user.avatar"
+              [alt]="user.name"
+            />
+
+            <span
+              class="workspace__mobile-search-status"
+              [class.workspace__mobile-search-status--online]="user.status === 'online'">
+            </span>
+          </div>
+
+          <span>{{ user.name }}</span>
+
+          @if (user.id === auth.currentUser()?.id) {
+            <span class="workspace__mobile-search-you">
+              (Du)
+            </span>
+          }
+        </button>
+      }
+
+    } @else {
+      @for (channel of filteredMobileChannels(); track channel.id) {
+        <button
+          type="button"
+          class="workspace__mobile-search-channel"
+          (click)="selectMobileChannel(channel)">
+          <span class="workspace__mobile-search-hash">
+            #
+          </span>
+          <span>
+            {{ channel.name }}
+          </span>
+        </button>
+      }
+
+    }
+  </div>
+</section>
     <app-chat-area
       (openShowProfil)="openShowProfilDialog()"
       (openMemberList)="openMemberListDialog()"
