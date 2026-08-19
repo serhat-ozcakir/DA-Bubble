@@ -1,74 +1,89 @@
 <div class="workspace">
   <app-header
-     [threadOpen]="isThreadOpen"></app-header>
+    [threadOpen]="isThreadOpen"
+    [mobileChatOpen]="mobileView() === 'chat'"
+    (mobileBack) = "showMobileSidebar()">
+  </app-header>
 
-  <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed" [class.thread-open]=isThreadOpen>
-    <app-sidebar 
-    (openNewMessage)="openNewMessage()" 
-    (openCreateChannel)="openCreateChannelDialog()"
-    (chatSelected)="closeNewMessage()"
-    ></app-sidebar>
+  <main
+    class="workspace__content"
+    [class.sidebar-closed]="isSidebarClosed"
+    [class.thread-open]="isThreadOpen"
+    [class.mobile-sidebar-view]="mobileView() === 'sidebar'"
+    [class.mobile-chat-view]="mobileView() === 'chat'"
+    [class.mobile-thread-view]="mobileView() === 'thread'"
+  >
 
-    <button class="workspace__sidebar-toggle" type="button" (click)="toggleSidebar()">
+    <app-sidebar
+      (openNewMessage)="openNewMessage()"
+      (openCreateChannel)="openCreateChannelDialog()"
+      (chatSelected)="onChatSelected()">
+    </app-sidebar>
+
+    <button
+      class="workspace__sidebar-toggle"
+      type="button"
+      (click)="toggleSidebar()">
+
       <div class="workspace__toggle-content">
         @if (isSidebarClosed) {
-        <span> Workspace-Menü öffnen </span>
-        <img src="assets\icons\Group 2.png" alt="sidebar icon" />
+          <span>Workspace-Menü öffnen</span>
+          <img src="assets/icons/Group 2.png" alt="sidebar icon" />
         } @else {
-        <span> Workspace-Menü schließen </span>
-        <img src="assets\icons\Group 3.png" alt="sidebar icon" />
+          <span>Workspace-Menü schließen</span>
+          <img src="assets/icons/Group 3.png" alt="sidebar icon" />
         }
-
       </div>
     </button>
-    <app-chat-area 
-    (openShowProfil)="openShowProfilDialog()"
-    (openMemberList)="openMemberListDialog()" 
-    (openAddMembers)="openAddMembersDialog()" 
-    (openChannelSettings)="openChannelSettingsDialog()"
-    [showNewMessage] = "showNewMessage()"
-    (closeNewMessage)="closeNewMessage()"
-    (openProfile)="openShowProfilDialog()"
-    >
 
+    <app-chat-area
+      (openShowProfil)="openShowProfilDialog()"
+      (openMemberList)="openMemberListDialog()"
+      (openAddMembers)="openAddMembersDialog()"
+      (openChannelSettings)="openChannelSettingsDialog()"
+      [showNewMessage]="showNewMessage()"
+      (closeNewMessage)="closeNewMessage()"
+      (openProfile)="openShowProfilDialog()">
     </app-chat-area>
-    @if(showAddMemberDialog()){
-    <app-add-members-dialag 
-    (closeAddMemberDialog)="closeAddMembersDialog()"
-    [threadOpen] = "isThreadOpen">
-    </app-add-members-dialag>
+
+    @if (showAddMemberDialog()) {
+      <app-add-members-dialag
+        (closeAddMemberDialog)="closeAddMembersDialog()"
+        [threadOpen]="isThreadOpen">
+      </app-add-members-dialag>
     }
 
-    @if(showProfilDialog()){
-      <app-show-profil-dialog (closeProfilDialogEvent)="closeShowProfilDialog()"/>
+    @if (showProfilDialog()) {
+      <app-show-profil-dialog
+        (closeProfilDialogEvent)="closeShowProfilDialog()">
+      </app-show-profil-dialog>
     }
 
-    @if(isThreadOpen){
-    <app-thread-panel></app-thread-panel>
+    @if (isThreadOpen) {
+      <app-thread-panel></app-thread-panel>
     }
   </main>
 </div>
 
-@if(showCreateChannelDialog()){
-<app-channel-create-dialog 
-(closeDialog)="closeCreateChannelDialog()"
-[SidebarClosed]="isSidebarClosed">
-
-</app-channel-create-dialog>
+@if (showCreateChannelDialog()) {
+  <app-channel-create-dialog
+    (closeDialog)="closeCreateChannelDialog()"
+    [SidebarClosed]="isSidebarClosed">
+  </app-channel-create-dialog>
 }
 
-@if(showMemberListDialog()){
-<app-add-members-list 
-(openAddMembers)="openAddMembersFromList()" 
-(closeAddMemberList)="closeAddMemberList()" 
-[threadOpen] = "isThreadOpen">
-
-</app-add-members-list>
+@if (showMemberListDialog()) {
+  <app-add-members-list
+    (openAddMembers)="openAddMembersFromList()"
+    (closeAddMemberList)="closeAddMemberList()"
+    [threadOpen]="isThreadOpen">
+  </app-add-members-list>
 }
 
-@if(showChannelSettingsDialog()){
-<app-channel-detail (openChannelSettings)="openChannelSettingsDialog()"
-  (closeChannelSettings)="closeChannelSettingsDialog()"
-  [SidebarClosed]="isSidebarClosed">
-</app-channel-detail>
+@if (showChannelSettingsDialog()) {
+  <app-channel-detail
+    (openChannelSettings)="openChannelSettingsDialog()"
+    (closeChannelSettings)="closeChannelSettingsDialog()"
+    [SidebarClosed]="isSidebarClosed">
+  </app-channel-detail>
 }

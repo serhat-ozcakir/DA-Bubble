@@ -1,4 +1,4 @@
-import { Component, HostListener, ElementRef, inject, computed, signal, input, } from '@angular/core';
+import { Component, HostListener, ElementRef, inject, computed, signal, input, output, } from '@angular/core';
 import { Auth } from '../../../core/services/auth.service';
 import { UserMenu } from './user-menu/user-menu';
 import { ProfileDialog } from './profile-dialog/profile-dialog';
@@ -20,6 +20,8 @@ import { SearchResult } from '../../../core/models/search-result.model';
 })
 export class Header {
   threadOpen = input(false);
+  mobileBack = output<void>();
+  mobileChatOpen = input(false);
   private elementRef = inject(ElementRef);
   userService = inject(UserService);
   channelService = inject(ChannelService);
@@ -30,6 +32,7 @@ export class Header {
   isEditProfileDialogOpen = false;
   searchText = signal('');
   isSearchOpen = signal(false);
+
 
   constructor(public auth: Auth,
     private router: Router
@@ -96,6 +99,11 @@ export class Header {
 
     return 'messages'
   })
+
+  onMobileBack(): void {
+    this.closeSearch();
+    this.mobileBack.emit();
+  }
 
   @HostListener('document:click', ['$event'])
   closeUserMenuOnOutsideClick(event: MouseEvent): void {

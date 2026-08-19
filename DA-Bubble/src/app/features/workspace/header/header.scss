@@ -7,15 +7,11 @@
   display: flex;
   align-items: center;
 
-&__top {
-  width: 100%;
-  display: grid;
+  &__top {
     width: 100%;
     min-width: 0;
-
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr) auto;
-
     align-items: center;
     gap: 16px;
 
@@ -30,7 +26,40 @@
     &.sidebar-closed.thread-open {
       grid-template-columns: 0 minmax(0, 1fr) 320px;
     }
-}
+  }
+
+  &__mobile-nav {
+    display: none;
+  }
+
+  &__mobile-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    img {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+  }
+
+  &__mobile-logo{
+    width: 40px;
+    height: 40px;
+  }
+
+  &__mobile-workspace-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000000;
+  }
 
   &__logo {
     display: flex;
@@ -229,11 +258,9 @@
 
     span {
       overflow: hidden;
-
       color: #686868;
       font-size: 15px;
       line-height: 1.35;
-
       white-space: nowrap;
       text-overflow: ellipsis;
     }
@@ -313,6 +340,11 @@
   }
 }
 
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 991px) {
   .header {
     height: auto;
@@ -321,8 +353,62 @@
 
     &__top {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
       gap: 16px;
+
+      /*
+       * Bir channel veya DM açık olduğunda:
+       * logo + search kaybolur
+       * geri butonu + Devspace görünür
+       */
+      &.mobile-chat-open {
+        .header__mobile-nav {
+          display: flex;
+        }
+
+        .header__logo {
+          display: none;
+        }
+
+        .header__search {
+          display: none;
+        }
+      }
+    }
+
+    &__mobile-nav {
+      min-width: 0;
+      align-items: center;
+      gap: 6px;
+    }
+
+    &__mobile-back {
+      flex-shrink: 0;
+      width: 28px;
+      height: 40px;
+
+      img {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &__mobile-workspace-name {
+      overflow: hidden;
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    &__logo {
+      display: flex;
+      align-items: center;
+
+      img {
+        width: 118px;
+      }
     }
 
     &__search {
@@ -335,6 +421,7 @@
 
       input {
         height: 100%;
+        min-width: 0;
         padding: 0 44px 0 0;
         font-size: 14px;
       }
@@ -367,14 +454,80 @@
       height: 48px;
     }
 
-    &__logo img {
-      width: 118px;
-    }
-
     &__username,
     &__arrow,
     &__status {
       display: none;
+    }
+
+    &__avatar-wrapper {
+      flex-shrink: 0;
+
+      img {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   320px gibi dar ekranlar
+   ========================================================= */
+
+@media (max-width: 540px) {
+  .header {
+    padding:
+      max(12px, env(safe-area-inset-top))
+      12px
+      12px;
+
+    &__top {
+      gap: 10px;
+    }
+
+    &__logo img {
+      width: 112px;
+    }
+
+    &__search {
+      height: 46px;
+      padding: 0 16px;
+
+      input {
+        font-size: 14px;
+      }
+
+      > img {
+        right: 16px;
+        width: 21px;
+        height: 21px;
+      }
+    }
+
+    &__search-dropdown {
+      left: 0;
+      width: 100%;
+      max-height: min(420px, 60dvh);
+    }
+
+    &__mobile-nav {
+      gap: 4px;
+    }
+
+    &__mobile-workspace-name {
+      font-size: 17px;
+    }
+
+    &__mobile-back {
+      width: 26px;
+
+      img {
+        width: 19px;
+        height: 19px;
+      }
     }
 
     &__avatar-wrapper img {
