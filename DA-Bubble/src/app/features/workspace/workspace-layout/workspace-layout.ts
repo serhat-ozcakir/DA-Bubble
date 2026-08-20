@@ -1,4 +1,4 @@
-import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, effect, HostListener, inject, signal } from '@angular/core';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 import { ChatArea } from '../chat-area/chat-area';
@@ -21,8 +21,8 @@ type MobileView = 'sidebar' | 'chat' | 'thread' | 'search';
 @Component({
   selector: 'app-workspace-layout',
 
-  imports: [Header, Sidebar, ChatArea, ThreadPanel, ChannelCreateDialog, AddMembersDialag,
-    AddMembersList, ChannelDetail, ShowProfilDialog],
+  imports: [Header, Sidebar, ChatArea, ThreadPanel, ChannelCreateDialog,
+    AddMembersDialag, AddMembersList, ChannelDetail, ShowProfilDialog],
 
   templateUrl: './workspace-layout.html',
   styleUrl: './workspace-layout.scss',
@@ -43,6 +43,19 @@ export class WorkspaceLayout {
   showNewMessage = signal(false);
   showProfilDialog = signal(false);
   mobileSearchText = signal('');
+
+  constructor() {
+    effect(() => {
+      const threadOpen = !!this.messageService.selectedThreadMessage()
+      if (threadOpen) {
+        this.mobileView.set('thread');
+        return;
+      }
+      if (this.mobileView() === 'thread') {
+        this.mobileView.set('chat')
+      }
+    })
+  }
 
 
   async ngOnInit(): Promise<void> {
@@ -135,7 +148,8 @@ export class WorkspaceLayout {
   }
 
   showMobileSidebar(): void {
-    this.mobileView.set('sidebar');
+  this.messageService.selectedThreadMessage.set(null);
+  this.mobileView.set('sidebar');
   }
 
   showMobileChat(): void {

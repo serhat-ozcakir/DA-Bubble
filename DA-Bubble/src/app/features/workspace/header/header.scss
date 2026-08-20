@@ -321,24 +321,24 @@
     padding: 16px;
     align-items: stretch;
 
-    &__top {
+    &__top,
+    &__top.thread-open,
+    &__top.sidebar-closed,
+    &__top.sidebar-closed.thread-open {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       gap: 16px;
+    }
 
-      &.mobile-chat-open {
-        .header__mobile-nav {
-          display: flex;
-        }
+    &__top.mobile-chat-open {
+      .header__mobile-nav {
+        display: flex;
+      }
 
-        .header__logo {
-          display: none;
-        }
-
-        .header__search {
-          display: none;
-        }
+      .header__logo,
+      .header__search {
+        display: none;
       }
     }
 

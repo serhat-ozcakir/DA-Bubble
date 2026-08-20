@@ -508,3 +508,250 @@
     background: #eceefe;
   }
 }
+
+@media (max-width: 1024px) {
+  .thread-panel {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .thread-panel__content {
+    flex: 1;
+    min-height: 0;
+
+    padding: 20px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .thread-panel__message {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .thread-panel__reply {
+    gap: 12px;
+    padding: 10px 4px;
+  }
+
+  .thread-reply-wrapper {
+    margin-bottom: 18px;
+  }
+
+  .thread-panel__avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .thread-panel__body {
+    max-width: min(75%, 420px);
+    gap: 6px;
+  }
+
+  .thread-panel__meta {
+    gap: 8px;
+
+    strong {
+      font-size: 15px;
+    }
+
+    span {
+      font-size: 12px;
+    }
+  }
+
+  .thread-panel__bubble {
+    padding: 10px 14px;
+
+    font-size: 14px;
+    line-height: 1.4;
+
+    border-radius: 0 18px 18px 18px;
+  }
+
+  .thread-panel__reply--own {
+    .thread-panel__bubble {
+      border-radius: 18px 0 18px 18px;
+    }
+  }
+
+  .thread-panel__divider {
+    gap: 10px;
+
+    margin: 8px 0 18px;
+
+    font-size: 13px;
+  }
+
+  .thread-reactions {
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .thread-reactions__button {
+    min-width: 38px;
+    height: 30px;
+
+    padding: 0 8px;
+
+    font-size: 16px;
+  }
+
+  .thread-reactions__more {
+    min-width: 38px;
+    height: 30px;
+
+    padding: 0 8px;
+
+    font-size: 12px;
+  }
+
+  .thread-reactions__add {
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+
+    img {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /*
+   * Desktop'ta action bar hover ile açılıyor.
+   * Touch cihazda hover güvenilir olmadığı için
+   * dokunulabilir hale getiriyoruz.
+   */
+  .thread-actions-container {
+    top: -24px;
+    right: 16px;
+
+    &--own {
+      left: 8px;
+      right: auto;
+    }
+  }
+
+  .thread-actions {
+    gap: 6px;
+    padding: 3px;
+  }
+
+  .thread-actions__button {
+    width: 32px;
+    height: 32px;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .thread-emoji-picker {
+    max-width: calc(100vw - 32px);
+    max-height: 260px;
+
+    right: 0;
+  }
+
+  .message-edit {
+    right: 0;
+
+    min-width: min(260px, calc(100vw - 40px));
+  }
+
+  .message-edit-form {
+    padding-left: 0;
+    gap: 10px;
+
+    &__textarea {
+      min-height: 80px;
+
+      font-size: 14px;
+    }
+
+    &__actions {
+      padding-left: 0;
+      gap: 8px;
+    }
+
+    &__button {
+      font-size: 13px;
+    }
+  }
+}
+
+
+@media (max-width: 540px) {
+  .thread-panel__content {
+    padding: 16px;
+  }
+
+  .thread-panel__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .thread-panel__body {
+    max-width: 78%;
+  }
+
+  .thread-panel__bubble {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .thread-panel__meta {
+    strong {
+      font-size: 14px;
+    }
+
+    span {
+      font-size: 11px;
+    }
+  }
+
+  .thread-panel__divider {
+    margin: 6px 0 16px;
+    font-size: 12px;
+  }
+}
+
+
+@media (max-width: 360px) {
+  .thread-panel__content {
+    padding: 12px;
+  }
+
+  .thread-panel__message,
+  .thread-panel__reply {
+    gap: 8px;
+  }
+
+  .thread-panel__avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .thread-panel__body {
+    max-width: 80%;
+  }
+
+  .thread-reactions {
+    gap: 4px;
+  }
+
+  .thread-reactions__button {
+    min-width: 36px;
+    padding: 0 7px;
+  }
+}

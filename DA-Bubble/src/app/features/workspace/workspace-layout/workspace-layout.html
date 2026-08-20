@@ -1,7 +1,7 @@
 <div class="workspace">
   <app-header
     [threadOpen]="isThreadOpen"
-    [mobileChatOpen]="mobileView() === 'chat'"
+    [mobileChatOpen]="mobileView() === 'chat'|| mobileView() === 'thread'"
     (mobileBack) = "showMobileSidebar()"
     (mobileSearchOpen)="openMobileSearch()">
   </app-header>
@@ -43,7 +43,7 @@
       type="button"
       class="workspace__mobile-search-close"
       (click)="closeMobileSearch()">
-      ✕
+     <img src="assets/icons/close.png" alt="Close" />
     </button>
   </div>
 
