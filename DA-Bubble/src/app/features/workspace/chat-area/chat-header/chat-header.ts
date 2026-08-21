@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output,computed } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
 import { UserService } from '../../../../core/services/user.service';
@@ -22,6 +22,14 @@ export class ChatHeader {
   constructor() {
   }
 
+    isSelfDm = computed(() => {
+    const dmUser = this.directMessageService.currentDmUser();
+    const currentUser = this.authService.currentUserProfile();
+    
+    return !!dmUser &&
+      !!currentUser &&
+      dmUser.id === currentUser.id;
+  })
   openDialog(): void {
     this.openAddMembers.emit();
   }
