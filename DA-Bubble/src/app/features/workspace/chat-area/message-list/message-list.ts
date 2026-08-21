@@ -1,4 +1,4 @@
-import { Component,effect,inject, OnDestroy, output,} from '@angular/core';
+import { Component, effect, inject, OnDestroy, output, computed } from '@angular/core';
 import { MessageItemComponent } from '../message-item/message-item';
 import { MessageService } from '../../../../core/services/message.service';
 import { Auth } from '../../../../core/services/auth.service';
@@ -45,6 +45,15 @@ export class MessageList implements OnDestroy {
     });
   }
 
+  isSelfDm = computed(() => {
+    const dmUser = this.directMessageService.currentDmUser();
+    const currentUser = this.authService.currentUserProfile();
+    
+    return !!dmUser &&
+      !!currentUser &&
+      dmUser.id === currentUser.id;
+  })
+
   async ngOnInit(): Promise<void> {
     await this.authService.loadCurrentUser();
     await this.channelService.loadChannels();
@@ -55,73 +64,73 @@ export class MessageList implements OnDestroy {
   }
 
   getMessages(): MessageView[] {
-  if (this.directMessageService.currentDmUser()) {
-    return this.directMessageService.directMessages();
+    if (this.directMessageService.currentDmUser()) {
+      return this.directMessageService.directMessages();
+    }
+
+    return this.messageService.messages();
   }
 
-  return this.messageService.messages();
-}
+  shouldShowDate(
+    messages: MessageView[],
+    index: number
+  ): boolean {
+    if (index === 0) {
+      return true;
+    }
 
-shouldShowDate(
-  messages: MessageView[],
-  index: number
-): boolean {
-  if (index === 0) {
-    return true;
+    const currentDate = this.getDateKey(
+      messages[index].createdAt
+    );
+
+    const previousDate = this.getDateKey(
+      messages[index - 1].createdAt
+    );
+
+    return currentDate !== previousDate;
   }
 
-  const currentDate = this.getDateKey(
-    messages[index].createdAt
-  );
+  formatMessageDate(dateString: string): string {
+    const date = new Date(dateString);
+    const today = new Date();
 
-  const previousDate = this.getDateKey(
-    messages[index - 1].createdAt
-  );
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
 
-  return currentDate !== previousDate;
-}
+    if (this.isSameDay(date, today)) {
+      return 'Heute';
+    }
 
-formatMessageDate(dateString: string): string {
-  const date = new Date(dateString);
-  const today = new Date();
+    if (this.isSameDay(date, yesterday)) {
+      return 'Gestern';
+    }
 
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  if (this.isSameDay(date, today)) {
-    return 'Heute';
+    return date.toLocaleDateString('de-DE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+    });
   }
 
-  if (this.isSameDay(date, yesterday)) {
-    return 'Gestern';
+  private getDateKey(dateString: string): string {
+    const date = new Date(dateString);
+
+    return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
   }
 
-  return date.toLocaleDateString('de-DE', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-  });
-}
+  private isSameDay(
+    firstDate: Date,
+    secondDate: Date
+  ): boolean {
+    return (
+      firstDate.getFullYear() === secondDate.getFullYear() &&
+      firstDate.getMonth() === secondDate.getMonth() &&
+      firstDate.getDate() === secondDate.getDate()
+    );
+  }
 
-private getDateKey(dateString: string): string {
-  const date = new Date(dateString);
-
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
-
-private isSameDay(
-  firstDate: Date,
-  secondDate: Date
-): boolean {
-  return (
-    firstDate.getFullYear() === secondDate.getFullYear() &&
-    firstDate.getMonth() === secondDate.getMonth() &&
-    firstDate.getDate() === secondDate.getDate()
-  );
-}
-
-openUserProfile(): void {
-  this.openProfile.emit()
-};
+  openUserProfile(): void {
+    this.openProfile.emit()
+  };
 
 }

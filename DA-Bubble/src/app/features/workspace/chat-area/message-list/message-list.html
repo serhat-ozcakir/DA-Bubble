@@ -1,17 +1,35 @@
 <div class="message-list">
   @if (directMessageService.currentDmUser(); as dmUser) {
-  @if(directMessageService.directMessages().length === 0){
-  <div class="dm-empty-state">
-    <div class="dm-empty-state__user">
-      <img [src]="dmUser.avatar" [alt]="dmUser.name" />
-      <h2>{{ dmUser.name }}</h2>
-    </div>
-    <p>
-      Diese Unterhaltung findet nur zwischen
-      <span (click)="openUserProfile()">@{{ dmUser.name }}</span>
-      und dir statt.
-    </p>
-  </div>
+   @if(directMessageService.directMessages().length === 0){
+    @if(isSelfDm()){
+        <div class="dm-empty-state dm-empty-state--self">
+          <div class="dm-empty-state__user">
+            <img [src]="dmUser.avatar" [alt]="dmUser.name"/>
+            <h2>
+              {{ dmUser.name }} (Du)
+            </h2>
+          </div>
+
+          <p>
+            <span class="dm-empty-state__self-intro">Dieser Raum ist nur für dich da.</span> Mache dir Notizen, liste deine To-dos auf
+            oder bewahre Links und Dateien griffbereit auf.
+            Du kannst hier auch gerne Dinge mit dir selbst besprechen.
+          </p>
+
+        </div>
+    } @else {
+      <div class="dm-empty-state">
+        <div class="dm-empty-state__user">
+          <img [src]="dmUser.avatar" [alt]="dmUser.name" />
+          <h2>{{ dmUser.name }}</h2>
+        </div>
+        <p>
+          Diese Unterhaltung findet nur zwischen
+          <span (click)="openUserProfile()">@{{ dmUser.name }}</span>
+          und dir statt.
+        </p>
+      </div>
+    }
   }
   }
   @for (message of getMessages(); track message.id; let index = $index) {

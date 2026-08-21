@@ -127,6 +127,10 @@ app-thread-panel {
   display: none;
 }
 
+.workspace__mobile-new-message {
+  display: none;
+}
+
 @media (max-width: 1024px) {
 
   :host {
@@ -326,6 +330,35 @@ app-thread-panel {
       pointer-events: none;
     }
   }
+
+    .workspace__mobile-new-message {
+       position: absolute;
+      right: 20px;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      z-index: 20;
+      width: 60px;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background:transparent;
+      cursor: pointer;
+
+      img {
+        width: 60px;
+        height: auto;
+        object-fit: contain;
+        display: block;
+      }
+
+      &:hover {
+        background-color: #535af1;
+      }
+    
+    }
 
 
   /* SEARCH RESULTS */

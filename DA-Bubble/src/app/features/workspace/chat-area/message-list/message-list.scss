@@ -76,9 +76,22 @@
 
     span {
       color: #535af1;
+
       &:hover {
         font-weight: 700;
         cursor: pointer;
+      }
+    }
+
+    .dm-empty-state__self-intro {
+      color: #686868;
+      font-weight: 700;
+      cursor: default;
+
+      &:hover {
+        color: #686868;
+        font-weight: 700;
+        cursor: default;
       }
     }
   }

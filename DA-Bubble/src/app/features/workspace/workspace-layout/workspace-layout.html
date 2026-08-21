@@ -138,6 +138,19 @@
     @if (isThreadOpen) {
       <app-thread-panel></app-thread-panel>
     }
+    @if (
+  mobileView() === 'sidebar' ||
+  mobileView() === 'search'
+) {
+  <button
+    class="workspace__mobile-new-message"
+    type="button"
+    aria-label="Neue Nachricht"
+    (click)="openMobileNewMessage()"
+  >
+ <img src="assets/icons/new-message-edit_square.png" alt="new message logo" />
+  </button>
+}
   </main>
 </div>
 

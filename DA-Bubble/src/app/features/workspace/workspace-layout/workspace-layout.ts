@@ -148,8 +148,8 @@ export class WorkspaceLayout {
   }
 
   showMobileSidebar(): void {
-  this.messageService.selectedThreadMessage.set(null);
-  this.mobileView.set('sidebar');
+    this.messageService.selectedThreadMessage.set(null);
+    this.mobileView.set('sidebar');
   }
 
   showMobileChat(): void {
@@ -162,6 +162,11 @@ export class WorkspaceLayout {
 
   openMobileSearch(): void {
     this.mobileView.set('search');
+  }
+
+  openMobileNewMessage(): void {
+    this.showNewMessage.set(true);
+    this.mobileView.set('chat');
   }
 
   closeMobileSearch(): void {
