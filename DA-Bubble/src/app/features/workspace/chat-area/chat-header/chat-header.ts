@@ -30,12 +30,17 @@ export class ChatHeader {
       !!currentUser &&
       dmUser.id === currentUser.id;
   })
-  openDialog(): void {
-    this.openAddMembers.emit();
-  }
 
   openMemberListDialog(): void {
     this.openMemberList.emit();
+  }
+
+  openMembersMobile():void{
+    if(window.matchMedia('(max-width:1024px)').matches){
+       this.openMemberList.emit();
+       return;
+    }
+     this.openAddMembers.emit();
   }
 
   openChannelSettingsDialog(): void {

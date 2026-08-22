@@ -48,7 +48,7 @@
       <span class="chat-header__member-count">{{channelService.channelMembers().length}}</span>
     </div>
     @if(!authService.isGuestUser()){
-    <button class="chat-header__add-member" type="button" (click)="openDialog()">
+    <button class="chat-header__add-member" type="button" (click)="openMembersMobile()">
       <img src="assets/logo/person_add.png" alt="Mitglied hinzufügen" />
     </button>
     }
