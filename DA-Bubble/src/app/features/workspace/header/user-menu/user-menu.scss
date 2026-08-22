@@ -3,14 +3,11 @@
   top: 72px;
   right: 0;
   z-index: 20;
-
   display: flex;
   flex-direction: column;
   gap: 16px;
-
   width: 280px;
   padding: 32px 24px;
-
   background-color: white;
   border-radius: 30px 0 30px 30px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -19,7 +16,6 @@
     border: none;
     background: transparent;
     padding: 10px 24px;
-
     font-size: 24px;
     font-weight: 600;
     color: black;
@@ -29,6 +25,123 @@
     &:hover {
       background-color: #eceefe;
       color: #535af1;
+    }
+  }
+}
+
+
+@media (max-width: 1024px) {
+  .user-menu {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    z-index: 1000;
+    width: 100%;
+    padding: 42px 48px calc(26px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    gap: 8px;
+    background-color: #ffffff;
+    border-radius: 30px 30px 0 0;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.14);
+    animation: userMenuSlideUp 280ms ease-out;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      width: 64px;
+      height: 6px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background-color: #d9d9d9;
+    }
+
+    button {
+      width: 100%;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      border-radius: 30px;
+      font-size: 24px;
+      font-weight: 600;
+      text-align: left;
+
+      &:hover {
+        background-color: #eceefe;
+        color: #535af1;
+      }
+    }
+
+    @keyframes userMenuSlideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    button:first-child::before {
+      content: '';
+      width: 30px;
+      height: 30px;
+      margin-right: 20px;
+      background-image: url('/assets/logo/account_circle.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      flex-shrink: 0;
+    }
+
+    button:last-child::before {
+      content: '';
+      width: 30px;
+      height: 30px;
+      margin-right: 20px;
+      background-image: url('/assets/icons/logout.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      flex-shrink: 0;
+    }
+  }
+}
+
+
+@media (max-width: 540px) {
+  .user-menu {
+    padding:38px 36px calc(22px + env(safe-area-inset-bottom));
+    button {
+      min-height: 58px;
+      padding: 0 16px;
+      font-size: 21px;
+    }
+
+    button:first-child::before,
+    button:last-child::before {
+      width: 28px;
+      height: 28px;
+
+      margin-right: 18px;
+    }
+  }
+}
+
+
+@media (max-width: 360px) {
+  .user-menu {
+    padding:36px 28px calc(20px + env(safe-area-inset-bottom));
+
+    button {
+      min-height: 54px;
+      font-size: 19px;
     }
   }
 }

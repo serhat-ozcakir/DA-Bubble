@@ -1,7 +1,5 @@
 <header class="header">
-  <div class="header__top" 
-  [class.thread-open]="threadOpen()" 
-  [class.mobile-chat-open]="mobileChatOpen()">
+  <div class="header__top" [class.thread-open]="threadOpen()" [class.mobile-chat-open]="mobileChatOpen()">
     <div class="header__mobile-nav">
       <button type="button" class="header__mobile-back" (click)="onMobileBack()">
         <img src="assets/icons/keyboard_arrow_left.png" alt="Zurück" />
@@ -114,6 +112,8 @@
       </span>
 
       @if (isUserMenuOpen) {
+      <div class="header__mobile-menu-backdrop" (click)="closeUserMenu()">
+      </div>
       <app-user-menu (ProfileClick)="openProfileMenu()" (LogoutClick)="logout()" />
       }
       @if (isProfileMenuOpen) {

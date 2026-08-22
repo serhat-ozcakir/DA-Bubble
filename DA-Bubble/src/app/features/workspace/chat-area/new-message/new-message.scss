@@ -520,22 +520,17 @@
   }
 
   .new-message__mention-dropdown {
-    left: 0;
-    bottom: 70px;
-
+    left: 13;
+    bottom: 103px;
     width: min(430px, calc(100vw - 64px));
     max-height: min(320px, 42dvh);
-
     padding: 10px 0;
-
     border-radius: 20px 20px 20px 0;
   }
 
   .new-message__mention-option {
     gap: 12px;
-
     padding: 9px 16px;
-
     font-size: 14px;
   }
 
@@ -546,29 +541,24 @@
 
   .new-message__mention-hash {
     width: 40px;
-
     font-size: 22px;
   }
 
   .new-message__mention-empty {
     padding: 14px 16px;
-
     font-size: 14px;
   }
 
   .emoji-picker {
     left: 0;
     bottom: 52px;
-
     max-width: calc(100vw - 64px);
     max-height: min(300px, 40dvh);
-
     overflow: auto;
   }
 
   .new-message__error {
     margin: 6px 16px;
-
     font-size: 13px;
   }
 }
@@ -580,19 +570,16 @@
 
     h2 {
       margin-bottom: 12px;
-
       font-size: 16px;
     }
   }
 
   .new-message__recipient {
     min-height: 40px;
-
     padding: 0 12px;
 
     input {
       height: 38px;
-
       font-size: 13px;
     }
   }
@@ -606,22 +593,18 @@
   }
 
   .new-message__composer {
-    margin:
-      0
-      12px
-      calc(12px + env(safe-area-inset-bottom));
-
+    margin:0 12px calc(12px + env(safe-area-inset-bottom));
     padding: 12px 14px;
 
     textarea {
       min-height: 44px;
-
       font-size: 13px;
     }
   }
 
   .new-message__mention-dropdown {
-    width: calc(100vw - 52px);
+    width: calc(100vw - 70px);
+    left: 16px;
   }
 
   .emoji-picker {
@@ -649,16 +632,13 @@
   }
 
   .new-message__composer {
-    margin:
-      0
-      10px
-      calc(10px + env(safe-area-inset-bottom));
-
+    margin:0 10px calc(10px + env(safe-area-inset-bottom));
     padding: 11px 12px;
   }
 
   .new-message__mention-dropdown {
-    width: calc(100vw - 44px);
+    width: calc(100vw - 60px);
+    left: 13px;
   }
 
   .emoji-picker {

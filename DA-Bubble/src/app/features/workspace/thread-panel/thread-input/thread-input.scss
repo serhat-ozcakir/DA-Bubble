@@ -177,14 +177,183 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
   .thread-input {
-    margin: 12px 16px 16px;
+    margin:12px 16px calc(16px + env(safe-area-inset-bottom));
+    padding: 14px 16px;
+    gap: 12px;
+
+    textarea {
+      min-height: 46px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    &__actions {
+      gap: 8px;
+
+      button {
+        width: 34px;
+        height: 34px;
+
+        img {
+          width: 22px;
+          height: 22px;
+        }
+      }
+    }
+
+    &__send {
+      width: 34px;
+      height: 34px;
+
+      img {
+        width: 24px;
+        height: 24px;
+      }
+    }
 
     &__mention-dropdown {
       left: 0;
-      width: 100%;
-      max-height: 280px;
+      bottom: 70px;
+      width: min(320px, calc(100vw - 64px));
+      max-height: min(320px, 40dvh);
+      padding: 10px 0;
+      border-radius: 20px 20px 20px 0;
     }
+
+    &__mention-option {
+      gap: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    &__mention-avatar {
+      width: 36px;
+      height: 36px;
+    }
+
+    &__mention-status {
+      width: 9px;
+      height: 9px;
+    }
+
+    &__mention-hash {
+      width: 36px;
+
+      font-size: 22px;
+    }
+
+    &__mention-empty {
+      padding: 14px 16px;
+
+      font-size: 14px;
+    }
+  }
+
+  .emoji-picker {
+    left: 0;
+    bottom: 46px;
+    max-width: calc(100vw - 64px);
+    max-height: min(300px, 40dvh);
+    overflow: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .thread-input {
+    margin:10px 12px calc(12px + env(safe-area-inset-bottom));
+    padding: 12px 14px;
+    gap: 10px;
+
+    textarea {
+      min-height: 42px;
+      font-size: 13px;
+    }
+
+    &__actions {
+      gap: 6px;
+
+      button {
+        width: 32px;
+        height: 32px;
+
+        img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    &__send {
+      width: 32px;
+      height: 32px;
+
+      img {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    &__mention-dropdown {
+      width: calc(100vw - 48px);
+      bottom: 66px;
+    }
+
+    &__mention-option {
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    &__mention-avatar {
+      width: 34px;
+      height: 34px;
+    }
+
+    &__mention-hash {
+      width: 34px;
+      font-size: 20px;
+    }
+  }
+
+  .emoji-picker {
+    max-width: calc(100vw - 48px);
+  }
+}
+
+@media (max-width: 360px) {
+  .thread-input {
+    margin:8px 10px calc(10px + env(safe-area-inset-bottom));
+    padding: 11px 12px;
+
+    textarea {
+      min-height: 40px;
+      font-size: 12px;
+    }
+
+    &__mention-dropdown {
+      width: calc(100vw - 40px);
+    }
+
+    &__actions {
+      button {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    &__send {
+      width: 30px;
+      height: 30px;
+
+      img {
+        width: 21px;
+        height: 21px;
+      }
+    }
+  }
+
+  .emoji-picker {
+    max-width: calc(100vw - 40px);
   }
 }

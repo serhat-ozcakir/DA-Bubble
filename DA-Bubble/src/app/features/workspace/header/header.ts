@@ -134,7 +134,9 @@ export class Header {
   closeProfileMenu(): void {
     this.isProfileMenuOpen = false;
   }
-
+  closeUserMenu(): void {
+    this.isUserMenuOpen = false;
+  }
   openEditProfileDialog(): void {
     this.isEditProfileDialogOpen = true;
     this.isProfileMenuOpen = false;
@@ -165,14 +167,14 @@ export class Header {
     }
   }
 
-openSearch(): void {
-  if (window.matchMedia('(max-width: 1024px)').matches) {
-    this.mobileSearchOpen.emit();
-    return;
-  }
+  openSearch(): void {
+    if (window.matchMedia('(max-width: 1024px)').matches) {
+      this.mobileSearchOpen.emit();
+      return;
+    }
 
-  this.isSearchOpen.set(true);
-}
+    this.isSearchOpen.set(true);
+  }
 
   closeSearch(): void {
     this.isSearchOpen.set(false);
@@ -225,9 +227,9 @@ openSearch(): void {
     }
 
     const user = this.userService.user()
-    .find((user)=> user.id === result.profileId)
+      .find((user) => user.id === result.profileId)
 
-    if(!user){
+    if (!user) {
       return;
     }
     await this.directMessageService.selectDmUser(user);
