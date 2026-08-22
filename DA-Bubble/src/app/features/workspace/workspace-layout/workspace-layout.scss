@@ -131,12 +131,25 @@ app-thread-panel {
   display: none;
 }
 
+.workspace__mobile-create-channel {
+  display: none;
+}
+
 @media (max-width: 1024px) {
 
   :host {
     width: 100%;
     min-width: 0;
   }
+
+  .workspace__mobile-create-channel {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    background: #ffffff;
+  }
+
 
   .workspace {
     max-width: none;
@@ -181,9 +194,7 @@ app-thread-panel {
     }
   }
 
-
   /* CHAT VIEW */
-
   .workspace__content.mobile-chat-view {
 
     > app-sidebar,
@@ -197,8 +208,7 @@ app-thread-panel {
     }
   }
 
-
-  /* THREAD VIEW */
+ /* THREAD VIEW */
 
   .workspace__content.mobile-thread-view {
 
@@ -216,9 +226,7 @@ app-thread-panel {
     }
   }
 
-
   /* SEARCH VIEW */
-
   .workspace__content.mobile-search-view {
 
     > app-sidebar,
@@ -238,9 +246,23 @@ app-thread-panel {
     }
   }
 
+  .workspace__content.mobile-create-channel-view {
+  > app-sidebar,
+  > app-chat-area,
+  > app-thread-panel,
+  > .workspace__mobile-search {
+    display: none;
+  }
+
+  > .workspace__mobile-create-channel {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+}
 
   /* SEARCH HEADER  Search */
-
   .workspace__mobile-search-header {
     width: 100%;
     height: 52px;
@@ -260,9 +282,7 @@ app-thread-panel {
     }
   }
 
-
   /* CLOSE BUTTON  */
-
   .workspace__mobile-search-close {
     width: 32px;
     height: 32px;
@@ -287,9 +307,7 @@ app-thread-panel {
     }
   }
 
-
   /* SEARCH INPUT */
-
   .workspace__mobile-search-input-wrapper {
     position: relative;
     width: calc(100% - 32px);
@@ -360,9 +378,7 @@ app-thread-panel {
     
     }
 
-
   /* SEARCH RESULTS */
-
   .workspace__mobile-search-results {
     width: 100%;
     flex: 1;
@@ -373,9 +389,7 @@ app-thread-panel {
     overflow-x: hidden;
   }
 
-
   /* USER RESULT */
-
   .workspace__mobile-search-user {
     width: 100%;
     display: flex;
@@ -396,9 +410,7 @@ app-thread-panel {
     }
   }
 
-
   /* USER AVATAR */
-
   .workspace__mobile-search-avatar {
     position: relative;
     width: 38px;
@@ -414,9 +426,7 @@ app-thread-panel {
     }
   }
 
-
   /* USER ONLINE STATUS */
-
   .workspace__mobile-search-status {
     position: absolute;
     right: 0;
@@ -433,15 +443,12 @@ app-thread-panel {
   }
 
   /* "(Du)" */
-
   .workspace__mobile-search-you {
     color: #686868;
     font-size: 13px;
   }
 
-
   /* CHANNEL RESULT */
-
   .workspace__mobile-search-channel {
     width: 100%;
     display: flex;
@@ -463,7 +470,6 @@ app-thread-panel {
   }
 
   /* CHANNEL # */
-
   .workspace__mobile-search-hash {
     width: 18px;
     flex-shrink: 0;
@@ -473,9 +479,7 @@ app-thread-panel {
   }
 }
 
-
 /* SMALL MOBILE  */
-
 @media (max-width: 540px) {
 
   .workspace__mobile-search-header {
@@ -519,9 +523,7 @@ app-thread-panel {
   }
 }
 
-
 /* 320px */
-
 @media (max-width: 360px) {
 
   .workspace__mobile-search-results {

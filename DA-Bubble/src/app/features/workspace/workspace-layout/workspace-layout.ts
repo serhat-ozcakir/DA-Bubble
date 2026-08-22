@@ -16,7 +16,7 @@ import { DirectMessageService } from '../../../core/services/direct-message.serv
 import { Profile } from '../../../core/models/profile.model';
 import { Channel } from '../../../core/models/channel.model';
 
-type MobileView = 'sidebar' | 'chat' | 'thread' | 'search';
+type MobileView = 'sidebar' | 'chat' | 'thread' | 'search' | 'create-channel';
 
 @Component({
   selector: 'app-workspace-layout',
@@ -175,7 +175,14 @@ export class WorkspaceLayout {
   }
 
   openCreateChannelDialog(): void {
+    if(window.matchMedia('(max-width:1024px)').matches){
+      this.mobileView.set('create-channel');
+      return;
+    }
     this.showCreateChannelDialog.set(true);
+  }
+  closeMobileCreateChannel():void{
+    this.mobileView.set('sidebar')
   }
 
   closeCreateChannelDialog(): void {

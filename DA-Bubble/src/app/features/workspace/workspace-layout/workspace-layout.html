@@ -1,85 +1,62 @@
 <div class="workspace">
-  <app-header
-    [threadOpen]="isThreadOpen"
-    [mobileChatOpen]="mobileView() === 'chat'|| mobileView() === 'thread'"
-    (mobileBack) = "showMobileSidebar()"
-    (mobileSearchOpen)="openMobileSearch()">
+@if(mobileView()=== 'create-channel'){
+      <section class="workspace__mobile-create-channel">
+      <app-channel-create-dialog
+        [mobileFullPage]="true"
+        (closeDialog)="closeMobileCreateChannel()">
+      </app-channel-create-dialog>
+    </section>
+} @else {
+  <app-header [threadOpen]="isThreadOpen" [mobileChatOpen]="mobileView() === 'chat'|| mobileView() === 'thread'"
+    (mobileBack)="showMobileSidebar()" (mobileSearchOpen)="openMobileSearch()">
   </app-header>
 
-  <main
-    class="workspace__content"
-    [class.sidebar-closed]="isSidebarClosed"
-    [class.thread-open]="isThreadOpen"
-    [class.mobile-sidebar-view]="mobileView() === 'sidebar'"
-    [class.mobile-chat-view]="mobileView() === 'chat'"
-    [class.mobile-thread-view]="mobileView() === 'thread'"
-    [class.mobile-search-view]="mobileView() === 'search'">
+  <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed" [class.thread-open]="isThreadOpen"
+    [class.mobile-sidebar-view]="mobileView() === 'sidebar'" [class.mobile-chat-view]="mobileView() === 'chat'"
+    [class.mobile-thread-view]="mobileView() === 'thread'" [class.mobile-search-view]="mobileView() === 'search'">
 
-    <app-sidebar
-      (openNewMessage)="openNewMessage()"
-      (openCreateChannel)="openCreateChannelDialog()"
+    <app-sidebar (openNewMessage)="openNewMessage()" (openCreateChannel)="openCreateChannelDialog()"
       (chatSelected)="onChatSelected()">
     </app-sidebar>
 
-    <button
-      class="workspace__sidebar-toggle"
-      type="button"
-      (click)="toggleSidebar()">
+    <button class="workspace__sidebar-toggle" type="button" (click)="toggleSidebar()">
 
       <div class="workspace__toggle-content">
         @if (isSidebarClosed) {
-          <span>Workspace-Menü öffnen</span>
-          <img src="assets/icons/Group 2.png" alt="sidebar icon" />
+        <span>Workspace-Menü öffnen</span>
+        <img src="assets/icons/Group 2.png" alt="sidebar icon" />
         } @else {
-          <span>Workspace-Menü schließen</span>
-          <img src="assets/icons/Group 3.png" alt="sidebar icon" />
+        <span>Workspace-Menü schließen</span>
+        <img src="assets/icons/Group 3.png" alt="sidebar icon" />
         }
       </div>
     </button>
-<section class="workspace__mobile-search">
-  <div class="workspace__mobile-search-header">
-    <strong>Search</strong>
-    <button
-      type="button"
-      class="workspace__mobile-search-close"
-      (click)="closeMobileSearch()">
-     <img src="assets/icons/close.png" alt="Close" />
-    </button>
-  </div>
+    <section class="workspace__mobile-search">
+      <div class="workspace__mobile-search-header">
+        <strong>Search</strong>
+        <button type="button" class="workspace__mobile-search-close" (click)="closeMobileSearch()">
+          <img src="assets/icons/close.png" alt="Close" />
+        </button>
+      </div>
 
-  <div class="workspace__mobile-search-input-wrapper">
-    <input
-      type="text"
-      placeholder="@ oder # eingeben"
-      [value]="mobileSearchText()"
-      (input)="onMobileSearchInput($event)"
-      autofocus
-    />
+      <div class="workspace__mobile-search-input-wrapper">
+        <input type="text" placeholder="@ oder # eingeben" [value]="mobileSearchText()"
+          (input)="onMobileSearchInput($event)" autofocus />
 
-    <img
-      src="assets/icons/search.png"
-      alt="search icon"
-    />
-  </div>
+        <img src="assets/icons/search.png" alt="search icon" />
+      </div>
 
-  <div class="workspace__mobile-search-results">
+      <div class="workspace__mobile-search-results">
 
-    @if (mobileSearchMode() === 'users') {
+        @if (mobileSearchMode() === 'users') {
 
-      @for (user of filteredMobileUsers(); track user.id) {
-        <button
-          type="button"
-          class="workspace__mobile-search-user"
-          (click)="selectMobileUser(user)">
+        @for (user of filteredMobileUsers(); track user.id) {
+        <button type="button" class="workspace__mobile-search-user" (click)="selectMobileUser(user)">
 
           <div class="workspace__mobile-search-avatar">
-            <img
-              [src]="user.avatar"
-              [alt]="user.name"
-            />
+            <img [src]="user.avatar" [alt]="user.name" />
 
-            <span
-              class="workspace__mobile-search-status"
+            <span class="workspace__mobile-search-status"
               [class.workspace__mobile-search-status--online]="user.status === 'online'">
             </span>
           </div>
@@ -87,19 +64,16 @@
           <span>{{ user.name }}</span>
 
           @if (user.id === auth.currentUser()?.id) {
-            <span class="workspace__mobile-search-you">
-              (Du)
-            </span>
+          <span class="workspace__mobile-search-you">
+            (Du)
+          </span>
           }
         </button>
-      }
+        }
 
-    } @else {
-      @for (channel of filteredMobileChannels(); track channel.id) {
-        <button
-          type="button"
-          class="workspace__mobile-search-channel"
-          (click)="selectMobileChannel(channel)">
+        } @else {
+        @for (channel of filteredMobileChannels(); track channel.id) {
+        <button type="button" class="workspace__mobile-search-channel" (click)="selectMobileChannel(channel)">
           <span class="workspace__mobile-search-hash">
             #
           </span>
@@ -107,72 +81,63 @@
             {{ channel.name }}
           </span>
         </button>
-      }
+        }
 
-    }
-  </div>
-</section>
-    <app-chat-area
-      (openShowProfil)="openShowProfilDialog()"
-      (openMemberList)="openMemberListDialog()"
-      (openAddMembers)="openAddMembersDialog()"
-      (openChannelSettings)="openChannelSettingsDialog()"
-      [showNewMessage]="showNewMessage()"
-      (closeNewMessage)="closeNewMessage()"
-      (openProfile)="openShowProfilDialog()">
+        }
+      </div>
+    </section>
+    <app-chat-area (openShowProfil)="openShowProfilDialog()" (openMemberList)="openMemberListDialog()"
+      (openAddMembers)="openAddMembersDialog()" (openChannelSettings)="openChannelSettingsDialog()"
+      [showNewMessage]="showNewMessage()" (closeNewMessage)="closeNewMessage()" (openProfile)="openShowProfilDialog()">
     </app-chat-area>
 
     @if (showAddMemberDialog()) {
-      <app-add-members-dialag
-        (closeAddMemberDialog)="closeAddMembersDialog()"
-        [threadOpen]="isThreadOpen">
-      </app-add-members-dialag>
+    <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()" [threadOpen]="isThreadOpen">
+    </app-add-members-dialag>
     }
 
     @if (showProfilDialog()) {
-      <app-show-profil-dialog
-        (closeProfilDialogEvent)="closeShowProfilDialog()">
-      </app-show-profil-dialog>
+    <app-show-profil-dialog (closeProfilDialogEvent)="closeShowProfilDialog()">
+    </app-show-profil-dialog>
     }
 
     @if (isThreadOpen) {
-      <app-thread-panel></app-thread-panel>
+    <app-thread-panel></app-thread-panel>
     }
     @if (
-  mobileView() === 'sidebar' ||
-  mobileView() === 'search'
-) {
-  <button
-    class="workspace__mobile-new-message"
-    type="button"
-    aria-label="Neue Nachricht"
-    (click)="openMobileNewMessage()"
-  >
- <img src="assets/icons/new-message-edit_square.png" alt="new message logo" />
-  </button>
-}
+    mobileView() === 'sidebar' ||
+    mobileView() === 'search'
+    ) {
+    <button class="workspace__mobile-new-message" type="button" aria-label="Neue Nachricht"
+      (click)="openMobileNewMessage()">
+      <img src="assets/icons/new-message-edit_square.png" alt="new message logo" />
+    </button>
+    }
+
+    @if(mobileView()=== 'create-channel'){
+    <section>
+      <app-channel-create-dialog (closeDialog)="closeMobileCreateChannel()">
+      </app-channel-create-dialog>
+    </section>
+    }
   </main>
+
+}
 </div>
 
 @if (showCreateChannelDialog()) {
-  <app-channel-create-dialog
-    (closeDialog)="closeCreateChannelDialog()"
-    [SidebarClosed]="isSidebarClosed">
-  </app-channel-create-dialog>
+<app-channel-create-dialog (closeDialog)="closeCreateChannelDialog()" [SidebarClosed]="isSidebarClosed">
+</app-channel-create-dialog>
 }
 
 @if (showMemberListDialog()) {
-  <app-add-members-list
-    (openAddMembers)="openAddMembersFromList()"
-    (closeAddMemberList)="closeAddMemberList()"
-    [threadOpen]="isThreadOpen">
-  </app-add-members-list>
+<app-add-members-list (openAddMembers)="openAddMembersFromList()" (closeAddMemberList)="closeAddMemberList()"
+  [threadOpen]="isThreadOpen">
+</app-add-members-list>
 }
 
 @if (showChannelSettingsDialog()) {
-  <app-channel-detail
-    (openChannelSettings)="openChannelSettingsDialog()"
-    (closeChannelSettings)="closeChannelSettingsDialog()"
-    [SidebarClosed]="isSidebarClosed">
-  </app-channel-detail>
+<app-channel-detail (openChannelSettings)="openChannelSettingsDialog()"
+  (closeChannelSettings)="closeChannelSettingsDialog()" [SidebarClosed]="isSidebarClosed">
+</app-channel-detail>
 }

@@ -153,3 +153,172 @@ h2 {
     cursor: not-allowed;
   }
 }
+
+@media (max-width: 1024px) {
+  :host:has(.dialog--mobile-full-page) {
+    position: static;
+    inset: auto;
+    z-index: auto;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .dialog-backdrop:has(.dialog--mobile-full-page) {
+    position: static;
+
+    width: 100%;
+    height: 100%;
+
+    background: #ffffff;
+  }
+
+  .dialog--mobile-full-page {
+    position: static;
+
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+
+    padding: 24px 20px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border-radius: 0;
+    box-shadow: none;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    .dialog__header {
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .dialog__close {
+      width: 32px;
+      height: 32px;
+
+      img {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .dialog--mobile-full-page + * {
+    box-sizing: border-box;
+  }
+
+  .dialog--mobile-full-page {
+    h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .dialog__text {
+      margin: 0 0 20px;
+
+      max-width: none;
+
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .dialog__label {
+      margin-bottom: 8px;
+
+      font-size: 14px;
+
+      span {
+        font-size: 13px;
+      }
+    }
+
+    .dialog__input,
+    .dialog__description {
+      width: 100%;
+      height: 44px;
+
+      padding: 0 16px;
+      margin-bottom: 18px;
+
+      box-sizing: border-box;
+
+      gap: 10px;
+
+      border-radius: 24px;
+
+      span {
+        font-size: 20px;
+      }
+
+      input {
+        min-width: 0;
+        font-size: 14px;
+      }
+    }
+
+    .dialog__error {
+      margin: -12px 0 14px 16px;
+      font-size: 12px;
+    }
+
+    .dialog__actions {
+      margin-top: 8px;
+      justify-content: flex-end;
+    }
+
+    .dialog__submit {
+      padding: 10px 20px;
+
+      border-radius: 22px;
+
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 540px) {
+  .dialog--mobile-full-page {
+    padding: 20px 16px;
+
+    h2 {
+      font-size: 18px;
+    }
+
+    .dialog__text {
+      font-size: 13px;
+    }
+
+    .dialog__input,
+    .dialog__description {
+      height: 42px;
+
+      padding: 0 14px;
+
+      input {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .dialog--mobile-full-page {
+    padding: 18px 12px;
+
+    h2 {
+      font-size: 17px;
+    }
+
+    .dialog__text {
+      font-size: 12px;
+    }
+  }
+}

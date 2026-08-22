@@ -17,6 +17,7 @@ export class ChannelCreateDialog {
   isLoading = signal(false);
   errorMessage = signal('');
   SidebarClosed = input<boolean>(false);
+  mobileFullPage = input<boolean>(false);
 
   constructor(private channelService: ChannelService) { }
 
