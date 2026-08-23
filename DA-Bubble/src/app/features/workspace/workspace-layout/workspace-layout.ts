@@ -16,7 +16,7 @@ import { DirectMessageService } from '../../../core/services/direct-message.serv
 import { Profile } from '../../../core/models/profile.model';
 import { Channel } from '../../../core/models/channel.model';
 
-type MobileView = 'sidebar' | 'chat' | 'thread' | 'search' | 'create-channel';
+type MobileView = 'sidebar' | 'chat' | 'thread' | 'search' | 'create-channel' | 'channel-detail';
 
 @Component({
   selector: 'app-workspace-layout',
@@ -43,6 +43,7 @@ export class WorkspaceLayout {
   showNewMessage = signal(false);
   showProfilDialog = signal(false);
   mobileSearchText = signal('');
+  addMembersAsBottomSheet = signal(false);
 
   constructor() {
     effect(() => {
@@ -175,13 +176,13 @@ export class WorkspaceLayout {
   }
 
   openCreateChannelDialog(): void {
-    if(window.matchMedia('(max-width:1024px)').matches){
+    if (window.matchMedia('(max-width:1024px)').matches) {
       this.mobileView.set('create-channel');
       return;
     }
     this.showCreateChannelDialog.set(true);
   }
-  closeMobileCreateChannel():void{
+  closeMobileCreateChannel(): void {
     this.mobileView.set('sidebar')
   }
 
@@ -190,11 +191,13 @@ export class WorkspaceLayout {
   }
 
   openAddMembersDialog(): void {
+    this.addMembersAsBottomSheet.set(false);
     this.showAddMemberDialog.set(true);
   }
 
   closeAddMembersDialog(): void {
     this.showAddMemberDialog.set(false);
+    this.addMembersAsBottomSheet.set(false);
   }
 
   openMemberListDialog(): void {
@@ -206,16 +209,30 @@ export class WorkspaceLayout {
   }
 
   openAddMembersFromList(): void {
+    this.addMembersAsBottomSheet.set(false);
     this.showAddMemberDialog.set(true);
     this.showMemberListDialog.set(false);
   }
 
   openChannelSettingsDialog(): void {
+    if (window.matchMedia('(max-width:1024px)').matches) {
+      this.mobileView.set('channel-detail');
+      return;
+    }
     this.showChannelSettingsDialog.set(true);
+  }
+
+  openAddMembersFromChannelDetail(): void {
+    this.addMembersAsBottomSheet.set(true);
+    this.showAddMemberDialog.set(true);
   }
 
   closeChannelSettingsDialog(): void {
     this.showChannelSettingsDialog.set(false);
+  }
+
+  closeMobileChannelSettings(): void {
+    this.mobileView.set('chat');
   }
 
   openNewMessage(): void {

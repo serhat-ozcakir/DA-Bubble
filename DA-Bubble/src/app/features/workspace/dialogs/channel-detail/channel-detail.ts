@@ -1,6 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators, } from '@angular/forms';
+import { Auth } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-channel-detail',
@@ -11,6 +12,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators, } from '@angul
 export class ChannelDetail {
   closeChannelSettings = output<void>();
   channelService = inject(ChannelService);
+  authService = inject(Auth)
   isLeaving = signal(false);
   leaveErrorMessage = signal('');
   isEditingName = signal(false);
@@ -20,6 +22,8 @@ export class ChannelDetail {
   isSavingDescription = signal(false);
   descriptionErrorMessage = signal('');
   SidebarClosed = input<boolean>(false);
+  mobileFullPage = input<boolean>(false);
+  openAddMembersDialog = output<void>();
 
   channelEditForm = new FormGroup({
     name: new FormControl('', {
@@ -37,6 +41,10 @@ export class ChannelDetail {
     }),
   });
 
+  openAddMembers(): void {
+    this.openAddMembersDialog.emit();
+  }
+
   startEditingName(): void {
     const channel = this.channelService.currentChannel();
 
@@ -45,20 +53,20 @@ export class ChannelDetail {
     this.isEditingName.set(true)
   }
 
-startEditingDescription(): void {
-  const currentChannel = this.channelService.currentChannel();
+  startEditingDescription(): void {
+    const currentChannel = this.channelService.currentChannel();
 
-  if (!currentChannel) {
-    return;
+    if (!currentChannel) {
+      return;
+    }
+
+    this.channelEditForm.controls.description.setValue(
+      currentChannel.description ?? ''
+    );
+
+    this.descriptionErrorMessage.set('');
+    this.isEditingDescriptionName.set(true);
   }
-
-  this.channelEditForm.controls.description.setValue(
-    currentChannel.description ?? ''
-  );
-
-  this.descriptionErrorMessage.set('');
-  this.isEditingDescriptionName.set(true);
-}
 
   cancelNameEdit(): void {
     this.isEditingName.set(false);
@@ -117,50 +125,50 @@ startEditingDescription(): void {
   }
 
   async saveChannelDescription(): Promise<void> {
-  const descriptionControl =
-    this.channelEditForm.controls.description;
+    const descriptionControl =
+      this.channelEditForm.controls.description;
 
-  const currentChannel =
-    this.channelService.currentChannel();
+    const currentChannel =
+      this.channelService.currentChannel();
 
-  if (!currentChannel) {
-    return;
+    if (!currentChannel) {
+      return;
+    }
+
+    if (descriptionControl.invalid) {
+      descriptionControl.markAsTouched();
+      return;
+    }
+
+    const newDescription =
+      descriptionControl.getRawValue().trim();
+
+    const currentDescription =
+      currentChannel.description?.trim() ?? '';
+
+    if (newDescription === currentDescription) {
+      this.isEditingDescriptionName.set(false);
+      return;
+    }
+
+    this.isSavingDescription.set(true);
+    this.descriptionErrorMessage.set('');
+
+    try {
+      await this.channelService.updateChannelDescription(
+        currentChannel.id,
+        newDescription
+      );
+
+      this.isEditingDescriptionName.set(false);
+    } catch (error) {
+      this.descriptionErrorMessage.set(
+        'Die Beschreibung konnte nicht gespeichert werden.'
+      );
+    } finally {
+      this.isSavingDescription.set(false);
+    }
   }
-
-  if (descriptionControl.invalid) {
-    descriptionControl.markAsTouched();
-    return;
-  }
-
-  const newDescription =
-    descriptionControl.getRawValue().trim();
-
-  const currentDescription =
-    currentChannel.description?.trim() ?? '';
-
-  if (newDescription === currentDescription) {
-    this.isEditingDescriptionName.set(false);
-    return;
-  }
-
-  this.isSavingDescription.set(true);
-  this.descriptionErrorMessage.set('');
-
-  try {
-    await this.channelService.updateChannelDescription(
-      currentChannel.id,
-      newDescription
-    );
-
-    this.isEditingDescriptionName.set(false);
-  } catch (error) {
-    this.descriptionErrorMessage.set(
-      'Die Beschreibung konnte nicht gespeichert werden.'
-    );
-  } finally {
-    this.isSavingDescription.set(false);
-  }
-}
 
   close(): void {
     this.closeChannelSettings.emit();

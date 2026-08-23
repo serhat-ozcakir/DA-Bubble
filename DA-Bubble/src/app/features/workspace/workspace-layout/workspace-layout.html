@@ -1,12 +1,17 @@
 <div class="workspace">
-@if(mobileView()=== 'create-channel'){
-      <section class="workspace__mobile-create-channel">
-      <app-channel-create-dialog
-        [mobileFullPage]="true"
-        (closeDialog)="closeMobileCreateChannel()">
-      </app-channel-create-dialog>
-    </section>
-} @else {
+  @if(mobileView()=== 'create-channel'){
+  <section class="workspace__mobile-create-channel">
+    <app-channel-create-dialog [mobileFullPage]="true" (closeDialog)="closeMobileCreateChannel()">
+    </app-channel-create-dialog>
+  </section>
+  } @else if(mobileView()=== 'channel-detail') {
+  <section class="workspace__mobile-full-page">
+    <app-channel-detail [mobileFullPage]="true" (openAddMembersDialog)="openAddMembersFromChannelDetail()"
+      (closeChannelSettings)="closeMobileChannelSettings()">
+    </app-channel-detail>
+  </section>
+
+  } @else {
   <app-header [threadOpen]="isThreadOpen" [mobileChatOpen]="mobileView() === 'chat'|| mobileView() === 'thread'"
     (mobileBack)="showMobileSidebar()" (mobileSearchOpen)="openMobileSearch()">
   </app-header>
@@ -91,10 +96,7 @@
       [showNewMessage]="showNewMessage()" (closeNewMessage)="closeNewMessage()" (openProfile)="openShowProfilDialog()">
     </app-chat-area>
 
-    @if (showAddMemberDialog()) {
-    <app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()" [threadOpen]="isThreadOpen">
-    </app-add-members-dialag>
-    }
+
 
     @if (showProfilDialog()) {
     <app-show-profil-dialog (closeProfilDialogEvent)="closeShowProfilDialog()">
@@ -122,8 +124,14 @@
     }
   </main>
 
-}
+  }
 </div>
+
+@if (showAddMemberDialog()) {
+<app-add-members-dialag (closeAddMemberDialog)="closeAddMembersDialog()" [threadOpen]="isThreadOpen"
+  [mobileBottomSheet]="addMembersAsBottomSheet()">
+</app-add-members-dialag>
+}
 
 @if (showCreateChannelDialog()) {
 <app-channel-create-dialog (closeDialog)="closeCreateChannelDialog()" [SidebarClosed]="isSidebarClosed">

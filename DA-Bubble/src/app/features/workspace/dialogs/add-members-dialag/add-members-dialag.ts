@@ -20,6 +20,7 @@ export class AddMembersDialag {
   isLoading = signal(false);
   errorMessage = signal('');
   threadOpen = input<boolean>(false);
+  mobileBottomSheet = input<boolean>(false);
 
   filteredUsers = computed(() => {
     const search = this.searchText().toLowerCase().trim();
