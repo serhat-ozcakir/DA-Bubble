@@ -1,4 +1,4 @@
-import { Component, computed, effect, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, effect, Host, HostListener, inject, signal } from '@angular/core';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 import { ChatArea } from '../chat-area/chat-area';
@@ -70,6 +70,32 @@ export class WorkspaceLayout {
     }
 
     this.channelService.subscribeToCurrentChannelMembers();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const isMobile = window.matchMedia('(max-width:1024px)').matches;
+    if (isMobile) {
+      this.closeDesktopDialogs();
+      return;
+    }
+    this.closeMobileViews();
+
+  }
+
+  private closeDesktopDialogs(): void {
+    this.showChannelSettingsDialog.set(false);
+    this.showCreateChannelDialog.set(false);
+    this.showMemberListDialog.set(false);
+  }
+
+  private closeMobileViews(): void {
+    if (this.mobileView() === 'channel-detail' || 'create-channel') {
+      this.mobileView.set('sidebar')
+    }
+    this.showAddMemberDialog.set(false);
+    this.addMembersAsBottomSheet.set(false);
+    this.showMemberListDialog.set(false);
   }
 
   mobileSearchMode = computed<'users' | 'channels'>(() => {

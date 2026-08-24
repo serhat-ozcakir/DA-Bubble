@@ -6,25 +6,27 @@ import { AuthCallback } from './features/auth/auth-callback/auth-callback';
 
 export const routes: Routes = [
     {
-        path:'auth/callback',
+        path: 'auth/callback',
         component: AuthCallback
     },
     {
-        path:'impressum',
-        component: Impressum
+        path: 'impressum',
+        loadComponent: () =>
+            import('./features/legal/impressum/impressum').then(m => m.Impressum)
     },
     {
-        path:'datenschutz',
-        component: Datenschutz
+        path: 'datenschutz',
+        loadComponent:()=>
+            import('./features/legal/datenschutz/datenschutz').then(m=>m.Datenschutz)
     },
 
     {
-        path:'',
-        loadChildren:()=> import('./features/auth/auth.routes').then(m=>m.Auth_Routes)
+        path: '',
+        loadChildren: () => import('./features/auth/auth.routes').then(m => m.Auth_Routes)
     },
     {
-        path:'workspace',
-        loadChildren:()=> import('./features/workspace/workspace.routes').then(m=>m.Workspace_Routes),
+        path: 'workspace',
+        loadChildren: () => import('./features/workspace/workspace.routes').then(m => m.Workspace_Routes),
         canActivate: [authGuard]
     }
 ];
