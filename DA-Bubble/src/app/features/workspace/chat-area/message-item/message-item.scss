@@ -505,6 +505,47 @@
   }
 }
 
+@media (max-width: 761px) {
+  .reaction-tooltip {
+    left: 50%;
+    right: auto;
+    min-width: 130px;
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    box-sizing: border-box;
+    transform: translateX(-50%);
+    border-radius: 20px;
+    text-align: center;
+  }
+
+  .message--own {
+    .reaction-tooltip {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      border-radius: 20px;
+    }
+  }
+
+  .reaction-tooltip__emoji {
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+
+  .reaction-tooltip__text {
+    gap: 2px;
+    font-size: 13px;
+    line-height: 1.25;
+
+    strong,
+    span {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+}
+
+
 @media (max-width: 400px) {
   .message {
     &__thread-info {
@@ -532,5 +573,19 @@
         justify-content: flex-end;
       }
     }
+  }
+
+  .reaction-tooltip {
+    min-width: 115px;
+    max-width: calc(100vw - 16px);
+    padding: 5px 8px;
+  }
+
+  .reaction-tooltip__emoji {
+    font-size: 24px;
+  }
+
+  .reaction-tooltip__text {
+    font-size: 12px;
   }
 }

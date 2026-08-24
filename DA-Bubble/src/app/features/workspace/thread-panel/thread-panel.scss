@@ -523,12 +523,9 @@
   .thread-panel__content {
     flex: 1;
     min-height: 0;
-
     padding: 20px;
-
     overflow-y: auto;
     overflow-x: hidden;
-
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
@@ -571,10 +568,8 @@
 
   .thread-panel__bubble {
     padding: 10px 14px;
-
     font-size: 14px;
     line-height: 1.4;
-
     border-radius: 0 18px 18px 18px;
   }
 
@@ -586,9 +581,7 @@
 
   .thread-panel__divider {
     gap: 10px;
-
     margin: 8px 0 18px;
-
     font-size: 13px;
   }
 
@@ -600,18 +593,14 @@
   .thread-reactions__button {
     min-width: 38px;
     height: 30px;
-
     padding: 0 8px;
-
     font-size: 16px;
   }
 
   .thread-reactions__more {
     min-width: 38px;
     height: 30px;
-
     padding: 0 8px;
-
     font-size: 12px;
   }
 
@@ -626,11 +615,6 @@
     }
   }
 
-  /*
-   * Desktop'ta action bar hover ile açılıyor.
-   * Touch cihazda hover güvenilir olmadığı için
-   * dokunulabilir hale getiriyoruz.
-   */
   .thread-actions-container {
     top: -24px;
     right: 16px;
@@ -665,7 +649,6 @@
 
   .message-edit {
     right: 0;
-
     min-width: min(260px, calc(100vw - 40px));
   }
 
@@ -690,6 +673,44 @@
   }
 }
 
+@media (max-width: 761px) {
+  .reaction-tooltip {
+    left: 50%;
+    right: auto;
+    min-width: 130px;
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    box-sizing: border-box;
+    transform: translateX(-50%);
+    border-radius: 20px;
+    text-align: center;
+  }
+
+  .thread-panel__reply--own {
+    .reaction-tooltip {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      border-radius: 20px;
+    }
+  }
+
+  .reaction-tooltip__emoji {
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+
+  .reaction-tooltip__text {
+    gap: 2px;
+    font-size: 13px;
+    line-height: 1.25;
+    strong,
+    span {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+}
 
 @media (max-width: 540px) {
   .thread-panel__content {
@@ -726,6 +747,22 @@
   }
 }
 
+
+@media (max-width: 400px) {
+  .reaction-tooltip {
+    min-width: 115px;
+    max-width: calc(100vw - 16px);
+    padding: 5px 8px;
+  }
+
+  .reaction-tooltip__emoji {
+    font-size: 24px;
+  }
+
+  .reaction-tooltip__text {
+    font-size: 12px;
+  }
+}
 
 @media (max-width: 360px) {
   .thread-panel__content {

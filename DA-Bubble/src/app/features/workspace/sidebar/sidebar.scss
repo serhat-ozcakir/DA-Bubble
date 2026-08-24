@@ -60,7 +60,13 @@
     }
 
     &:hover img {
-      filter: invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
+      filter:
+        invert(38%)
+        sepia(93%)
+        saturate(2113%)
+        hue-rotate(222deg)
+        brightness(96%)
+        contrast(96%);
     }
   }
 
@@ -69,6 +75,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    flex-shrink: 0;
   }
 
   &__section-title {
@@ -97,6 +104,7 @@
       font-size: 16px;
       font-weight: 700;
       color: #000000;
+
       transition: color 0.2s ease;
     }
 
@@ -106,7 +114,13 @@
       }
 
       img {
-        filter: invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
+        filter:
+          invert(38%)
+          sepia(93%)
+          saturate(2113%)
+          hue-rotate(222deg)
+          brightness(96%)
+          contrast(96%);
       }
     }
   }
@@ -116,7 +130,7 @@
     cursor: pointer;
     transition: transform 0.2s ease;
 
-    >img {
+    > img {
       width: 10px;
       height: auto;
     }
@@ -144,21 +158,30 @@
     }
 
     &:hover img {
-      filter: invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
+      filter:
+        invert(38%)
+        sepia(93%)
+        saturate(2113%)
+        hue-rotate(222deg)
+        brightness(96%)
+        contrast(96%);
     }
   }
-
   &__list,
   &__dm-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    min-height: 0;
+    overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: #adb0d9 transparent;
+    scrollbar-color: #c6c8eb transparent;
 
     &::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
     }
 
     &::-webkit-scrollbar-track {
@@ -166,14 +189,21 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #adb0d9;
+      background: #c6c8eb;
       border-radius: 10px;
     }
-  }
 
+    &:hover {
+      scrollbar-color: #adb0d9 transparent;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: #adb0d9;
+    }
+  }
   &__list {
     max-height: 300px;
-    overflow-y: auto;
+
     padding-right: 4px;
   }
 
@@ -188,13 +218,6 @@
     border-radius: 20px;
     font-size: 15px;
     cursor: pointer;
-
-    &--active {
-      background: #eceefe;
-      color: #535af1;
-      font-weight: 700;
-    }
-
     &:hover {
       background: #eceefe;
       color: #535af1;
@@ -221,7 +244,6 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    overflow-y: auto;
     padding-right: 4px;
   }
 
@@ -250,9 +272,9 @@
     img {
       width: 42px;
       height: 42px;
+      display: block;
       border-radius: 50%;
       object-fit: cover;
-      display: block;
     }
   }
 
@@ -279,8 +301,6 @@
   }
 }
 
-
-
 @media (max-width: 1024px) {
   .sidebar {
     width: 100%;
@@ -291,10 +311,7 @@
     flex-direction: column;
     padding: 20px 24px;
     border-radius: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
     position: relative;
 
     &__header {
@@ -304,6 +321,7 @@
     &__section {
       flex-shrink: 0;
       margin-bottom: 24px;
+      min-height: 0;
     }
 
     &__section-title {
@@ -323,12 +341,34 @@
       width: 32px;
       height: 32px;
     }
-
     &__list,
     &__dm-list {
-      overflow: visible;
-      max-height: none;
-      padding-right: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: #c6c8eb transparent;
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #c6c8eb;
+        border-radius: 10px;
+      }
+    }
+    &__list {
+      max-height: min(34dvh, 280px);
+    }
+
+    &__dm-list {
+      max-height: min(38dvh, 320px);
+
+      gap: 10px;
     }
 
     &__channel {
@@ -340,11 +380,8 @@
 
     &__add-channel {
       margin: 14px 0 0 40px;
-      font-size: 14px;
-    }
 
-    &__dm-list {
-      gap: 10px;
+      font-size: 14px;
     }
 
     &__dm-item {
@@ -372,6 +409,13 @@
     &__section {
       margin-bottom: 20px;
     }
+    &__list {
+      max-height: min(32dvh, 240px);
+    }
+
+    &__dm-list {
+      max-height: min(36dvh, 280px);
+    }
 
     &__channel {
       margin-left: 22px;
@@ -391,8 +435,17 @@
   .sidebar {
     padding: 16px;
 
+    &__list {
+      max-height: min(30dvh, 210px);
+    }
+
+    &__dm-list {
+      max-height: min(34dvh, 250px);
+    }
+
     &__channel {
       margin-left: 18px;
+
       padding: 6px 10px;
     }
 

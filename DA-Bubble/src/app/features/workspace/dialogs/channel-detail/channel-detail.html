@@ -1,8 +1,6 @@
 <div class="channel-detail-backdrop" (click)="close()">
-  <div class="channel-detail" 
-  (click)="$event.stopPropagation()"
-  [class.channel-detail--sidebar-close]="SidebarClosed()"
-  [class.channel-detail--mobile-full-page]="mobileFullPage()">
+  <div class="channel-detail" (click)="$event.stopPropagation()" [class.channel-detail--sidebar-close]="SidebarClosed()"
+    [class.channel-detail--mobile-full-page]="mobileFullPage()">
 
     <div class="channel-detail__header">
       <h2>
@@ -15,48 +13,34 @@
     </div>
 
     <div class="channel-detail__section channel-detail__section--name">
-<div class="channel-detail__section-header">
-  <h3>Channel-Name</h3>
+      <div class="channel-detail__section-header">
+        <h3>Channel-Name</h3>
 
-  @if (isEditingName()) {
-    <button
-      class="channel-detail__edit-button"
-      type="button"
-      [disabled]="isSavingName()"
-      (click)="saveChannelName()">
+        @if (isEditingName()) {
+        <button class="channel-detail__edit-button" type="button" [disabled]="isSavingName()"
+          (click)="saveChannelName()">
 
-      <span class="channel-detail__desktop-action">
-        @if (isSavingName()) {
-          Wird gespeichert...
+          <span class="channel-detail__desktop-action">
+            @if (isSavingName()) {
+            Wird gespeichert...
+            } @else {
+            Speichern
+            }
+          </span>
+
+          <img class="channel-detail__mobile-action" src="assets/icons/check_circle.png" alt="Speichern" />
+        </button>
         } @else {
-          Speichern
+        <button class="channel-detail__edit-button" type="button" (click)="startEditingName()">
+
+          <span class="channel-detail__desktop-action">
+            Bearbeiten
+          </span>
+
+          <img class="channel-detail__mobile-action" src="assets/icons/edit.png" alt="Bearbeiten" />
+        </button>
         }
-      </span>
-
-      <img
-        class="channel-detail__mobile-action"
-        src="assets/icons/check_circle.png"
-        alt="Speichern"
-      />
-    </button>
-  } @else {
-    <button
-      class="channel-detail__edit-button"
-      type="button"
-      (click)="startEditingName()">
-
-      <span class="channel-detail__desktop-action">
-        Bearbeiten
-      </span>
-
-      <img
-        class="channel-detail__mobile-action"
-        src="assets/icons/edit.png"
-        alt="Bearbeiten"
-      />
-    </button>
-  }
-</div>
+      </div>
 
       @if (isEditingName()) {
       <div class="channel-detail__name-input">
@@ -95,128 +79,103 @@
       }
     </div>
 
-<div class="channel-detail__section">
-<div class="channel-detail__section-header">
-  <h3>Beschreibung</h3>
+    <div class="channel-detail__section">
+      <div class="channel-detail__section-header">
+        <h3>Beschreibung</h3>
 
-  @if (isEditingDescriptionName()) {
-    <button
-      class="channel-detail__edit-button"
-      type="button"
-      [disabled]="isSavingDescription()"
-      (click)="saveChannelDescription()">
+        @if (isEditingDescriptionName()) {
+        <button class="channel-detail__edit-button" type="button" [disabled]="isSavingDescription()"
+          (click)="saveChannelDescription()">
 
-      <span class="channel-detail__desktop-action">
-        @if (isSavingDescription()) {
-          Wird gespeichert...
+          <span class="channel-detail__desktop-action">
+            @if (isSavingDescription()) {
+            Wird gespeichert...
+            } @else {
+            Speichern
+            }
+          </span>
+
+          <img class="channel-detail__mobile-action" src="assets/icons/check_circle.png" alt="Speichern" />
+        </button>
         } @else {
-          Speichern
+        <button class="channel-detail__edit-button" type="button" (click)="startEditingDescription()">
+
+          <span class="channel-detail__desktop-action">
+            Bearbeiten
+          </span>
+
+          <img class="channel-detail__mobile-action" src="assets/icons/edit.png" alt="Bearbeiten" />
+        </button>
         }
-      </span>
+      </div>
 
-      <img
-        class="channel-detail__mobile-action"
-        src="assets/icons/check_circle.png"
-        alt="Speichern"
-      />
-    </button>
-  } @else {
-    <button
-      class="channel-detail__edit-button"
-      type="button"
-      (click)="startEditingDescription()">
+      @if (isEditingDescriptionName()) {
+      <textarea class="channel-detail__description-input"
+        [formControl]="channelEditForm.controls.description"></textarea>
 
-      <span class="channel-detail__desktop-action">
-        Bearbeiten
-      </span>
-
-      <img
-        class="channel-detail__mobile-action"
-        src="assets/icons/edit.png"
-        alt="Bearbeiten"
-      />
-    </button>
-  }
-</div>
-
-  @if (isEditingDescriptionName()) {
-    <textarea
-      class="channel-detail__description-input"
-      [formControl]="channelEditForm.controls.description"
-    ></textarea>
-
-    @if (
+      @if (
       channelEditForm.controls.description.touched &&
       channelEditForm.controls.description.hasError('maxlength')
-    ) {
+      ) {
       <p class="channel-detail__error">
         Die Beschreibung darf maximal 200 Zeichen haben.
       </p>
-    }
+      }
 
-    @if (descriptionErrorMessage()) {
+      @if (descriptionErrorMessage()) {
       <p class="channel-detail__error">
         {{ descriptionErrorMessage() }}
       </p>
-    }
-  } @else {
-    <p class="channel-detail__description">
-      {{ channelService.currentChannel()?.description }}
-    </p>
-  }
+      }
+      } @else {
+      <p class="channel-detail__description">
+        {{ channelService.currentChannel()?.description }}
+      </p>
+      }
 
-  <hr class="channel-detail__divider">
+      <hr class="channel-detail__divider">
 
-  <h3 class="channel-detail__creator-title">
-    Erstellt von
-  </h3>
+      <h3 class="channel-detail__creator-title">
+        Erstellt von
+      </h3>
 
-  <p class="channel-detail__creator">
-    {{ channelService.creator()?.name }}
-  </p>
-</div>
-  <div class="channel-detail__members">
-  <h3>Mitglieder</h3>
+      <p class="channel-detail__creator">
+        {{ channelService.creator()?.name }}
+      </p>
+    </div>
+    @if(mobileFullPage()){
+    <div class="channel-detail__members">
+      <h3>Mitglieder</h3>
 
-  <div class="channel-detail__members-list">
-    @for (member of channelService.channelMembers(); track member.id) {
-      <div class="channel-detail__member">
-        <div class="channel-detail__member-avatar">
-          <img
-            [src]="member.avatar"
-            [alt]="member.name"
-          />
+      <div class="channel-detail__members-list">
+        @for (member of channelService.channelMembers(); track member.id) {
+        <div class="channel-detail__member">
+          <div class="channel-detail__member-avatar">
+            <img [src]="member.avatar" [alt]="member.name" />
 
-          <span
-            class="channel-detail__member-status"
-            [class.channel-detail__member-status--online]="
+            <span class="channel-detail__member-status" [class.channel-detail__member-status--online]="
               member.status === 'online'
             ">
+            </span>
+          </div>
+
+          <span>
+            {{ member.name }}
           </span>
         </div>
-
-        <span>
-          {{ member.name }}
-        </span>
+        }
       </div>
+
+      <button type="button" class="channel-detail__add-member" (click)="openAddMembers()">
+
+        <span class="channel-detail__add-member-icon">
+          <img src="assets/logo/Add-members.png" alt="" />
+        </span>
+
+        <span>Mitglieder hinzufügen</span>
+      </button>
+    </div>
     }
-  </div>
-
-  <button
-    type="button"
-    class="channel-detail__add-member"
-    (click)="openAddMembers()">
-
-    <span class="channel-detail__add-member-icon">
-      <img
-        src="assets/logo/Add-members.png"
-        alt=""
-      />
-    </span>
-
-    <span>Mitglieder hinzufügen</span>
-  </button>
-</div>
     <div class="channel-detail__footer">
       @if (leaveErrorMessage()) {
       <p class="channel-detail__error">
