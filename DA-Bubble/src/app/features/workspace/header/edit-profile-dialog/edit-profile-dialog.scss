@@ -28,7 +28,7 @@
       font-weight: 700;
     }
 
-        button {
+    button {
       width: 40px;
       height: 40px;
       display: flex;
@@ -53,14 +53,11 @@
     .close-button {
       width: 40px;
       height: 40px;
-
       border: none;
       border-radius: 50%;
       background: transparent;
-
       cursor: pointer;
       font-size: 24px;
-
       transition: 125ms ease-in-out;
 
       &:hover {
@@ -73,27 +70,22 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-
     margin-bottom: 40px;
   }
 
   &__avatar {
     width: 200px;
     height: 200px;
-
     border-radius: 50%;
     object-fit: cover;
-
     margin-bottom: 40px;
   }
 
   &__info {
     width: 100%;
-
     display: flex;
     align-items: center;
     gap: 16px;
-
     margin-bottom: 20px;
 
     h4 {
@@ -122,15 +114,11 @@
   &__input {
     width: 100%;
     height: 60px;
-
     border: 1px solid #adb0d9;
     border-radius: 999px;
-
     padding: 0 24px;
-
     font-size: 18px;
     outline: none;
-
     transition: 125ms ease-in-out;
 
     &:focus {
@@ -147,17 +135,12 @@
   .edit-button {
     min-width: 120px;
     height: 50px;
-
     border-radius: 999px;
     border: 1px solid #535af1;
-
     padding: 12px 24px;
-
     font-size: 18px;
     font-weight: 700;
-
     cursor: pointer;
-
     transition: 125ms ease-in-out;
   }
 
@@ -176,6 +159,283 @@
 
     &:hover {
       background: #444df2;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .edit-profile-dialog {
+    padding:
+      max(20px, env(safe-area-inset-top))
+      20px
+      calc(20px + env(safe-area-inset-bottom));
+
+    box-sizing: border-box;
+
+    &__content-wrapper {
+      width: min(100%, 460px);
+      max-height: calc(
+        100dvh -
+        max(20px, env(safe-area-inset-top)) -
+        20px -
+        env(safe-area-inset-bottom)
+      );
+
+      padding: 28px;
+      box-sizing: border-box;
+      border-radius: 26px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    &__header {
+      margin-bottom: 24px;
+
+      h2 {
+        min-width: 0;
+        font-size: 26px;
+        line-height: 1.2;
+      }
+
+      button,
+      .close-button {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+
+        img {
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    &__content {
+      margin-bottom: 26px;
+    }
+
+    &__avatar {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 26px;
+    }
+
+    &__info {
+      gap: 12px;
+      margin-bottom: 16px;
+
+      h4 {
+        font-size: 18px;
+      }
+    }
+
+    &__edit-icon {
+      width: 26px;
+      height: 26px;
+    }
+
+    &__form {
+      gap: 24px;
+    }
+
+    &__input {
+      width: 100%;
+      height: 52px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    &__buttons {
+      gap: 16px;
+    }
+
+    .edit-button {
+      min-width: 108px;
+      height: 46px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  }
+}
+
+@media (max-width: 540px) {
+  .edit-profile-dialog {
+    padding:
+      max(14px, env(safe-area-inset-top))
+      14px
+      calc(14px + env(safe-area-inset-bottom));
+
+    &__content-wrapper {
+      width: 100%;
+      max-width: 420px;
+      padding: 22px 20px;
+      border-radius: 24px;
+    }
+
+    &__header {
+      margin-bottom: 20px;
+
+      h2 {
+        font-size: 22px;
+      }
+
+      button,
+      .close-button {
+        width: 32px;
+        height: 32px;
+
+        img {
+          width: 17px;
+          height: 17px;
+        }
+      }
+    }
+
+    &__content {
+      margin-bottom: 22px;
+    }
+
+    &__avatar {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 22px;
+    }
+
+    &__info {
+      gap: 10px;
+      margin-bottom: 14px;
+
+      h4 {
+        font-size: 17px;
+      }
+    }
+
+    &__edit-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    &__form {
+      gap: 20px;
+    }
+
+    &__input {
+      height: 48px;
+      padding: 0 18px;
+      font-size: 15px;
+    }
+
+    &__buttons {
+      gap: 12px;
+    }
+
+    .edit-button {
+      min-width: 100px;
+      height: 44px;
+      padding: 9px 16px;
+      font-size: 15px;
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  .edit-profile-dialog {
+    padding:
+      max(10px, env(safe-area-inset-top))
+      10px
+      calc(10px + env(safe-area-inset-bottom));
+
+    &__content-wrapper {
+      padding: 20px 16px;
+      border-radius: 22px;
+    }
+
+    &__header {
+      gap: 10px;
+      margin-bottom: 18px;
+
+      h2 {
+        font-size: 20px;
+      }
+    }
+
+    &__avatar {
+      width: 105px;
+      height: 105px;
+      margin-bottom: 18px;
+    }
+
+    &__info {
+      h4 {
+        font-size: 16px;
+      }
+    }
+
+    &__edit-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    &__input {
+      height: 46px;
+      padding: 0 16px;
+      font-size: 14px;
+    }
+
+    &__buttons {
+      width: 100%;
+      gap: 10px;
+    }
+
+    .edit-button {
+      flex: 1;
+      min-width: 0;
+      height: 42px;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 340px) {
+  .edit-profile-dialog {
+    padding:
+      max(8px, env(safe-area-inset-top))
+      8px
+      calc(8px + env(safe-area-inset-bottom));
+
+    &__content-wrapper {
+      padding: 18px 14px;
+    }
+
+    &__header {
+      h2 {
+        font-size: 18px;
+      }
+    }
+
+    &__avatar {
+      width: 96px;
+      height: 96px;
+    }
+
+    &__info {
+      h4 {
+        font-size: 15px;
+      }
+    }
+
+    &__input {
+      height: 44px;
+      padding: 0 14px;
+      font-size: 13px;
+    }
+
+    .edit-button {
+      height: 40px;
+      padding: 7px 10px;
+      font-size: 13px;
     }
   }
 }

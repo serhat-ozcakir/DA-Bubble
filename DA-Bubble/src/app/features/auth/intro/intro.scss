@@ -78,3 +78,78 @@
       scale(0.5);
   }
 }
+
+@media (max-width: 1024px) {
+  .intro {
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    height: 100dvh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+      180deg,
+      #797ef3 0%,
+      #313ae5 100%
+    );
+
+    overflow: hidden;
+
+    &__brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 0;
+
+      // Desktop'taki köşeye gitme animasyonunu iptal ediyoruz
+      animation: none;
+      transform: none;
+    }
+
+    &__logo {
+      width: 52px;
+      height: auto;
+
+      display: block;
+
+      position: static;
+
+      z-index: 2;
+    }
+
+    // Figma mobilde DABubble yazısını göstermiyor
+    &__name-wrapper {
+      display: none;
+      width: 0;
+
+      animation: none;
+    }
+
+    &__name {
+      display: none;
+
+      animation: none;
+      transform: none;
+    }
+  }
+}
+
+@media (max-width: 540px) {
+  .intro {
+    &__logo {
+      width: 48px;
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .intro {
+    &__logo {
+      width: 44px;
+    }
+  }
+}

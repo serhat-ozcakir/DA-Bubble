@@ -11,8 +11,11 @@ export class Intro implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
+    const isMobile = window.matchMedia('(max-width:1024px)').matches;
+    const introDuration = isMobile ? 1500 : 3000;
+
     setTimeout(() => {
       this.router.navigate(['login']);
-    }, 4000);
+    }, introDuration);
   }
 }

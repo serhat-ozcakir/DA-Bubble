@@ -207,3 +207,309 @@
     }
   }
 }
+
+@media (max-width: 1024px) {
+  .profile-dialog {
+    padding:
+      max(20px, env(safe-area-inset-top))
+      20px
+      calc(20px + env(safe-area-inset-bottom));
+
+    box-sizing: border-box;
+
+    &__content-wrapper {
+      width: min(100%, 460px);
+      max-height: calc(
+        100dvh -
+        max(20px, env(safe-area-inset-top)) -
+        20px -
+        env(safe-area-inset-bottom)
+      );
+
+      padding: 28px;
+      box-sizing: border-box;
+      border-radius: 26px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    &__header {
+      margin-bottom: 24px;
+
+      h2 {
+        font-size: 26px;
+      }
+
+      button,
+      .close-button {
+        width: 34px;
+        height: 34px;
+
+        img {
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    &__content {
+      margin-bottom: 26px;
+    }
+
+    &__avatar {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 24px;
+    }
+
+    &__info {
+      margin-bottom: 18px;
+      gap: 12px;
+
+      h4 {
+        min-width: 0;
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .edit-button {
+        flex-shrink: 0;
+        font-size: 16px;
+      }
+    }
+
+    &__status {
+      font-size: 17px;
+    }
+
+    .profile-dialog__status-indicator {
+      gap: 10px;
+
+      .status-indicator__dot {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    &__footer {
+      gap: 12px;
+
+      div {
+        gap: 12px;
+
+        span {
+          font-size: 19px;
+        }
+      }
+
+      p {
+        padding-left: 40px;
+        font-size: 16px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .status-icon {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    &__guest-info {
+      font-size: 15px;
+    }
+  }
+}
+
+@media (max-width: 540px) {
+  .profile-dialog {
+    padding:
+      max(14px, env(safe-area-inset-top))
+      14px
+      calc(14px + env(safe-area-inset-bottom));
+
+    &__content-wrapper {
+      width: 100%;
+      max-width: 420px;
+      padding: 22px 20px;
+      border-radius: 24px;
+    }
+
+    &__header {
+      margin-bottom: 20px;
+
+      h2 {
+        font-size: 23px;
+      }
+
+      button,
+      .close-button {
+        width: 32px;
+        height: 32px;
+
+        img {
+          width: 17px;
+          height: 17px;
+        }
+      }
+    }
+
+    &__content {
+      margin-bottom: 22px;
+    }
+
+    &__avatar {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+    }
+
+    &__info {
+      margin-bottom: 16px;
+
+      h4 {
+        font-size: 21px;
+      }
+
+      .edit-button {
+        font-size: 15px;
+      }
+    }
+
+    &__status {
+      font-size: 15px;
+    }
+
+    .profile-dialog__status-indicator {
+      gap: 8px;
+    }
+
+    &__footer {
+      gap: 10px;
+
+      div {
+        gap: 10px;
+
+        span {
+          font-size: 17px;
+        }
+      }
+
+      p {
+        padding-left: 36px;
+        font-size: 14px;
+      }
+
+      .status-icon {
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    &__guest-info {
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  .profile-dialog {
+    padding:max(10px, env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom));
+
+    &__content-wrapper {
+      padding: 20px 16px;
+      border-radius: 22px;
+    }
+
+    &__header {
+      margin-bottom: 18px;
+
+      h2 {
+        font-size: 21px;
+      }
+    }
+
+    &__avatar {
+      width: 105px;
+      height: 105px;
+      margin-bottom: 18px;
+    }
+
+    &__info {
+      gap: 8px;
+
+      h4 {
+        font-size: 19px;
+      }
+
+      .edit-button {
+        font-size: 14px;
+      }
+    }
+
+    &__status {
+      font-size: 14px;
+    }
+
+    &__footer {
+      div {
+        span {
+          font-size: 16px;
+        }
+      }
+
+      p {
+        padding-left: 34px;
+        font-size: 13px;
+      }
+
+      .status-icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}
+
+@media (max-width: 340px) {
+  .profile-dialog {
+    padding:max(8px, env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));
+    &__content-wrapper {
+        padding: 18px 14px;
+    }    &__header {
+      h2 {
+        font-size: 19px;
+      }
+    }
+
+    &__avatar {
+      width: 96px;
+      height: 96px;
+    }
+
+    &__info {
+      h4 {
+        font-size: 17px;
+      }
+
+      .edit-button {
+        font-size: 13px;
+      }
+    }
+
+    &__footer {
+      div {
+        span {
+          font-size: 15px;
+        }
+      }
+
+      p {
+        padding-left: 32px;
+        font-size: 12px;
+      }
+    }
+  }
+}
