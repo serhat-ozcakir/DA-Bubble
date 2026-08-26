@@ -181,6 +181,62 @@
   }
 }
 
+@media (min-width: 1025px) and (max-width: 1160px) {
+  .chat-header {
+    padding-left: 18px;
+    padding-right: 18px;
+
+    &__right {
+      gap: 8px;
+    }
+
+    &__members {
+      max-width: 150px;
+    }
+
+    &__members img {
+      width: 34px;
+      height: 34px;
+      margin-left: -8px;
+    }
+
+    &__member-count {
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    &__add-member {
+      width: 42px;
+      height: 42px;
+
+      img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .message {
+    &__thread-info {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: nowrap;
+    }
+
+    &__thread {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    &__last-reply {
+      font-size: 11px;
+      white-space: nowrap;
+    }
+  }
+}
+
 @media (max-width: 1024px) {
   .chat-header {
     width: 100%;

@@ -123,18 +123,37 @@
 
 .add-members__dropdown {
   position: absolute;
-  top: 238px;
-  left: 95px;
-  width: 420px;
+  top: 210px;
+  left: 65px;
+  width: 400px;
+  max-height: 320px;
   padding: 18px 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
   background-color: #ffffff;
   border: 1px solid #adb0d9;
-  border-radius: 0 0 30px 30px;
+  border-radius: 0;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
   z-index: 2;
+  scrollbar-width: thin;
+  scrollbar-color: #c6c8eb transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c6c8eb;
+    border-radius: 10px;
+  }
 }
 
 .add-members__users {
@@ -263,9 +282,9 @@
 
 .add-members__empty {
   position: absolute;
-  top: 238px;
-  left: 95px;
-  width: 420px;
+  top: 210px;
+  left: 68px;
+  width: 350px;
   padding: 12px 18px;
   box-sizing: border-box;
   background: #ffffff;
@@ -275,9 +294,7 @@
   font-size: 16px;
 }
 
-
 /* MOBILE */
-
 @media (max-width: 1024px) {
   :host {
     position: fixed;
@@ -358,9 +375,9 @@
 
   .add-members__dropdown {
     position: absolute;
-    top: 172px;
-    left: 22px;
-    width: calc(100% - 44px);
+    top: 173px;
+    left: 40px;
+    width: calc(100% - 200px);
     max-height: 260px;
     padding: 10px 0;
     overflow-y: auto;
@@ -422,9 +439,9 @@
 
   .add-members__empty {
     position: absolute;
-    top: 172px;
-    left: 22px;
-    width: calc(100% - 44px);
+    top: 175px;
+    left: 43px;
+    width: calc(100% - 200px);
     padding: 10px 14px;
     border-radius: 0 0 22px 22px;
     font-size: 13px;
@@ -559,10 +576,16 @@
     font-size: 14px;
   }
 
-  .add-members__dropdown,
+  .add-members__dropdown {
+      left: 34px;
+      width: calc(100% - 130px);
+      top: 170px;
+  }
+
   .add-members__empty {
-    left: 18px;
-    width: calc(100% - 36px);
+      left: 34px;
+      width: calc(100% - 130px);
+      top: 170px;
   }
 
   .add-members__submit {
@@ -603,7 +626,6 @@
     .add-members__dropdown,
     .add-members__empty {
       left: 16px;
-
       width: calc(100% - 32px);
     }
   }
@@ -629,9 +651,9 @@
 
   .add-members__dropdown,
   .add-members__empty {
-    left: 16px;
-
-    width: calc(100% - 32px);
+      left: 30px;
+      width: calc(100% - 75px);
+      top: 167px;
   }
 
   .add-members.add-members--mobile-bottom-sheet {

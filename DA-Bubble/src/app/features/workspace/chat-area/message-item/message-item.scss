@@ -413,6 +413,39 @@
     background: #eceefe;
   }
 }
+
+@media (min-width: 1025px) and (max-width: 1100px) {
+  .message {
+    &__thread-info {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      gap: 10px;
+      flex-wrap: nowrap;
+    }
+
+    &__thread {
+      flex-shrink: 0;
+      padding: 0;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    &__last-reply {
+      flex-shrink: 0;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    &--own {
+      .message__thread-info {
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+
 @media (max-width: 1024px) {
   .message {
     gap: 12px;
