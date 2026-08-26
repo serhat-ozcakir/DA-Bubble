@@ -77,16 +77,18 @@ export class WorkspaceLayout {
     const isMobile = window.matchMedia('(max-width:1024px)').matches;
     if (isMobile) {
       this.closeDesktopDialogs();
+      this.mobileView.set('sidebar');
+      this.isSidebarClosed = false
       return;
     }
     this.closeMobileViews();
-
   }
 
   private closeDesktopDialogs(): void {
     this.showChannelSettingsDialog.set(false);
     this.showCreateChannelDialog.set(false);
     this.showMemberListDialog.set(false);
+
   }
 
   private closeMobileViews(): void {

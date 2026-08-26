@@ -13,7 +13,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 32px;
+    margin-bottom: 25px;
     padding: 8px 8px 0;
     flex-shrink: 0;
   }
@@ -71,7 +71,7 @@
   }
 
   &__section {
-    margin-bottom: 32px;
+    margin-bottom: 18px;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -202,8 +202,7 @@
     }
   }
   &__list {
-    max-height: 300px;
-
+    max-height: 250px;
     padding-right: 4px;
   }
 
@@ -240,11 +239,29 @@
   }
 
   &__dm-list {
-    max-height: 360px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 250px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #c6c8eb transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c6c8eb;
+    border-radius: 10px;
+  }
   }
 
   &__dm-item {
@@ -319,12 +336,20 @@
     }
 
     &__section {
-      flex-shrink: 0;
-      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      flex: 0 1 auto;
       min-height: 0;
+      margin-bottom: 20px;
+    }
+
+    &__section:last-of-type {
+      margin-bottom: 0;
     }
 
     &__section-title {
+      flex-shrink: 0;
+
       padding: 0;
       margin-bottom: 8px;
     }
@@ -341,13 +366,17 @@
       width: 32px;
       height: 32px;
     }
+
     &__list,
     &__dm-list {
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       padding-right: 4px;
+      overscroll-behavior: contain;
       scrollbar-width: thin;
       scrollbar-color: #c6c8eb transparent;
+
       &::-webkit-scrollbar {
         width: 4px;
       }
@@ -361,13 +390,13 @@
         border-radius: 10px;
       }
     }
+
     &__list {
-      max-height: min(34dvh, 280px);
+      max-height: 295px;
     }
 
     &__dm-list {
-      max-height: min(38dvh, 320px);
-
+      max-height: 320px;
       gap: 10px;
     }
 
@@ -380,7 +409,6 @@
 
     &__add-channel {
       margin: 14px 0 0 40px;
-
       font-size: 14px;
     }
 
@@ -407,14 +435,15 @@
     padding: 18px 20px;
 
     &__section {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
+
     &__list {
-      max-height: min(32dvh, 240px);
+      max-height: 275px;
     }
 
     &__dm-list {
-      max-height: min(36dvh, 280px);
+      max-height: 295px;
     }
 
     &__channel {
@@ -436,16 +465,15 @@
     padding: 16px;
 
     &__list {
-      max-height: min(30dvh, 210px);
+      max-height: 230px;
     }
 
     &__dm-list {
-      max-height: min(34dvh, 250px);
+      max-height: 285px;
     }
 
     &__channel {
       margin-left: 18px;
-
       padding: 6px 10px;
     }
 
