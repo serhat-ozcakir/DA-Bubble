@@ -14,6 +14,29 @@
   flex-direction: column;
   gap: 24px;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #c6c8eb transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c6c8eb;
+    border-radius: 10px;
+  }
+
+  &:hover {
+    scrollbar-color: #adb0d9 transparent;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: #adb0d9;
+  }
 
   &__date-line {
     display: flex;

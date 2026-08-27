@@ -32,6 +32,34 @@
     flex-shrink: 0;
     cursor: pointer;
   }
+
+  &__back-button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color .2s ease;
+
+    &__back-icon {
+      width: 24px;
+      height: 24px;
+      fill: #000;
+      transition: fill .2s ease;
+    }
+
+    &:hover {
+      background-color: #ECEEFE;
+
+      .sign-up-header__back-icon {
+        fill: #535AF1;
+      }
+    }
+  }
 }
 
 h1 {
@@ -156,7 +184,7 @@ input {
   justify-content: flex-start;
   margin-top: -12px;
 
-  > span {
+  >span {
     color: red;
     font-size: 13px;
   }
@@ -168,7 +196,7 @@ input {
   justify-content: flex-start;
   margin-top: 0;
 
-  > span {
+  >span {
     color: red;
     font-size: 13px;
     padding-bottom: 6px;
@@ -237,10 +265,11 @@ input {
 }
 
 @media (max-width: 540px) and (max-height: 700px) {
-    h1 {
+  h1 {
     font-size: 28px;
     padding-left: 10px;
   }
+
   .sign-up-section {
     padding: 4px 0;
   }
