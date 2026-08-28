@@ -10,6 +10,7 @@ import { Profile } from '../models/profile.model';
 export class Search {
   private supabase = inject(Supabase);
   private authService = inject(Auth);
+
   results = signal<SearchResult[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -21,35 +22,47 @@ export class Search {
       this.clearSearch();
       return;
     }
+
+    this.startSearch();
+
+    const channelResults = await this.fetchChannelResults(term);
+    if (!channelResults) return;
+
+    const directResults = await this.searchDirectMessages(term);
+    this.finishSearch([...channelResults, ...directResults]);
+  }
+
+  private startSearch(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
+  }
 
+  private finishSearch(results: SearchResult[]): void {
+    this.results.set(results);
+    this.isLoading.set(false);
+  }
+
+  private async fetchChannelResults(term: string): Promise<SearchResult[] | null> {
     const { data, error } = await this.supabase.supabase
       .from('messages')
-      .select(`
-        id,
-        text,
-        created_at,
-        channel_id,
-        profiles (
-          id,
-          name,
-          avatar
-        )
-      `)
+      .select(`id, text,  created_at, channel_id, profiles (
+          id, name, avatar )`)
       .ilike('text', `%${term}%`)
       .order('created_at', { ascending: false })
       .limit(20);
 
-    if (error) {
-      console.log('Error:', error);
-      this.results.set([]);
-      this.errorMessage.set('Die Nachrichten konnten nicht durchsucht werden.');
-      this.isLoading.set(false);
-      return;
+    if (!error) {
+      return data.map((message) =>
+        this.mapChannelSearchResult(message)
+      );
     }
 
-    const searchResults: SearchResult[] = data.map((message: any) => ({
+    this.handleChannelSearchError(error);
+    return null;
+  }
+
+  private mapChannelSearchResult(message: any): SearchResult {
+    return {
       id: message.id,
       type: 'channel-message',
       text: message.text,
@@ -59,14 +72,15 @@ export class Search {
         'assets/img/avatar/avatar-3.png',
       channelId: message.channel_id,
       createdAt: message.created_at,
-    }));
+    };
+  }
 
-    const directMessageResults = await this.searchDirectMessages(term);
-
-    this.results.set([
-      ...searchResults,
-      ...directMessageResults,
-    ]);
+  private handleChannelSearchError(error: unknown): void {
+    console.log('Error:', error);
+    this.results.set([]);
+    this.errorMessage.set(
+      'Die Nachrichten konnten nicht durchsucht werden.'
+    );
     this.isLoading.set(false);
   }
 
@@ -80,53 +94,52 @@ export class Search {
     const currentUser = this.authService.currentUserProfile();
     const term = searchTerm.trim();
 
-    if (!currentUser || term.length < 2) {
-      return [];
-    }
+    if (!currentUser || term.length < 2) return [];
 
+    const data = await this.fetchDirectMessages(term, currentUser.id);
+    const users = await this.loadProfiles();
+
+    return data.map((message) =>
+      this.mapDirectSearchResult(message, currentUser.id, users)
+    );
+  }
+
+  private async fetchDirectMessages(term: string, currentUserId: string): Promise<any[]> {
     const { data, error } = await this.supabase.supabase
       .from('direct_messages')
-      .select(`
-      id,
-      text,
-      created_at,
-      sender_id,
-      receiver_id
-    `)
-      .or(
-        `sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`
+      .select(`id, text, created_at, sender_id, receiver_id`).or(
+        `sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`
       )
       .ilike('text', `%${term}%`)
       .order('created_at', { ascending: false })
       .limit(20);
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
+    return data;
+  }
 
-    const users = await this.loadProfiles();
+  private mapDirectSearchResult( message: any, currentUserId: string,users: Profile[]): SearchResult {
+    const otherUserId = this.getOtherUserId(
+      message,
+      currentUserId
+    );
 
-    return data.map((message) => {
-      const otherUserId =
-        message.sender_id === currentUser.id
-          ? message.receiver_id
-          : message.sender_id;
+    const otherUser = users.find(
+      (user) => user.id === otherUserId
+    );
 
-      const otherUser = users.find(
-        (user) => user.id === otherUserId
-      );
+    return {id: message.id, type: 'direct-message',text: message.text,
+      authorName: otherUser?.name ?? 'Unbekannter Benutzer',
+      avatar: otherUser?.avatar ?? 'assets/img/avatar/avatar-3.png',
+      profileId: otherUserId,
+      createdAt: message.created_at,
+    };
+  }
 
-      return {
-        id: message.id,
-        type: 'direct-message' as const,
-        text: message.text,
-        authorName: otherUser?.name ?? 'Unbekannter Benutzer',
-        avatar:
-          otherUser?.avatar ?? 'assets/img/avatar/avatar-3.png',
-        profileId: otherUserId,
-        createdAt: message.created_at,
-      };
-    });
+  private getOtherUserId( message: any, currentUserId: string): string {
+    return message.sender_id === currentUserId
+      ? message.receiver_id
+      : message.sender_id;
   }
 
   private async loadProfiles(): Promise<Profile[]> {
@@ -134,10 +147,7 @@ export class Search {
       .from('profiles')
       .select('*');
 
-    if (error) {
-      throw error;
-    }
-
+    if (error) throw error;
     return data;
   }
 }

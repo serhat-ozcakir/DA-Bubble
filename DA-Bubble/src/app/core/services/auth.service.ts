@@ -1,90 +1,80 @@
 import { Injectable, signal } from '@angular/core';
-import { Supabase } from '../supabase/supabase.service';
 import { User } from '@supabase/supabase-js';
+import { Supabase } from '../supabase/supabase.service';
 import { Profile } from '../models/profile.model';
 
 export interface RegisterData {
-
   name: string;
   email: string;
   password: string;
   avatar?: string;
 }
 
+const GUEST_AVATARS = [
+  'assets/img/avatar/avatar-1.png',
+  'assets/img/avatar/avatar-2.png',
+  'assets/img/avatar/avatar-3.png',
+  'assets/img/avatar/avatar-4.png',
+  'assets/img/avatar/avatar-5.png',
+  'assets/img/avatar/avatar-6.png',
+];
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class Auth {
-  private RegisterData?: RegisterData;
-
+  private registerData?: RegisterData;
   currentUser = signal<User | null>(null);
   currentUserProfile = signal<Profile | null>(null);
 
-  constructor(private supabase: Supabase) {
-
-  }
+  constructor(private supabase: Supabase) {}
 
   async ensureGoogleProfile(): Promise<boolean> {
-    const { data, error } =
-      await this.supabase.supabase.auth.getUser();
-
-    if (error) {
-      throw error;
-    }
-
-    const user = data.user;
-
-    if (!user) {
-      throw new Error('Google user could not be loaded.');
-    }
-
-    const { data: existingProfile, error: profileError } =
-      await this.supabase.supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-
-    if (profileError) {
-      throw profileError;
-    }
-
-    if (existingProfile) {
-      this.currentUser.set(user);
-      this.currentUserProfile.set(existingProfile);
-
+    const user = await this.getAuthenticatedUser(
+      'Google user could not be loaded.'
+    );
+    const profile = await this.getProfile(user.id);
+    if (profile) {
+      this.setCurrentSession(user, profile);
       return false;
     }
+    return this.createMissingGoogleProfile(user);
+  }
 
-    const googleName =
+  private async createMissingGoogleProfile(user: User): Promise<boolean> {
+    const profile = await this.createGoogleProfile(user);
+    this.setCurrentSession(user, profile);
+    return true;
+  }
+
+  private async createGoogleProfile(user: User): Promise<Profile> {
+    const { data, error } = await this.supabase.supabase
+      .from('profiles')
+      .insert(this.buildGoogleProfile(user))
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  private buildGoogleProfile(user: User) {
+    return {
+      id: user.id,
+      email: user.email ?? '',
+      name: this.getGoogleUserName(user),
+      avatar: 'assets/logo/Profile.png',
+      status: 'offline',
+    };
+  }
+
+  private getGoogleUserName(user: User): string {
+    return (
       user.user_metadata?.['full_name'] ??
       user.user_metadata?.['name'] ??
       user.email?.split('@')[0] ??
-      'User';
-
-    const { data: newProfile, error: insertError } =
-      await this.supabase.supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          email: user.email ?? '',
-          name: googleName,
-          avatar: 'assets/logo/Profile.png',
-          status: 'offline',
-        })
-        .select()
-        .single();
-
-    if (insertError) {
-      throw insertError;
-    }
-
-    this.currentUser.set(user);
-    this.currentUserProfile.set(newProfile);
-
-    return true;
+      'User'
+    );
   }
 
   async signInWithGoogle(): Promise<void> {
@@ -96,273 +86,275 @@ export class Auth {
         },
       });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   }
 
-
-
   setRegisterData(data: RegisterData): void {
-    this.RegisterData = data;
+    this.registerData = data;
   }
 
   getRegisterData(): RegisterData | undefined {
-    return this.RegisterData;
+    return this.registerData;
   }
 
   setAvatar(avatar: string): void {
-    if (!this.RegisterData) return;
-    this.RegisterData.avatar = avatar;
-  }
-  clearRegisterData(): void {
-    this.RegisterData = undefined;
+    if (!this.registerData) return;
+    this.registerData.avatar = avatar;
   }
 
-  async loadCurrentUser() {
-    const { data, error } = await this.supabase.supabase.auth.getUser();
+  clearRegisterData(): void {
+    this.registerData = undefined;
+  }
+
+  async loadCurrentUser(): Promise<void> {
+    const { data, error } =
+      await this.supabase.supabase.auth.getUser();
 
     if (error || !data.user) {
-      this.currentUser.set(null);
-      this.currentUserProfile.set(null);
+      this.clearCurrentSession();
       return;
     }
-    this.currentUser.set(data.user);
+    await this.loadUserSession(data.user);
+  }
 
-    const { data: profile, error: profileError } = await this.supabase.supabase
+  private async loadUserSession(user: User): Promise<void> {
+    this.currentUser.set(user);
+    const profile = await this.getProfile(user.id);
+    this.currentUserProfile.set(profile);
+  }
+
+  private async getProfile(userId: string): Promise<Profile | null> {
+    const { data, error } = await this.supabase.supabase
       .from('profiles')
       .select('*')
-      .eq('id', data.user.id)
+      .eq('id', userId)
       .maybeSingle();
 
-    if (profileError) {
-      throw profileError;
-    }
-
-    this.currentUserProfile.set(profile);
-
+    if (error) throw error;
+    return data;
   }
 
   async signUp() {
-    if (!this.RegisterData) {
-      throw new Error('Register data is not set.');
-    }
-    const { email, password, name, avatar } = this.RegisterData;
-    const { data, error } = await this.supabase.supabase.auth.signUp({
-      email,
-      password,
-    })
-    if (error) {
-      throw error;
-    }
+    const registerData = this.requireRegisterData();
+    const { email, password } = registerData;
+    const { data, error } =
+      await this.supabase.supabase.auth.signUp({ email, password });
 
-    if (!data.user) {
+    if (error) throw error;
+    await this.finishSignUp(data.user, registerData);
+    return data;
+  }
+
+  private async finishSignUp(user: User | null,registerData: RegisterData): Promise<void> {
+    if (!user) {
       this.clearRegisterData();
       throw new Error('User data is missing after sign up.');
     }
-
-    const { error: profileError } = await this.supabase.supabase.from('profiles').insert({
-      id: data.user.id,
-      email,
-      name,
-      avatar,
-      status: 'offline',
-    })
-
-    if (profileError) {
-      throw profileError;
-    }
-
+    await this.createRegisteredProfile(user.id, registerData);
     this.clearRegisterData();
+  }
 
-    return data;
+  private async createRegisteredProfile(
+    userId: string,
+    data: RegisterData
+  ): Promise<void> {
+    const { error } = await this.supabase.supabase
+      .from('profiles')
+      .insert(this.buildRegisteredProfile(userId, data));
+
+    if (error) throw error;
+  }
+
+  private buildRegisteredProfile(userId: string, data: RegisterData) {
+    return {
+      id: userId,
+      email: data.email,
+      name: data.name,
+      avatar: data.avatar,
+      status: 'offline',
+    };
+  }
+
+  private requireRegisterData(): RegisterData {
+    if (!this.registerData) {
+      throw new Error('Register data is not set.');
+    }
+    return this.registerData;
   }
 
   async login(email: string, password: string) {
-    this.currentUser.set(null);
-    this.currentUserProfile.set(null);
+    this.clearCurrentSession();
+    const { data, error } =
+      await this.supabase.supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    await this.loadCurrentUser();
-    await this.updateStatus('online');
-    await this.loadCurrentUser();
-
+    if (error) throw error;
+    await this.initializeLoggedInUser();
     return data;
   }
 
-  async logout() {
+  private async initializeLoggedInUser(): Promise<void> {
+    await this.loadCurrentUser();
+    await this.updateStatus('online');
+    await this.loadCurrentUser();
+  }
+
+  async logout(): Promise<void> {
     await this.updateStatus('offline');
-    const { error } = await this.supabase.supabase.auth.signOut();
-    if (error) {
-      throw error;
-    }
+    const { error } =
+      await this.supabase.supabase.auth.signOut();
+
+    if (error) throw error;
+    this.clearCurrentSession();
+  }
+
+  private clearCurrentSession(): void {
     this.currentUser.set(null);
     this.currentUserProfile.set(null);
   }
 
   async resetPassword(email: string) {
-    const { data, error } = await this.supabase.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:4200/reset-password',
+    const { data, error } =
+      await this.supabase.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'http://localhost:4200/reset-password',
+      });
 
-    });
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
     return data;
   }
 
   async updatePassword(newPassword: string) {
-    const { data, error } = await this.supabase.supabase.auth.updateUser({
-      password: newPassword,
-    });
-    if (error) {
-      throw error;
-    }
+    const { data, error } =
+      await this.supabase.supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+    if (error) throw error;
     return data;
   }
 
   async updateProfileName(name: string) {
-    if (this.isGuestUser()) {
-      throw new Error(
-        'Gastbenutzer können ihr Profil nicht bearbeiten.'
-      );
-    }
-    const user = this.currentUser();
-    if (!user) {
-      throw new Error('No user is currently logged in.');
-    }
-    const { data, error } = await this.supabase.supabase.from('profiles')
+    const user = this.getEditableCurrentUser();
+    const { data, error } = await this.supabase.supabase
+      .from('profiles')
       .update({ name })
       .eq('id', user.id)
       .select()
       .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
     this.currentUserProfile.set(data);
     return data;
   }
 
+  private getEditableCurrentUser(): User {
+    if (this.isGuestUser()) {
+      throw new Error(
+        'Gastbenutzer können ihr Profil nicht bearbeiten.'
+      );
+    }
+
+    const user = this.currentUser();
+    if (!user) throw new Error('No user is currently logged in.');
+    return user;
+  }
+
   async updateStatus(status: 'online' | 'offline') {
     const user = this.currentUser();
-
     if (!user) return;
 
-    const { data, error } = await this.supabase.supabase.from('profiles')
+    const { data, error } = await this.supabase.supabase
+      .from('profiles')
       .update({ status })
       .eq('id', user.id)
       .select()
       .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
     this.currentUserProfile.set(data);
     return data;
   }
 
   async updateCurrentUserAvatar(avatar: string): Promise<void> {
-    const {
-      data: { user },
-      error: userError,
-    } = await this.supabase.supabase.auth.getUser();
+    const user = await this.getAuthenticatedUser(
+      'No authenticated user found.'
+    );
+    const profile = await this.updateUserAvatar(user.id, avatar);
+    this.setCurrentSession(user, profile);
+  }
 
-    if (userError) {
-      throw userError;
-    }
+  private async updateUserAvatar(
+    userId: string,
+    avatar: string
+  ): Promise<Profile> {
+    const { data, error } = await this.supabase.supabase
+      .from('profiles')
+      .update({ avatar, status: 'online' })
+      .eq('id', userId)
+      .select()
+      .single();
 
-    if (!user) {
-      throw new Error('No authenticated user found.');
-    }
-
-    const { data: updatedProfile, error: updateError } =
-      await this.supabase.supabase
-        .from('profiles')
-        .update({
-          avatar,
-          status: 'online',
-        })
-        .eq('id', user.id)
-        .select()
-        .single();
-
-    if (updateError) {
-      throw updateError;
-    }
-
-    this.currentUser.set(user);
-    this.currentUserProfile.set(updatedProfile);
+    if (error) throw error;
+    return data;
   }
 
   async guestLogin(): Promise<void> {
-    this.currentUser.set(null);
-    this.currentUserProfile.set(null);
+    this.clearCurrentSession();
+    const guestUser = await this.signInGuest();
+    const guestProfile = await this.createGuestProfile(guestUser);
 
+    await this.addGuestToWelcomeChannel(guestUser.id);
+    this.setCurrentSession(guestUser, guestProfile);
+    await this.loadCurrentUser();
+    this.ensureGuestProfileLoaded();
+  }
+
+  private async signInGuest(): Promise<User> {
     const { data, error } =
       await this.supabase.supabase.auth.signInAnonymously();
 
-    if (error) {
-      throw error;
+    if (error) throw error;
+    if (!data.user) {
+      throw new Error('Gastbenutzer konnte nicht erstellt werden.');
     }
+    return data.user;
+  }
 
-    const guestUser = data.user;
+  private async createGuestProfile(user: User): Promise<Profile> {
+    const { data, error } = await this.supabase.supabase
+      .from('profiles')
+      .insert(this.buildGuestProfile(user))
+      .select()
+      .single();
 
-    if (!guestUser) {
-      throw new Error(
-        'Gastbenutzer konnte nicht erstellt werden.'
-      );
-    }
+    if (error) await this.handleGuestProfileError(error);
+    return data;
+  }
 
-    const guestName = `Gast ${guestUser.id.slice(-4)}`;
+  private buildGuestProfile(user: User) {
+    return {
+      id: user.id,
+      email: null,
+      name: `Gast ${user.id.slice(-4)}`,
+      avatar: this.getRandomGuestAvatar(),
+      status: 'online',
+      is_guest: true,
+    };
+  }
 
-    const guestAvatars = [
-      'assets/img/avatar/avatar-1.png',
-      'assets/img/avatar/avatar-2.png',
-      'assets/img/avatar/avatar-3.png',
-      'assets/img/avatar/avatar-4.png',
-      'assets/img/avatar/avatar-5.png',
-      'assets/img/avatar/avatar-6.png',
-    ];
+  private getRandomGuestAvatar(): string {
+    const index = Math.floor(Math.random() * GUEST_AVATARS.length);
+    return GUEST_AVATARS[index];
+  }
 
-    const randomAvatar =
-      guestAvatars[
-      Math.floor(Math.random() * guestAvatars.length)
-      ];
+  private async handleGuestProfileError(error: unknown): Promise<never> {
+    await this.supabase.supabase.auth.signOut();
+    throw error;
+  }
 
-    const { data: guestProfile, error: profileError } =
-      await this.supabase.supabase
-        .from('profiles')
-        .insert({
-          id: guestUser.id,
-          email: null,
-          name: guestName,
-          avatar: randomAvatar,
-          status: 'online',
-          is_guest: true,
-        })
-        .select()
-        .single();
-
-    if (profileError) {
-      await this.supabase.supabase.auth.signOut();
-      throw profileError;
-    }
-
-    await this.addGuestToWelcomeChannel(guestUser.id);
-
-    this.currentUser.set(guestUser);
-    this.currentUserProfile.set(guestProfile);
-    await this.loadCurrentUser();
-
+  private ensureGuestProfileLoaded(): void {
     if (!this.currentUserProfile()) {
       throw new Error('Das Gastprofil konnte nicht geladen werden.');
     }
@@ -371,45 +363,62 @@ export class Auth {
   private async addGuestToWelcomeChannel(
     guestUserId: string
   ): Promise<void> {
-    const { data: welcomeChannel, error: channelError } =
-      await this.supabase.supabase
-        .from('channels')
-        .select('id')
-        .eq('name', 'Willkommen')
-        .maybeSingle();
+    const channelId = await this.getWelcomeChannelId();
+    await this.createGuestMembership(channelId, guestUserId);
+  }
 
-    if (channelError) {
-      throw channelError;
+  private async getWelcomeChannelId(): Promise<string> {
+    const { data, error } = await this.supabase.supabase
+      .from('channels')
+      .select('id')
+      .eq('name', 'Willkommen')
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
+      throw new Error('Der Channel "Willkommen" wurde nicht gefunden.');
     }
+    return data.id;
+  }
 
-    if (!welcomeChannel) {
-      throw new Error(
-        'Der Channel "Willkommen" wurde nicht gefunden.'
-      );
-    }
+  private async createGuestMembership(
+    channelId: string,
+    guestUserId: string
+  ): Promise<void> {
+    const { error } = await this.supabase.supabase
+      .from('channel_members')
+      .insert({
+        channel_id: channelId,
+        profile_id: guestUserId,
+        role: 'member',
+      });
 
-    const { error: membershipError } =
-      await this.supabase.supabase
-        .from('channel_members')
-        .insert({
-          channel_id: welcomeChannel.id,
-          profile_id: guestUserId,
-          role: 'member',
-        });
+    if (error) this.throwMembershipError(error);
+  }
 
-    if (membershipError) {
-      console.error(
-        'Fehler beim Hinzufügen zum Willkommen-Channel:',
-        membershipError
-      );
+  private throwMembershipError(error: unknown): never {
+    console.error(
+      'Fehler beim Hinzufügen zum Willkommen-Channel:',
+      error
+    );
+    throw error;
+  }
 
-      throw membershipError;
-    }
+  private async getAuthenticatedUser(missingUserMessage: string): Promise<User> {
+    const { data, error } =
+      await this.supabase.supabase.auth.getUser();
+
+    if (error) throw error;
+    if (!data.user) throw new Error(missingUserMessage);
+    return data.user;
+  }
+
+  private setCurrentSession(user: User, profile: Profile): void {
+    this.currentUser.set(user);
+    this.currentUserProfile.set(profile);
   }
 
   isGuestUser(): boolean {
-    const profile = this.currentUserProfile();
-    return profile?.is_guest === true;
+    return this.currentUserProfile()?.is_guest === true;
   }
-
 }

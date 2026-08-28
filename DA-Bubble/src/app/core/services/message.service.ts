@@ -1,24 +1,24 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { MessageView } from "../models/message-view.model";
-import { Supabase } from "../supabase/supabase.service";
-import { ChannelService } from "./channel.service";
-import { Auth } from './auth.service'
+import { MessageView } from '../models/message-view.model';
+import { Supabase } from '../supabase/supabase.service';
+import { ChannelService } from './channel.service';
+import { Auth } from './auth.service';
 import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MessageService {
-
   private supabase = inject(Supabase);
   private channelService = inject(ChannelService);
   private authService = inject(Auth);
+  private userService = inject(UserService);
   private realtimeChannel: any = null;
   private threadRealtimeChannel: any = null;
-  private userService = inject(UserService);
-  selectedThreadMessage = signal<MessageView | null>(null)
-  threadMessages = signal<MessageView[]>([])
 
+  messages = signal<MessageView[]>([]);
+  selectedThreadMessage = signal<MessageView | null>(null);
+  threadMessages = signal<MessageView[]>([]);
 
   private formatTime(dateString: string): string {
     return new Date(dateString).toLocaleTimeString('de-DE', {
@@ -27,257 +27,387 @@ export class MessageService {
     });
   }
 
-  messages = signal<MessageView[]>([]);
-
   async loadMessages(): Promise<void> {
     const channel = this.channelService.currentChannel();
-    const currentUserProfile = this.authService.currentUserProfile();
+    const profile = this.authService.currentUserProfile();
 
-    if (!channel || !currentUserProfile) {
+    if (!channel || !profile) {
       console.error('Kein Kanal ausgewählt oder kein Benutzerprofil verfügbar');
       return;
     }
 
+    const data = await this.fetchMessages(channel.id);
+    if (!data) return;
+    this.messages.set(this.buildMessageViews(data, profile.id));
+  }
+
+  private async fetchMessages(channelId: string): Promise<any[] | null> {
     const { data, error } = await this.supabase.supabase
       .from('messages')
       .select('*, profiles(name, avatar)')
-      .eq('channel_id', channel.id)
+      .eq('channel_id', channelId)
       .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Fehler beim Laden der Nachrichten:', error);
-      return;
-    }
+    if (!error) return data;
+    console.error('Fehler beim Laden der Nachrichten:', error);
+    return null;
+  }
 
-    const mainMessages = data.filter((message) => !message.parent_message_id)
-    const replies = data.filter((message) => message.parent_message_id)
-    const loadedMessages: MessageView[] = mainMessages.map((message) => {
-      const messageReplies = replies.filter(
-        (reply) => reply.parent_message_id === message.id
-      );
+  private buildMessageViews(data: any[], profileId: string): MessageView[] {
+    const mainMessages = data.filter((message) => !message.parent_message_id);
+    const replies = data.filter((message) => message.parent_message_id);
 
-      const threadCount = messageReplies.length;
-      const lastThreadReply = messageReplies.length > 0 ?
-        messageReplies[messageReplies.length - 1] : null
+    return mainMessages.map((message) =>
+      this.mapMainMessage(message, replies, profileId)
+    );
+  }
 
-      return {
-        id: message.id,
-        authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
-        avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
-        text: message.text,
-        time: this.formatTime(message.created_at),
-        createdAt: message.created_at,
-        isOwnMessage: message.author_id === currentUserProfile.id,
-        threadCount,
-        lastThreadReplyTime: lastThreadReply
-          ? this.formatTime(lastThreadReply.created_at)
-          : null,
-      };
-    });
-    this.messages.set(loadedMessages);
+  private mapMainMessage(
+    message: any,
+    replies: any[],
+    profileId: string
+  ): MessageView {
+    const messageReplies = replies.filter(
+      (reply) => reply.parent_message_id === message.id
+    );
+    const lastReply = messageReplies.at(-1) ?? null;
 
+    return this.createMessageView(
+      message,
+      profileId,
+      messageReplies.length,
+      lastReply
+    );
+  }
+
+  private createMessageView(
+    message: any,
+    profileId: string,
+    threadCount = 0,
+    lastReply: any = null
+  ): MessageView {
+    return {
+      id: message.id,
+      authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
+      avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
+      text: message.text,
+      time: this.formatTime(message.created_at),
+      createdAt: message.created_at,
+      isOwnMessage: message.author_id === profileId,
+      threadCount,
+      lastThreadReplyTime: lastReply
+        ? this.formatTime(lastReply.created_at)
+        : null,
+    };
   }
 
   private incrementThreadCount(parentMessageId: string): void {
     this.messages.update((messages) =>
       messages.map((message) =>
-        message.id === parentMessageId ? {
-          ...message,
-          threadCount: (message.threadCount || 0) + 1,
-        } : message
+        this.incrementMatchingThread(message, parentMessageId)
       )
     );
-    const selectedMessage = this.selectedThreadMessage();
 
-    if (selectedMessage?.id === parentMessageId) {
-      this.selectedThreadMessage.set({
-        ...selectedMessage,
-        threadCount: (selectedMessage.threadCount || 0) + 1,
-      });
-    }
+    this.incrementSelectedThread(parentMessageId);
+  }
+
+  private incrementMatchingThread(
+    message: MessageView,
+    parentId: string
+  ): MessageView {
+    if (message.id !== parentId) return message;
+
+    return {
+      ...message,
+      threadCount: (message.threadCount || 0) + 1,
+    };
+  }
+
+  private incrementSelectedThread(parentMessageId: string): void {
+    const selectedMessage = this.selectedThreadMessage();
+    if (selectedMessage?.id !== parentMessageId) return;
+
+    this.selectedThreadMessage.set({
+      ...selectedMessage,
+      threadCount: (selectedMessage.threadCount || 0) + 1,
+    });
   }
 
   async sendMessage(text: string): Promise<void> {
-    const { data: authUserData } =
-      await this.supabase.supabase.auth.getUser();
+    const authUser = await this.getAuthUser();
+    if (!authUser) return;
 
-    const authUser = authUserData.user;
-
-    if (!authUser) {
-      console.error('Kein eingeloggter Benutzer');
-      return;
-    }
-
-    const currentUserProfile = this.authService.currentUserProfile();
-
-    if (!currentUserProfile) {
+    const profile = this.authService.currentUserProfile();
+    if (!profile) {
       console.error('Kein Benutzerprofil verfügbar');
       return;
     }
 
     const channel = this.channelService.currentChannel();
-
     if (!channel) {
       console.error('Kein Kanal ausgewählt');
       return;
     }
 
+    await this.insertMessage(channel.id, authUser.id, text);
+  }
 
+  private async getAuthUser() {
+    const { data } = await this.supabase.supabase.auth.getUser();
 
-    const { data, error } = await this.supabase.supabase
+    if (!data.user) {
+      console.error('Kein eingeloggter Benutzer');
+      return null;
+    }
+
+    return data.user;
+  }
+
+  private async insertMessage(
+    channelId: string,
+    authorId: string,
+    text: string
+  ): Promise<void> {
+    const { error } = await this.supabase.supabase
       .from('messages')
-      .insert({
-        channel_id: channel.id,
-        author_id: authUser.id,
-        text,
-      })
+      .insert({ channel_id: channelId, author_id: authorId, text })
       .select()
       .single();
 
     if (error) {
       console.error('Fehler beim Senden der Nachricht:', error);
-      return;
     }
-
-
   }
+
   listenToMessages(): void {
     const channel = this.channelService.currentChannel();
+    if (!channel) return;
 
-    if (!channel) {
-      return;
-    }
+    this.removeMessageRealtimeChannel();
+    this.realtimeChannel = this.createMessageRealtimeChannel(channel.id);
+  }
 
-    if (this.realtimeChannel) {
-      this.supabase.supabase.removeChannel(this.realtimeChannel);
-    }
+  private removeMessageRealtimeChannel(): void {
+    if (!this.realtimeChannel) return;
+    this.supabase.supabase.removeChannel(this.realtimeChannel);
+  }
 
-    this.realtimeChannel = this.supabase.supabase
-      .channel(`messages-${channel.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `channel_id=eq.${channel.id}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as any;
+private createMessageRealtimeChannel(channelId: string) {
+  return this.supabase.supabase
+    .channel(`messages-${channelId}`)
+    .on(
+      'postgres_changes',
+      this.getMessageRealtimeConfig(channelId),
+      (payload) => this.handleMessageRealtimePayload(payload)
+    )
+    .subscribe((status) => {
+      console.log('Realtime status:', status);
+    });
+}
 
-          if (newMessage.parent_message_id) {
-            this.messages.update((messages) =>
-              messages.map((message) =>
-                message.id === newMessage.parent_message_id
-                  ? {
-                    ...message,
-                    threadCount: (message.threadCount || 0) + 1,
-                  }
-                  : message
-              )
-            );
+private getMessageRealtimeConfig(channelId: string) {
+  return {
+    event: '*' as const,
+    schema: 'public',
+    table: 'messages',
+    filter: `channel_id=eq.${channelId}`,
+  };
+}
 
-            return;
-          }
+private handleRealtimeMessage(newMessage: any): void {
+  if (newMessage.parent_message_id) {
+    this.updateThreadInfo(newMessage);
+    return;
+  }
 
-          const alreadyExists = this.messages().some(
-            (message) => message.id === newMessage.id
-          );
+  if (this.messageAlreadyExists(newMessage.id)) return;
 
-          if (alreadyExists) {
-            return;
-          }
+  const profile = this.authService.currentUserProfile();
+  if (!profile) return;
 
-          const currentUserProfile = this.authService.currentUserProfile();
+  this.addRealtimeMessage(newMessage, profile.id);
+}
 
-          if (!currentUserProfile) {
-            return;
-          }
+private updateThreadInfo(newMessage: any): void {
+  const parentId = newMessage.parent_message_id;
+  const replyTime = this.formatTime(newMessage.created_at);
 
-          const author = this.userService
-            .user()
-            .find((user) => user.id === newMessage.author_id);
+  this.incrementThreadCount(parentId);
+  this.updateLastThreadReplyTime(parentId, replyTime);
+}
 
-          const realtimeMessage: MessageView = {
-            id: newMessage.id,
-            authorName: author?.name ?? 'Unbekannter Benutzer',
-            avatar:
-              author?.avatar || 'assets/img/avatar/avatar-3.png',
-            text: newMessage.text,
-            time: this.formatTime(newMessage.created_at),
-            createdAt: newMessage.created_at,
-            isOwnMessage:
-              newMessage.author_id === currentUserProfile.id,
-            threadCount: 0,
-          };
+private updateLastThreadReplyTime(
+  parentId: string,
+  replyTime: string
+): void {
+  this.messages.update((messages) =>
+    messages.map((message) =>
+      this.setLastReplyTime(message, parentId, replyTime)
+    )
+  );
 
-          this.messages.update((messages) => [
-            ...messages,
-            realtimeMessage,
-          ]);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Realtime status:', status);
-      });
+  this.updateSelectedThreadReplyTime(parentId, replyTime);
+}
+
+private setLastReplyTime(
+  message: MessageView,
+  parentId: string,
+  replyTime: string
+): MessageView {
+  if (message.id !== parentId) return message;
+
+  return {
+    ...message,
+    lastThreadReplyTime: replyTime,
+  };
+}
+
+private updateSelectedThreadReplyTime(
+  parentId: string,
+  replyTime: string
+): void {
+  const selectedMessage = this.selectedThreadMessage();
+  if (selectedMessage?.id !== parentId) return;
+
+  this.selectedThreadMessage.set({
+    ...selectedMessage,
+    lastThreadReplyTime: replyTime,
+  });
+}
+
+  private handleMessageRealtimePayload(payload: any): void {
+  if (payload.eventType === 'INSERT') {
+    this.handleRealtimeMessage(payload.new);
+    return;
+  }
+
+  if (payload.eventType === 'UPDATE') {
+    this.handleRealtimeUpdate(payload.new);
+  }
+}
+
+private handleRealtimeUpdate(message: any): void {
+  if (!message?.id) return;
+
+  this.updateMessageStates(
+    message.id,
+    message.text
+  );
+}
+
+  private messageAlreadyExists(messageId: string): boolean {
+    return this.messages().some((message) => message.id === messageId);
+  }
+
+  private addRealtimeMessage(newMessage: any, profileId: string): void {
+    const author = this.userService
+      .user()
+      .find((user) => user.id === newMessage.author_id);
+
+    const message = this.createRealtimeMessage(
+      newMessage,
+      profileId,
+      author
+    );
+
+    this.messages.update((messages) => [...messages, message]);
+  }
+
+  private createRealtimeMessage(
+    message: any,
+    profileId: string,
+    author: any
+  ): MessageView {
+    return {
+      id: message.id,
+      authorName: author?.name ?? 'Unbekannter Benutzer',
+      avatar: author?.avatar || 'assets/img/avatar/avatar-3.png',
+      text: message.text,
+      time: this.formatTime(message.created_at),
+      createdAt: message.created_at,
+      isOwnMessage: message.author_id === profileId,
+      threadCount: 0,
+    };
   }
 
   async openThread(message: MessageView): Promise<void> {
     console.log('Thread geöffnet:', message);
     this.selectedThreadMessage.set(message);
-    await this.loadThreadMessages(message.id)
-    this.listenToThreadMessage(message.id)
+    await this.loadThreadMessages(message.id);
+    this.listenToThreadMessage(message.id);
   }
 
   async loadThreadMessages(parentMessageId: string): Promise<void> {
+    const profile = this.authService.currentUserProfile();
+    if (!profile) return;
 
-    const currentUserProfile = this.authService.currentUserProfile()
+    const data = await this.fetchThreadMessages(parentMessageId);
+    if (!data) return;
 
-    if (!currentUserProfile) {
-      return;
-    }
+    this.threadMessages.set(
+      data.map((message) => this.mapThreadMessage(message, profile.id))
+    );
+  }
 
+  private async fetchThreadMessages(
+    parentMessageId: string
+  ): Promise<any[] | null> {
     const { data, error } = await this.supabase.supabase
       .from('messages')
       .select('*, profiles(name,avatar)')
       .eq('parent_message_id', parentMessageId)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: true });
 
-    if (error) {
-      console.log('Fehler beim Laden der Thread-Nachrichten:', error);
-      return;
-    }
+    if (!error) return data;
+    console.log('Fehler beim Laden der Thread-Nachrichten:', error);
+    return null;
+  }
 
-    const loadedThreadMessages: MessageView[] = data.map((message) => ({
+  private mapThreadMessage(message: any, profileId: string): MessageView {
+    return {
       id: message.id,
       authorName: message.profiles?.name || 'Unbekannter Benutzer',
       avatar: message.profiles?.avatar || 'assets/img/avatar/avatar-3.png',
       text: message.text,
       time: this.formatTime(message.created_at),
       createdAt: message.created_at,
-      isOwnMessage: message.author_id === currentUserProfile.id,
-    }));
-
-    this.threadMessages.set(loadedThreadMessages)
+      isOwnMessage: message.author_id === profileId,
+    };
   }
 
   async sendThreadMessage(text: string): Promise<void> {
-    const selectedMessage = this.selectedThreadMessage();
-    const currentUserProfile = this.authService.currentUserProfile();
+    const message = this.selectedThreadMessage();
+    const profile = this.authService.currentUserProfile();
     const channel = this.channelService.currentChannel();
 
-    if (!selectedMessage || !currentUserProfile || !channel) {
+    if (!message || !profile || !channel) {
       console.error('Thread, Benutzer oder Channel fehlt');
       return;
     }
 
-    const { data, error } = await this.supabase.supabase
+    await this.insertThreadMessage(
+      channel.id,
+      profile.id,
+      message.id,
+      text
+    );
+
+    await this.loadThreadMessages(message.id);
+  }
+
+  private async insertThreadMessage(
+    channelId: string,
+    authorId: string,
+    parentId: string,
+    text: string
+  ): Promise<void> {
+    const { error } = await this.supabase.supabase
       .from('messages')
       .insert({
-        channel_id: channel.id,
-        author_id: currentUserProfile.id,
+        channel_id: channelId,
+        author_id: authorId,
         text,
-        parent_message_id: selectedMessage.id,
+        parent_message_id: parentId,
       })
       .select()
       .single();
@@ -285,36 +415,78 @@ export class MessageService {
     if (error) {
       console.error('Fehler beim Senden der Thread-Nachricht:', error);
     }
-    await this.loadThreadMessages(selectedMessage.id);
   }
 
   closeThread(): void {
     this.selectedThreadMessage.set(null);
-    this.threadMessages.set([])
+    this.threadMessages.set([]);
   }
 
   listenToThreadMessage(parentMessageId: string): void {
-    if (this.threadRealtimeChannel) {
-      this.supabase.supabase.removeChannel(this.threadRealtimeChannel)
-    }
+    this.removeThreadRealtimeChannel();
+    this.threadRealtimeChannel =
+      this.createThreadRealtimeChannel(parentMessageId);
+  }
 
-    this.threadRealtimeChannel = this.supabase.supabase
-      .channel(`thread-messages-${parentMessageId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `parent_message_id=eq.${parentMessageId}`,
-        },
-        (payload) => {
-          console.log('Realtime thread reply:', payload.new);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Thread realtime status:', status);
-      });
+  private removeThreadRealtimeChannel(): void {
+    if (!this.threadRealtimeChannel) return;
+    this.supabase.supabase.removeChannel(this.threadRealtimeChannel);
+  }
+
+private createThreadRealtimeChannel(parentMessageId: string) {
+  return this.supabase.supabase
+    .channel(`thread-messages-${parentMessageId}`)
+    .on(
+      'postgres_changes',
+      this.getThreadRealtimeConfig(parentMessageId),
+      (payload) => this.handleRealtimeThreadMessage(payload.new)
+    )
+    .subscribe((status) => {
+      console.log('Thread realtime status:', status);
+    });
+}
+  
+private handleRealtimeThreadMessage(newMessage: any): void {
+  if (this.threadMessageAlreadyExists(newMessage.id)) return;
+
+  const profile = this.authService.currentUserProfile();
+  if (!profile) return;
+
+  const message = this.buildRealtimeThreadMessage(
+    newMessage,
+    profile.id
+  );
+
+  this.threadMessages.update((messages) => [...messages, message]);
+}
+
+private threadMessageAlreadyExists(messageId: string): boolean {
+  return this.threadMessages()
+    .some((message) => message.id === messageId);
+}
+
+private buildRealtimeThreadMessage(
+  newMessage: any,
+  profileId: string
+): MessageView {
+  const author = this.userService
+    .user()
+    .find((user) => user.id === newMessage.author_id);
+
+  return this.createRealtimeMessage(
+    newMessage,
+    profileId,
+    author
+  );
+}
+
+  private getThreadRealtimeConfig(parentMessageId: string) {
+    return {
+      event: 'INSERT' as const,
+      schema: 'public',
+      table: 'messages',
+      filter: `parent_message_id=eq.${parentMessageId}`,
+    };
   }
 
   async updateMessage(
@@ -322,48 +494,61 @@ export class MessageService {
     newText: string
   ): Promise<void> {
     const text = newText.trim();
-
     if (!text) return;
 
-    const { error } =
-      await this.supabase.supabase
-        .from('messages')
-        .update({
-          text: text,
-        })
-        .eq('id', messageId)
-        .select('*');
+    const updated = await this.updateMessageRecord(messageId, text);
+    if (!updated) return;
 
-    if (error) {
-      console.log('error:', error);
-      return;
-    }
+    this.updateMessageStates(messageId, text);
+  }
 
+  private async updateMessageRecord(
+    messageId: string,
+    text: string
+  ): Promise<boolean> {
+    const { error } = await this.supabase.supabase
+      .from('messages')
+      .update({ text })
+      .eq('id', messageId)
+      .select('*');
+
+    if (!error) return true;
+    console.log('error:', error);
+    return false;
+  }
+
+  private updateMessageStates(messageId: string, text: string): void {
     this.messages.update((messages) =>
-      messages.map((message) =>
-        message.id === messageId
-          ? { ...message, text }
-          : message
-      )
+      this.replaceMessageText(messages, messageId, text)
     );
 
     this.threadMessages.update((messages) =>
-      messages.map((message) =>
-        message.id === messageId
-          ? { ...message, text }
-          : message
-      )
+      this.replaceMessageText(messages, messageId, text)
     );
 
-    const selectedMessage =
-      this.selectedThreadMessage();
-
-    if (selectedMessage?.id === messageId) {
-      this.selectedThreadMessage.set({
-        ...selectedMessage,
-        text,
-      });
-    }
+    this.updateSelectedThreadText(messageId, text);
   }
 
+  private replaceMessageText(
+    messages: MessageView[],
+    messageId: string,
+    text: string
+  ): MessageView[] {
+    return messages.map((message) =>
+      message.id === messageId ? { ...message, text } : message
+    );
+  }
+
+  private updateSelectedThreadText(
+    messageId: string,
+    text: string
+  ): void {
+    const selectedMessage = this.selectedThreadMessage();
+    if (selectedMessage?.id !== messageId) return;
+
+    this.selectedThreadMessage.set({
+      ...selectedMessage,
+      text,
+    });
+  }
 }

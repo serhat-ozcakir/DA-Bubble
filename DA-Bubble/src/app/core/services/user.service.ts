@@ -18,9 +18,7 @@ async loadUsers(): Promise<void> {
     console.error('Error loading users:', error);
     return;
   } 
-
    this.user.set(data);
- 
 }
 
 }

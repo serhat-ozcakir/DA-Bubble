@@ -24,48 +24,81 @@ export class DirectMessageService {
       return;
     }
 
+    const data = await this.fetchDirectMessages(currentUser, selectedUser);
+    if (!data) return;
+    this.setDirectMessages(data, currentUser, selectedUser);
+  }
+
+  private async fetchDirectMessages(
+    currentUser: Profile,
+    selectedUser: Profile
+  ): Promise<any[] | null> {
+    const filter = this.createConversationFilter(currentUser, selectedUser);
     const { data, error } = await this.supabase.supabase
       .from('direct_messages')
       .select('*')
-      .or(
-        `and(sender_id.eq.${currentUser.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUser.id})`
-      )
+      .or(filter)
       .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Fehler beim Laden der Direktnachrichten:', error);
-      return;
-    }
+    if (!error) return data;
+    console.error('Fehler beim Laden der Direktnachrichten:', error);
+    return null;
+  }
 
-    const loadedMessages = data.map((message) =>
+  private createConversationFilter(
+    currentUser: Profile,
+    selectedUser: Profile
+  ): string {
+    return `and(sender_id.eq.${currentUser.id},receiver_id.eq.${selectedUser.id}),`
+      + `and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUser.id})`;
+  }
+
+  private setDirectMessages(
+    data: any[],
+    currentUser: Profile,
+    selectedUser: Profile
+  ): void {
+    const messages = data.map((message) =>
       this.mapDirectMessage(message, currentUser, selectedUser)
     );
-
-    this.directMessages.set(loadedMessages);
+    this.directMessages.set(messages);
   }
 
-async updateDirectMessage(
-  messageId: string,
-  newText: string
-): Promise<void> {
-  const currentUser = this.authService.currentUserProfile();
-  const trimmedText = newText.trim();
+  async updateDirectMessage(
+    messageId: string,
+    newText: string
+  ): Promise<void> {
+    const currentUser = this.authService.currentUserProfile();
+    const text = newText.trim();
 
-  if (!currentUser || !trimmedText) {
-    return;
+    if (!currentUser || !text) return;
+
+    const data = await this.updateDirectMessageRecord(
+      messageId,
+      text,
+      currentUser.id
+    );
+    this.updateDirectMessageState(messageId, data.text);
   }
 
-  const { data, error } = await this.supabase.supabase
-    .from('direct_messages')
-    .update({
-      text: trimmedText,
-    })
-    .eq('id', messageId)
-    .eq('sender_id', currentUser.id)
-    .select()
-    .single();
+  private async updateDirectMessageRecord(
+    messageId: string,
+    text: string,
+    userId: string
+  ): Promise<any> {
+    const { data, error } = await this.supabase.supabase
+      .from('direct_messages')
+      .update({ text })
+      .eq('id', messageId)
+      .eq('sender_id', userId)
+      .select()
+      .single();
 
-  if (error) {
+    if (error) this.throwUpdateError(error);
+    return data;
+  }
+
+  private throwUpdateError(error: unknown): never {
     console.error(
       'Fehler beim Bearbeiten der Direktnachricht:',
       error
@@ -73,17 +106,16 @@ async updateDirectMessage(
     throw error;
   }
 
-  this.directMessages.update((messages) =>
-    messages.map((message) =>
-      message.id === messageId
-        ? {
-            ...message,
-            text: data.text,
-          }
-        : message
-    )
-  );
-}
+  private updateDirectMessageState(
+    messageId: string,
+    text: string
+  ): void {
+    this.directMessages.update((messages) =>
+      messages.map((message) =>
+        message.id === messageId ? { ...message, text } : message
+      )
+    );
+  }
 
   async sendDirectMessage(text: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
@@ -95,121 +127,163 @@ async updateDirectMessage(
       return;
     }
 
+    const data = await this.insertDirectMessage(
+      authUser.id,
+      selectedUser.id,
+      text
+    );
+    if (!data) return;
+    this.addSentMessage(data, currentUser, selectedUser);
+  }
+
+  private async insertDirectMessage(
+    senderId: string,
+    receiverId: string,
+    text: string
+  ): Promise<any | null> {
     const { data, error } = await this.supabase.supabase
       .from('direct_messages')
-      .insert({
-        sender_id: authUser.id,
-        receiver_id: selectedUser.id,
-        text,
-      })
+      .insert({ sender_id: senderId, receiver_id: receiverId, text })
       .select()
       .single();
 
-    if (error) {
-      console.error('Fehler beim Senden der Direktnachricht:', error);
-      return;
-    }
+    if (!error) return data;
+    console.error('Fehler beim Senden der Direktnachricht:', error);
+    return null;
+  }
 
-    const newMessage = this.mapDirectMessage(data, currentUser, selectedUser);
+  private addSentMessage(
+    data: any,
+    currentUser: Profile,
+    selectedUser: Profile
+  ): void {
+    const message = this.mapDirectMessage(
+      data,
+      currentUser,
+      selectedUser
+    );
+    this.addMessageIfMissing(message);
+  }
 
+  private addMessageIfMissing(message: MessageView): void {
     this.directMessages.update((messages) => {
-      const alreadyExists = messages.some((message) => message.id === newMessage.id);
-
-      if (alreadyExists) {
-        return messages;
-      }
-
-      return [...messages, newMessage];
+      const exists = messages.some((item) => item.id === message.id);
+      return exists ? messages : [...messages, message];
     });
   }
 
-listenToDirectMessages(): void {
-  const currentUser = this.authService.currentUserProfile();
-  const selectedUser = this.currentDmUser();
+  listenToDirectMessages(): void {
+    const currentUser = this.authService.currentUserProfile();
+    const selectedUser = this.currentDmUser();
 
-  if (!currentUser || !selectedUser) {
-    return;
+    if (!currentUser || !selectedUser) return;
+
+    this.removeDmRealtimeChannel();
+    this.dmRealtimeChannel = this.createDmRealtimeChannel(
+      currentUser,
+      selectedUser
+    );
   }
 
-  this.removeDmRealtimeChannel();
-
-  this.dmRealtimeChannel = this.supabase.supabase
-    .channel(`direct-messages-${currentUser.id}-${selectedUser.id}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'direct_messages',
-      },
-      (payload) => {
-        const changedMessage = payload.new as any;
-
-        if (!changedMessage?.id) {
-          return;
-        }
-
-        if (!this.belongsToCurrentConversation(changedMessage)) {
-          return;
-        }
-
-        const mappedMessage = this.mapDirectMessage(
-          changedMessage,
+  private createDmRealtimeChannel(
+    currentUser: Profile,
+    selectedUser: Profile
+  ): RealtimeChannel {
+    return this.supabase.supabase
+      .channel(`direct-messages-${currentUser.id}-${selectedUser.id}`)
+      .on(
+        'postgres_changes',
+        this.getDmRealtimeConfig(),
+        (payload) => this.handleDmRealtimePayload(
+          payload,
           currentUser,
           selectedUser
-        );
+        )
+      )
+      .subscribe();
+  }
 
-        if (payload.eventType === 'INSERT') {
-          this.directMessages.update((messages) => {
-            const alreadyExists = messages.some(
-              (message) => message.id === mappedMessage.id
-            );
+  private getDmRealtimeConfig() {
+    return {
+      event: '*' as const,
+      schema: 'public',
+      table: 'direct_messages',
+    };
+  }
 
-            if (alreadyExists) {
-              return messages;
-            }
+  private handleDmRealtimePayload(
+    payload: any,
+    currentUser: Profile,
+    selectedUser: Profile
+  ): void {
+    const changedMessage = payload.new as any;
+    if (!changedMessage?.id) return;
+    if (!this.belongsToCurrentConversation(changedMessage)) return;
 
-            return [...messages, mappedMessage];
-          });
+    const message = this.mapDirectMessage(
+      changedMessage,
+      currentUser,
+      selectedUser
+    );
+    this.applyRealtimeChange(payload.eventType, message);
+  }
 
-          return;
-        }
+  private applyRealtimeChange(
+    eventType: string,
+    message: MessageView
+  ): void {
+    if (eventType === 'INSERT') {
+      this.addMessageIfMissing(message);
+      return;
+    }
 
-        if (payload.eventType === 'UPDATE') {
-          this.directMessages.update((messages) =>
-            messages.map((message) =>
-              message.id === mappedMessage.id
-                ? mappedMessage
-                : message
-            )
-          );
-        }
-      }
-    )
-    .subscribe();
-}
+    if (eventType === 'UPDATE') {
+      this.replaceDirectMessage(message);
+    }
+  }
+
+  private replaceDirectMessage(message: MessageView): void {
+    this.directMessages.update((messages) =>
+      messages.map((item) =>
+        item.id === message.id ? message : item
+      )
+    );
+  }
 
   removeDmRealtimeChannel(): void {
-    if (this.dmRealtimeChannel) {
-      this.supabase.supabase.removeChannel(this.dmRealtimeChannel);
-      this.dmRealtimeChannel = null;
-    }
+    if (!this.dmRealtimeChannel) return;
+
+    this.supabase.supabase.removeChannel(this.dmRealtimeChannel);
+    this.dmRealtimeChannel = null;
   }
 
   private belongsToCurrentConversation(message: any): boolean {
     const currentUser = this.authService.currentUserProfile();
     const selectedUser = this.currentDmUser();
 
-    if (!currentUser || !selectedUser) {
-      return false;
-    }
+    if (!currentUser || !selectedUser) return false;
 
-    return (
-      (message.sender_id === currentUser.id &&
-        message.receiver_id === selectedUser.id) ||
-      (message.sender_id === selectedUser.id &&
-        message.receiver_id === currentUser.id)
+    return this.isMessageBetweenUsers(
+      message,
+      currentUser.id,
+      selectedUser.id
     );
+  }
+
+  private isMessageBetweenUsers(
+    message: any,
+    currentUserId: string,
+    selectedUserId: string
+  ): boolean {
+    const sentByCurrentUser =
+      message.sender_id === currentUserId &&
+      message.receiver_id === selectedUserId;
+
+    const sentBySelectedUser =
+      message.sender_id === selectedUserId &&
+      message.receiver_id === currentUserId;
+
+    return sentByCurrentUser || sentBySelectedUser;
   }
 
   private mapDirectMessage(
@@ -217,21 +291,32 @@ listenToDirectMessages(): void {
     currentUser: Profile,
     selectedUser: Profile
   ): MessageView {
+    const isOwnMessage = message.sender_id === currentUser.id;
+
     return {
       id: message.id,
-      authorName:
-        message.sender_id === currentUser.id
-          ? currentUser.name
-          : selectedUser.name,
-      avatar:
-        message.sender_id === currentUser.id
-          ? currentUser.avatar || 'assets/img/avatar/avatar-3.png'
-          : selectedUser.avatar || 'assets/img/avatar/avatar-3.png',
+      authorName: isOwnMessage ? currentUser.name : selectedUser.name,
+      avatar: this.getMessageAvatar(
+        isOwnMessage,
+        currentUser,
+        selectedUser
+      ),
       text: message.text,
       time: this.formatTime(message.created_at),
-       createdAt: message.created_at,
-      isOwnMessage: message.sender_id === currentUser.id,
+      createdAt: message.created_at,
+      isOwnMessage,
     };
+  }
+
+  private getMessageAvatar(
+    isOwnMessage: boolean,
+    currentUser: Profile,
+    selectedUser: Profile
+  ): string {
+    const fallback = 'assets/img/avatar/avatar-3.png';
+    return isOwnMessage
+      ? currentUser.avatar || fallback
+      : selectedUser.avatar || fallback;
   }
 
   private formatTime(dateString: string): string {
@@ -241,7 +326,7 @@ listenToDirectMessages(): void {
     });
   }
 
-  async selectDmUser(user:Profile):Promise<void>{
+  async selectDmUser(user: Profile): Promise<void> {
     this.currentDmUser.set(user);
     await this.loadDirectMessages();
     this.listenToDirectMessages();
