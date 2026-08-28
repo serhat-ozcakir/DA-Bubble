@@ -414,6 +414,39 @@
   }
 }
 
+@media (min-width: 1025px) and (max-width: 1200px) {
+  .message-edit {
+    right:0;
+    left: auto;
+    transform: none;
+    min-width: 220px;
+    max-width: calc(100vw - 32px);
+    top: 56px;
+    padding: 5px 10px;
+  }
+
+  .message-edit-form {
+    &__actions {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      padding-left: 0;
+      box-sizing: border-box;
+    }
+
+    &__button {
+      min-width: 0;
+      padding: 9px 14px;
+      font-size: 12px;
+      line-height: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+}
+
 @media (min-width: 1025px) and (max-width: 1100px) {
   .message {
     &__thread-info {
@@ -501,7 +534,7 @@
     gap: 5px;
     padding: 5px 8px;
 
-    > button {
+    >button {
       width: 32px;
       height: 32px;
       flex-shrink: 0;

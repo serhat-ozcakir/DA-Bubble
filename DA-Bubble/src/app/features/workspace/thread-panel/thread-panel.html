@@ -93,7 +93,8 @@
           <div class="thread-reactions">
             @for(reaction of getVisibleThreadReactions(reply.id); track reaction.emoji){
             <button type="button" class="thread-reactions__button"
-              [class.thread-reactions__button--active]="reaction.reactedByCurrentUser">
+              [class.thread-reactions__button--active]="reaction.reactedByCurrentUser"
+               (click)="toggleThreadReaction(reply.id,reaction.emoji)">
               <span>{{ reaction.emoji }}</span>
               <span>{{ reaction.count }}</span>
               <div class="reaction-tooltip">
