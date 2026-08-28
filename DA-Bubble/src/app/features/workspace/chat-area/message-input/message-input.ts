@@ -1,9 +1,9 @@
-import {ElementRef, HostListener, Component, inject, signal} from '@angular/core';
-import { MessageService } from '../../../../core/services/message.service';
+import {Component, ElementRef, HostListener, inject, signal,} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { MessageService } from '../../../../core/services/message.service';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
 import { ChannelService } from '../../../../core/services/channel.service';
-import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { UserService } from '../../../../core/services/user.service';
 import { Channel } from '../../../../core/models/channel.model';
 import { Profile } from '../../../../core/models/profile.model';
@@ -32,29 +32,30 @@ export class MessageInput {
 
   async sendMessage(): Promise<void> {
     const text = this.messageText.trim();
-
-    if (!text) {
-      return;
-    }
+    if (!text) return;
 
     this.messageText = '';
 
     try {
-      if (this.directMessageService.currentDmUser()) {
-        await this.directMessageService.sendDirectMessage(text);
-      } else {
-        await this.messageService.sendMessage(text);
-      }
-
+      await this.sendToCurrentConversation(text);
       this.closeMentionDropdown();
     } catch (error) {
-      console.error(
-        'Message could not be sent:',
-        error
-      );
-
-      this.messageText = text;
+      this.handleSendError(error, text);
     }
+  }
+
+  private async sendToCurrentConversation(text: string): Promise<void> {
+    if (this.directMessageService.currentDmUser()) {
+      await this.directMessageService.sendDirectMessage(text);
+      return;
+    }
+
+    await this.messageService.sendMessage(text);
+  }
+
+  private handleSendError(error: unknown, text: string): void {
+    console.error('Message could not be sent:', error);
+    this.messageText = text;
   }
 
   toggleEmojiPicker(): void {
@@ -63,36 +64,39 @@ export class MessageInput {
   }
 
   addEmoji(event: any): void {
-    const emoji =
-      event.emoji.native ||
-      event.emoji.colons ||
-      '';
-
+    const emoji = event.emoji.native || event.emoji.colons || '';
     this.messageText += emoji;
     this.showEmojiPicker = false;
   }
 
   onMessageInput(): void {
-    const lastWord =
-      this.messageText.split(' ').pop() ?? '';
+    const lastWord = this.getLastWord();
 
     if (lastWord.startsWith('@')) {
-      this.mentionType.set('users');
-      this.mentionSearchText.set(
-        lastWord.slice(1).toLowerCase()
-      );
+      this.openMention('users', lastWord);
       return;
     }
 
     if (lastWord.startsWith('#')) {
-      this.mentionType.set('channels');
-      this.mentionSearchText.set(
-        lastWord.slice(1).toLowerCase()
-      );
+      this.openMention('channels', lastWord);
       return;
     }
 
     this.closeMentionDropdown();
+  }
+
+  private getLastWord(): string {
+    return this.messageText.split(' ').pop() ?? '';
+  }
+
+  private openMention(
+    type: 'users' | 'channels',
+    word: string
+  ): void {
+    this.mentionType.set(type);
+    this.mentionSearchText.set(
+      word.slice(1).toLowerCase()
+    );
   }
 
   toggleMentionButton(): void {
@@ -106,15 +110,18 @@ export class MessageInput {
 
   private switchToUserMention(): void {
     this.replaceOrAddMentionCharacter('@');
-
-    this.mentionType.set('users');
-    this.mentionSearchText.set('');
+    this.setMentionType('users');
   }
 
   private switchToChannelMention(): void {
     this.replaceOrAddMentionCharacter('#');
+    this.setMentionType('channels');
+  }
 
-    this.mentionType.set('channels');
+  private setMentionType(
+    type: 'users' | 'channels'
+  ): void {
+    this.mentionType.set(type);
     this.mentionSearchText.set('');
   }
 
@@ -122,89 +129,73 @@ export class MessageInput {
     character: '@' | '#'
   ): void {
     const currentText = this.messageText;
-    const lastCharacter = currentText.at(-1);
 
-    if (
-      lastCharacter === '@' ||
-      lastCharacter === '#'
-    ) {
-      this.messageText =
-        currentText.slice(0, -1) +
-        character;
-
+    if (this.endsWithMentionCharacter(currentText)) {
+      this.replaceLastCharacter(currentText, character);
       return;
     }
 
-    const separator =
-      currentText.length > 0 &&
-      !currentText.endsWith(' ')
-        ? ' '
-        : '';
+    this.appendMentionCharacter(currentText, character);
+  }
 
-    this.messageText =
-      `${currentText}${separator}${character}`;
+  private endsWithMentionCharacter(text: string): boolean {
+    const lastCharacter = text.at(-1);
+    return lastCharacter === '@' || lastCharacter === '#';
+  }
+
+  private replaceLastCharacter(
+    text: string,
+    character: '@' | '#'
+  ): void {
+    this.messageText = text.slice(0, -1) + character;
+  }
+
+  private appendMentionCharacter(
+    text: string,
+    character: '@' | '#'
+  ): void {
+    const separator =
+      text.length > 0 && !text.endsWith(' ') ? ' ' : '';
+
+    this.messageText = `${text}${separator}${character}`;
   }
 
   filteredUsers(): Profile[] {
-    const search =
-      this.mentionSearchText();
+    const search = this.mentionSearchText();
+    const users = this.userService.user();
 
-    const users =
-      this.userService.user();
-
-    if (!search) {
-      return users;
-    }
+    if (!search) return users;
 
     return users.filter((user) =>
-      user.name
-        .toLowerCase()
-        .includes(search)
+      user.name.toLowerCase().includes(search)
     );
   }
 
   filteredChannels(): Channel[] {
-    const search =
-      this.mentionSearchText();
+    const search = this.mentionSearchText();
+    const channels = this.channelService.channels();
 
-    const channels =
-      this.channelService.channels();
-
-    if (!search) {
-      return channels;
-    }
+    if (!search) return channels;
 
     return channels.filter((channel) =>
-      channel.name
-        .toLowerCase()
-        .includes(search)
+      channel.name.toLowerCase().includes(search)
     );
   }
 
   selectUserMention(user: Profile): void {
-    this.replaceCurrentMention(
-      `@${user.name} `
-    );
+    this.replaceCurrentMention(`@${user.name} `);
   }
 
   selectChannelMention(channel: Channel): void {
-    this.replaceCurrentMention(
-      `#${channel.name} `
-    );
+    this.replaceCurrentMention(`#${channel.name} `);
   }
 
   private replaceCurrentMention(
     replacement: string
   ): void {
-    const words =
-      this.messageText.split(' ');
-
-    words[words.length - 1] =
-      replacement.trimEnd();
-
-    this.messageText =
-      `${words.join(' ')} `;
-
+    const words = this.messageText.split(' ');
+    words[words.length - 1] = replacement.trimEnd();
+    this.messageText = `${words.join(' ')} `;
     this.closeMentionDropdown();
   }
 
@@ -213,27 +204,22 @@ export class MessageInput {
     this.mentionSearchText.set('');
   }
 
-  @HostListener(
-    'document:click',
-    ['$event']
-  )
-  closePickersOnOutsideClick(
-    event: MouseEvent
-  ): void {
+  @HostListener('document:click', ['$event'])
+  closePickersOnOutsideClick(event: MouseEvent): void {
     const clickedInside =
-      this.elementRef.nativeElement
-        .contains(event.target);
+      this.elementRef.nativeElement.contains(event.target);
 
     if (!clickedInside) {
-      this.showEmojiPicker = false;
-      this.closeMentionDropdown();
+      this.closeAllPickers();
     }
   }
 
-  @HostListener(
-    'document:keydown.escape'
-  )
+  @HostListener('document:keydown.escape')
   closePickersOnEscape(): void {
+    this.closeAllPickers();
+  }
+
+  private closeAllPickers(): void {
     this.showEmojiPicker = false;
     this.closeMentionDropdown();
   }

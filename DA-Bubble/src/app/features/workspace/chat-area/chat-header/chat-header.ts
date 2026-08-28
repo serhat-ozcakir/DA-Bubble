@@ -1,4 +1,4 @@
-import { Component, inject, output,computed } from '@angular/core';
+import { Component, computed, inject, output } from '@angular/core';
 import { ChannelService } from '../../../../core/services/channel.service';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
 import { UserService } from '../../../../core/services/user.service';
@@ -19,36 +19,34 @@ export class ChatHeader {
   openMemberList = output<void>();
   openChannelSettings = output<void>();
   openShowProfil = output<void>();
-  constructor() {
-  }
 
-    isSelfDm = computed(() => {
+  isSelfDm = computed(() => {
     const dmUser = this.directMessageService.currentDmUser();
     const currentUser = this.authService.currentUserProfile();
-    
+
     return !!dmUser &&
       !!currentUser &&
       dmUser.id === currentUser.id;
-  })
+  });
 
   openMemberListDialog(): void {
     this.openMemberList.emit();
   }
 
-  openMembersMobile():void{
-    if(window.matchMedia('(max-width:1024px)').matches){
-       this.openMemberList.emit();
-       return;
+  openMembersMobile(): void {
+    if (window.matchMedia('(max-width:1024px)').matches) {
+      this.openMemberList.emit();
+      return;
     }
-     this.openAddMembers.emit();
+
+    this.openAddMembers.emit();
   }
 
   openChannelSettingsDialog(): void {
     this.openChannelSettings.emit();
   }
 
-  openShowProfilDialog():void{
+  openShowProfilDialog(): void {
     this.openShowProfil.emit();
   }
-
 }

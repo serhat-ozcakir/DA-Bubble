@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
   templateUrl: './datenschutz.html',
   styleUrl: './datenschutz.scss',
 })
+
 export class Datenschutz {
  goBack():void{
   window.history.back();

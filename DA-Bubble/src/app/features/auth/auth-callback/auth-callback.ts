@@ -14,30 +14,35 @@ export class AuthCallback implements OnInit {
     private authService: Auth,
     private router: Router,
     private toastService: ToastService
-  ) {
+  ) {}
 
+  async ngOnInit(): Promise<void> {
+    try {
+      await this.handleGoogleCallback();
+    } catch (error) {
+      await this.handleCallbackError(error);
+    }
   }
 
-async ngOnInit(): Promise<void> {
-  try {
-    const isNewGoogleUser = await this.authService.ensureGoogleProfile();
+  private async handleGoogleCallback(): Promise<void> {
+    const isNewUser = await this.authService.ensureGoogleProfile();
 
-    if (isNewGoogleUser) {
+    if (isNewUser) {
       await this.router.navigate(['/choose-avatar']);
       return;
     }
+    await this.completeGoogleLogin();
+  }
 
+  private async completeGoogleLogin(): Promise<void> {
     await this.authService.updateStatus('online');
-
     this.toastService.show('Google Anmeldung erfolgreich!');
-
     await this.router.navigate(['/workspace']);
-  } catch (error) {
+  }
+
+  private async handleCallbackError(error: unknown): Promise<void> {
     console.error('Google callback error:', error);
-
     this.toastService.show('Google-Anmeldung fehlgeschlagen.');
-
     await this.router.navigate(['/login']);
   }
-}
 }

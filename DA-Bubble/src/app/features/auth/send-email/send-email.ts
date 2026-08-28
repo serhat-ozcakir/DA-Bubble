@@ -7,6 +7,7 @@ import { RouterLink } from "@angular/router";
   templateUrl: './send-email.html',
   styleUrl: './send-email.scss',
 })
+
 export class SendEmail {
   goBack(){
     window.history.back();

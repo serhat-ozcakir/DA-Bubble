@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterLink, Router } from "@angular/router";
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Auth } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -11,41 +16,54 @@ import { ToastService } from '../../../core/services/toast.service';
   styleUrl: './sign-up.scss',
 })
 export class SignUp {
- // [x: string]: any;
-  signUpForm: FormGroup;
+  signUpForm = new FormGroup({
+    name: new FormControl('', [
+      Validators.required,
+    ]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+      Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/),
+    ]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
+    terms: new FormControl(false, [
+      Validators.requiredTrue,
+    ]),
+  });
 
   constructor(
     private router: Router,
     private authService: Auth,
     private toastService: ToastService
-  ) {
-    this.signUpForm = new FormGroup({
-      name: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)]),
-      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-      terms: new FormControl(false, [Validators.requiredTrue])
-    });
-  }
+  ) {}
 
-  goBack() {
+  goBack(): void {
     window.history.back();
   }
-  onSignUp(){
+
+  onSignUp(): void {
     if (this.signUpForm.invalid) {
       this.signUpForm.markAllAsTouched();
       return;
     }
 
+    this.saveRegisterData();
+    this.finishSignUpStep();
+  }
+
+  private saveRegisterData(): void {
     this.authService.setRegisterData({
-      name: this.signUpForm.get('name')?.value,
-      email: this.signUpForm.get('email')?.value,
-      password: this.signUpForm.get('password')?.value,
+      name: this.signUpForm.get('name')?.value ?? '',
+      email: this.signUpForm.get('email')?.value ?? '',
+      password: this.signUpForm.get('password')?.value ?? '',
     });
+  }
+
+  private finishSignUpStep(): void {
     this.toastService.show('Konto erfolgreich erstellt!');
     this.router.navigate(['/choose-avatar']);
   }
-
 }
-
-
-

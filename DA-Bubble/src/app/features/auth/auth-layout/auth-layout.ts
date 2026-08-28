@@ -9,15 +9,16 @@ import { Router, RouterOutlet } from '@angular/router';
   templateUrl: './auth-layout.html',
   styleUrl: './auth-layout.scss',
 })
+
 export class AuthLayout {
-constructor(private router: Router) {
+  constructor(private router: Router) {
+  }
 
-}
+  isLoginPage(): boolean {
+    return this.router.url === '/login';
+  }
 
-isLoginPage():boolean{
-  return this.router.url === '/login';
-}
-isIntro():boolean{
-  return this.router.url === '/';
-}
+  isIntro(): boolean {
+    return this.router.url === '/';
+  }
 }

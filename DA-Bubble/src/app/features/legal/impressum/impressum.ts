@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
   templateUrl: './impressum.html',
   styleUrl: './impressum.scss',
 })
+
 export class Impressum {
  goBack():void{
   window.history.back();

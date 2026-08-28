@@ -1,7 +1,12 @@
 import { Component } from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth.service';
-import { Router , RouterLink} from '@angular/router';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators} from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
@@ -11,40 +16,77 @@ import { ToastService } from '../../../core/services/toast.service';
   styleUrl: './reset-password.scss',
 })
 export class ResetPassword {
-  resetForm: FormGroup;
-  constructor(private authService: Auth, private router: Router, private toastService: ToastService) {
-    this.resetForm = new FormGroup({
-      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-      confirmPassword: new FormControl('', [Validators.required, Validators.minLength(6)])
-    });
-  }
+  resetForm = new FormGroup({
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
+    confirmPassword: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
+  });
+
+  constructor(
+    private authService: Auth,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
   async onResetPassword(): Promise<void> {
-    if (this.resetForm.invalid) {
-      this.resetForm.markAllAsTouched();
-      return;
-    }
-    const password = this.resetForm.get('password')?.value;
-    const confirmPassword = this.resetForm.get('confirmPassword')?.value;
+    if (!this.isFormValid()) return;
 
-    if (password !== confirmPassword) {
-      this.resetForm.get('confirmPassword')?.setErrors({ mismatch: true });
-      return;
-    }
+    const password = this.resetForm.get('password')?.value ?? '';
+    const confirmPassword =
+      this.resetForm.get('confirmPassword')?.value ?? '';
 
-    try{
-      await this.authService.updatePassword(password);
-      console.log('Password reset successful');
-      this.toastService.show('Passwort erfolgreich zurückgesetzt!');
-      this.router.navigate(['/login']);
-    } catch (error) {
-      console.error('Error resetting password:', error);
-      this.toastService.show('Fehler beim Zurücksetzen des Passworts.');
-    }
+    if (!this.passwordsMatch(password, confirmPassword)) return;
 
+    await this.updatePassword(password);
   }
 
-  goBack() {
+  private isFormValid(): boolean {
+    if (this.resetForm.valid) return true;
+
+    this.resetForm.markAllAsTouched();
+    return false;
+  }
+
+  private passwordsMatch(password: string, confirmPassword: string): boolean {
+    if (password === confirmPassword) return true;
+
+    this.resetForm
+      .get('confirmPassword')
+      ?.setErrors({ mismatch: true });
+
+    return false;
+  }
+
+  private async updatePassword(password: string): Promise<void> {
+    try {
+      await this.authService.updatePassword(password);
+      this.handleResetSuccess();
+    } catch (error) {
+      this.handleResetError(error);
+    }
+  }
+
+  private handleResetSuccess(): void {
+    console.log('Password reset successful');
+    this.toastService.show(
+      'Passwort erfolgreich zurückgesetzt!'
+    );
+    this.router.navigate(['/login']);
+  }
+
+  private handleResetError(error: unknown): void {
+    console.error('Error resetting password:', error);
+    this.toastService.show(
+      'Fehler beim Zurücksetzen des Passworts.'
+    );
+  }
+
+  goBack(): void {
     window.history.back();
   }
 }
