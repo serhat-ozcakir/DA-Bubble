@@ -1,16 +1,17 @@
-import { Component, HostListener, ElementRef, inject, computed, signal, input, output, } from '@angular/core';
+import {Component, computed, ElementRef, HostListener, 
+  inject, input, OnInit, output, signal} from '@angular/core';
+import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
+import { ChannelService } from '../../../core/services/channel.service';
+import { DirectMessageService } from '../../../core/services/direct-message.service';
+import { Search } from '../../../core/services/search.service';
+import { Profile } from '../../../core/models/profile.model';
+import { Channel } from '../../../core/models/channel.model';
+import { SearchResult } from '../../../core/models/search-result.model';
 import { UserMenu } from './user-menu/user-menu';
 import { ProfileDialog } from './profile-dialog/profile-dialog';
 import { EditProfileDialog } from './edit-profile-dialog/edit-profile-dialog';
-import { Router } from '@angular/router';
-import { UserService } from '../../../core/services/user.service';
-import { Profile } from '../../../core/models/profile.model';
-import { DirectMessageService } from '../../../core/services/direct-message.service';
-import { ChannelService } from '../../../core/services/channel.service';
-import { Channel } from '../../../core/models/channel.model';
-import { Search } from '../../../core/services/search.service';
-import { SearchResult } from '../../../core/models/search-result.model';
 
 @Component({
   selector: 'app-header',
@@ -18,88 +19,64 @@ import { SearchResult } from '../../../core/models/search-result.model';
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class Header {
-  threadOpen = input(false);
-  mobileBack = output<void>();
-  mobileChatOpen = input(false);
-  mobileSearchOpen = output<void>();
-  private elementRef = inject(ElementRef);
+export class Header implements OnInit {
+  auth = inject(Auth);
   userService = inject(UserService);
   channelService = inject(ChannelService);
   searchService = inject(Search);
   directMessageService = inject(DirectMessageService);
+
+  private elementRef = inject(ElementRef);
+  private router = inject(Router);
+
+  threadOpen = input(false);
+  mobileChatOpen = input(false);
+
+  mobileBack = output<void>();
+  mobileSearchOpen = output<void>();
+
   isUserMenuOpen = false;
   isProfileMenuOpen = false;
   isEditProfileDialogOpen = false;
+
   searchText = signal('');
   isSearchOpen = signal(false);
 
+  filteredUsers = computed(() => {
+    const search = this.getNormalizedSearch();
 
-  constructor(public auth: Auth,
-    private router: Router
-  ) { }
+    if (search.startsWith('#')) return [];
+
+    const userSearch = this.getUserSearch(search);
+    return this.filterUsers(userSearch);
+  });
+
+  filteredChannels = computed(() => {
+    const search = this.getNormalizedSearch();
+    if (!search.startsWith('#')) return [];
+
+    const channelSearch = search.slice(1).trim();
+    const channels = this.channelService.channels();
+
+    if (!channelSearch) return channels;
+
+    return channels.filter((channel) =>
+      channel.name.toLowerCase().includes(channelSearch)
+    );
+  });
+
+  searchMode = computed<'users' | 'channels' | 'messages'>(() => {
+    const search = this.searchText().trim();
+
+    if (!search || search.startsWith('@')) return 'users';
+    if (search.startsWith('#')) return 'channels';
+
+    return 'messages';
+  });
 
   async ngOnInit(): Promise<void> {
     await this.userService.loadUsers();
   }
-
-  filteredUsers = computed(() => {
-    const search = this.searchText().toLowerCase().trim();
-    const users = this.userService.user();
-
-    if (search.startsWith('#')) {
-      return [];
-    }
-
-    if (search.startsWith('@')) {
-      const userSearch = search.slice(1).trim();
-
-      if (!userSearch) {
-        return users;
-      }
-
-      return users.filter((user) =>
-        user.name.toLowerCase().includes(userSearch)
-      );
-    }
-
-    if (!search) {
-      return users;
-    }
-
-    return users.filter((user) =>
-      user.name.toLowerCase().includes(search)
-    );
-  });
-
-  filteredChannels = computed(() => {
-    const search = this.searchText().toLowerCase().trim();
-
-    if (!search.startsWith('#')) {
-      return [];
-    }
-
-    const channelSearch = search.slice(1).trim();
-    if (!channelSearch) {
-      return this.channelService.channels();
-    }
-    return this.channelService.channels().filter((channel) =>
-      channel.name.toLowerCase().includes(channelSearch)
-    )
-  })
-
-  searchMode = computed<'users' | 'channels' | 'messages'>(() => {
-    const search = this.searchText().trim();
-    if (!search || search.startsWith('@')) {
-      return 'users'
-    }
-
-    if (!search || search.startsWith('#')) {
-      return 'channels'
-    }
-
-    return 'messages'
-  })
 
   onMobileBack(): void {
     this.closeSearch();
@@ -107,17 +84,19 @@ export class Header {
   }
 
   @HostListener('document:click', ['$event'])
-  closeUserMenuOnOutsideClick(event: MouseEvent): void {
-    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+  closeMenusOnOutsideClick(event: MouseEvent): void {
+    const clickedInside =
+      this.elementRef.nativeElement.contains(event.target);
 
-    if (!clickedInside) {
-      this.isUserMenuOpen = false;
-      this.isSearchOpen.set(false);
-    }
+    if (!clickedInside) this.closeHeaderOverlays();
   }
 
   @HostListener('document:keydown.escape')
-  closeUserMenuOnEscape(): void {
+  closeMenusOnEscape(): void {
+    this.closeHeaderOverlays();
+  }
+
+  private closeHeaderOverlays(): void {
     this.isUserMenuOpen = false;
     this.isSearchOpen.set(false);
   }
@@ -134,9 +113,11 @@ export class Header {
   closeProfileMenu(): void {
     this.isProfileMenuOpen = false;
   }
+
   closeUserMenu(): void {
     this.isUserMenuOpen = false;
   }
+
   openEditProfileDialog(): void {
     this.isEditProfileDialogOpen = true;
     this.isProfileMenuOpen = false;
@@ -148,32 +129,44 @@ export class Header {
 
   async logout(): Promise<void> {
     await this.auth.logout();
-    this.isUserMenuOpen = false;
-    this.isProfileMenuOpen = false;
+    this.closeAccountMenus();
     this.router.navigate(['/login']);
   }
 
+  private closeAccountMenus(): void {
+    this.isUserMenuOpen = false;
+    this.isProfileMenuOpen = false;
+  }
 
   async onSearchInput(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-    const value = input.value
-    this.searchText.set(value);
+
+    this.searchText.set(input.value);
     this.isSearchOpen.set(true);
 
+    await this.updateMessageSearch(input.value);
+  }
+
+  private async updateMessageSearch(value: string): Promise<void> {
     if (this.searchMode() === 'messages') {
-      await this.searchService.searchChannelMessages(value)
-    } else {
-      this.searchService.clearSearch();
+      await this.searchService.searchChannelMessages(value);
+      return;
     }
+
+    this.searchService.clearSearch();
   }
 
   openSearch(): void {
-    if (window.matchMedia('(max-width: 1024px)').matches) {
+    if (this.isMobileSearch()) {
       this.mobileSearchOpen.emit();
       return;
     }
 
     this.isSearchOpen.set(true);
+  }
+
+  private isMobileSearch(): boolean {
+    return window.matchMedia('(max-width: 1024px)').matches;
   }
 
   closeSearch(): void {
@@ -193,49 +186,65 @@ export class Header {
   }
 
   async selectMessageResult(result: SearchResult): Promise<void> {
-
     if (result.type === 'channel-message') {
       this.openChannelResult(result);
+      return;
     }
 
     if (result.type === 'direct-message') {
-      this.openDirectMessageResult(result);
+      await this.openDirectMessageResult(result);
     }
   }
 
   private openChannelResult(result: SearchResult): void {
-    if (!result.channelId) {
-      return;
-    }
+    if (!result.channelId) return;
 
-    const channel = this.channelService
-      .channels()
-      .find((channel) => channel.id === result.channelId);
-
-    if (!channel) {
-      return;
-    }
+    const channel = this.findChannel(result.channelId);
+    if (!channel) return;
 
     this.directMessageService.currentDmUser.set(null);
     this.channelService.setCurrentChannel(channel);
     this.closeSearch();
   }
 
+  private findChannel(channelId: string): Channel | undefined {
+    return this.channelService
+      .channels()
+      .find((channel) => channel.id === channelId);
+  }
+
   private async openDirectMessageResult(result: SearchResult): Promise<void> {
-    if (!result.profileId) {
-      return;
-    }
+    if (!result.profileId) return;
 
-    const user = this.userService.user()
-      .find((user) => user.id === result.profileId)
+    const user = this.findUser(result.profileId);
+    if (!user) return;
 
-    if (!user) {
-      return;
-    }
     await this.directMessageService.selectDmUser(user);
     this.closeSearch();
   }
 
+  private findUser(profileId: string): Profile | undefined {
+    return this.userService
+      .user()
+      .find((user) => user.id === profileId);
+  }
 
+  private getNormalizedSearch(): string {
+    return this.searchText().toLowerCase().trim();
+  }
+
+  private getUserSearch(search: string): string {
+    return search.startsWith('@')
+      ? search.slice(1).trim()
+      : search;
+  }
+
+  private filterUsers(search: string): Profile[] {
+    const users = this.userService.user();
+    if (!search) return users;
+
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(search)
+    );
+  }
 }
-

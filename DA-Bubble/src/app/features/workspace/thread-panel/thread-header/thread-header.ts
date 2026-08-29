@@ -8,6 +8,7 @@ import { MessageService } from '../../../../core/services/message.service';
   templateUrl: './thread-header.html',
   styleUrl: './thread-header.scss',
 })
+
 export class ThreadHeader {
   channelService = inject(ChannelService)
   messageService = inject(MessageService)

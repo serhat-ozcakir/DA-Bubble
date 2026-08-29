@@ -1,12 +1,12 @@
 import { Component, inject, OnInit, output } from '@angular/core';
-import {Auth} from "../../../core/services/auth.service";
+import { Auth } from "../../../core/services/auth.service";
 import { ChannelService } from '../../../core/services/channel.service';
-import {UserService} from "../../../core/services/user.service";
+import { UserService } from "../../../core/services/user.service";
 import { MessageService } from '../../../core/services/message.service';
 import { Channel } from '../../../core/models/channel.model';
 import { DirectMessageService } from '../../../core/services/direct-message.service';
 import { Profile } from '../../../core/models/profile.model';
-  
+
 @Component({
   selector: 'app-sidebar',
   imports: [],
@@ -26,20 +26,16 @@ export class Sidebar implements OnInit {
   isDirectMessagesOpen = true;
   openCreateChannel = output<void>();
 
- constructor() {
- }
-
- async ngOnInit(): Promise<void> {
-   await this.userService.loadUsers();
+  async ngOnInit(): Promise<void> {
+    await this.userService.loadUsers();
   }
 
-  selectChannel(channel:Channel):void{
+  selectChannel(channel: Channel): void {
     this.channelService.setCurrentChannel(channel);
     this.direktMessageService.currentDmUser.set(null)
     this.messageService.closeThread();
     this.chatSelected.emit();
   }
-
 
   toggleSection(section: 'channels' | 'directMessages'): void {
     if (section === 'channels') {
@@ -49,7 +45,7 @@ export class Sidebar implements OnInit {
     }
   }
 
-  async selectDmUser(user:Profile):Promise<void>{
+  async selectDmUser(user: Profile): Promise<void> {
     this.channelService.currentChannel.set(null);
     this.direktMessageService.currentDmUser.set(user);
     this.messageService.closeThread();
@@ -57,16 +53,15 @@ export class Sidebar implements OnInit {
     this.chatSelected.emit();
   }
 
-  openDialog():void{
+  openDialog(): void {
     console.log('openDialog calisti');
     this.openCreateChannel.emit()
   }
 
-  openNewMessageView():void{
-  this.messageService.closeThread();
-  this.channelService.currentChannel.set(null);
-  this.direktMessageService.currentDmUser.set(null);
-  this.openNewMessage.emit();
+  openNewMessageView(): void {
+    this.messageService.closeThread();
+    this.channelService.currentChannel.set(null);
+    this.direktMessageService.currentDmUser.set(null);
+    this.openNewMessage.emit();
   }
-
 }

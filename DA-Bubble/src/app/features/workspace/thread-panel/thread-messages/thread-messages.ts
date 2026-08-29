@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
   templateUrl: './thread-messages.html',
   styleUrl: './thread-messages.scss',
 })
+
 export class ThreadMessages {
 
 }

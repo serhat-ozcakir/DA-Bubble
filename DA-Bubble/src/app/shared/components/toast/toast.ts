@@ -7,8 +7,7 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './toast.html',
   styleUrl: './toast.scss',
 })
-export class Toast {
-  constructor(public toastService: ToastService) {
 
-  }
+export class Toast {
+  constructor(public toastService: ToastService) { }
 }

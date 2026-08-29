@@ -14,25 +14,23 @@ import { Channel } from '../../../../core/models/channel.model';
   styleUrl: './thread-input.scss',
 })
 export class ThreadInput {
-  private messsageServis = inject(MessageService);
+  private messageService = inject(MessageService);
   private elementRef = inject(ElementRef);
+
   userService = inject(UserService);
   channelService = inject(ChannelService);
+
   replyText = '';
   showEmojiPicker = false;
+
   mentionType = signal<'users' | 'channels' | null>(null);
   mentionSearchText = signal('');
 
   filteredMentionUsers = computed(() => {
-    const search = this.mentionSearchText()
-      .toLowerCase()
-      .trim();
-
+    const search = this.getMentionSearch();
     const users = this.userService.user();
 
-    if (!search) {
-      return users;
-    }
+    if (!search) return users;
 
     return users.filter((user) =>
       user.name.toLowerCase().includes(search)
@@ -40,15 +38,10 @@ export class ThreadInput {
   });
 
   filteredMentionChannels = computed(() => {
-    const search = this.mentionSearchText()
-      .toLowerCase()
-      .trim();
-
+    const search = this.getMentionSearch();
     const channels = this.channelService.channels();
 
-    if (!search) {
-      return channels;
-    }
+    if (!search) return channels;
 
     return channels.filter((channel) =>
       channel.name.toLowerCase().includes(search)
@@ -56,32 +49,36 @@ export class ThreadInput {
   });
 
   handleEnter(event: KeyboardEvent): void {
-    if (event.shiftKey) {
-      return;
-    }
+    if (event.shiftKey) return;
 
     event.preventDefault();
     this.sendReply();
   }
 
   onReplyInput(): void {
-    const lastWord = this.replyText
-      .split(/\s/)
-      .pop() ?? '';
+    const lastWord = this.getLastWord();
 
     if (lastWord.startsWith('@')) {
-      this.mentionType.set('users');
-      this.mentionSearchText.set(lastWord.slice(1));
+      this.setMentionSearch('users', lastWord.slice(1));
       return;
     }
 
     if (lastWord.startsWith('#')) {
-      this.mentionType.set('channels');
-      this.mentionSearchText.set(lastWord.slice(1));
+      this.setMentionSearch('channels', lastWord.slice(1));
       return;
     }
-
     this.closeMentionDropdown();
+  }
+
+  private getLastWord(): string {
+    return this.replyText
+      .split(/\s/)
+      .pop() ?? '';
+  }
+
+  private setMentionSearch(type: 'users' | 'channels', search: string): void {
+    this.mentionType.set(type);
+    this.mentionSearchText.set(search);
   }
 
   toggleMentionButton(event: Event): void {
@@ -97,36 +94,48 @@ export class ThreadInput {
   }
 
   private switchToUserMention(): void {
-    this.replaceOrAddMentionCharacter('@');
-    this.mentionType.set('users');
-    this.mentionSearchText.set('');
+    this.activateMention('@', 'users');
   }
 
   private switchToChannelMention(): void {
-    this.replaceOrAddMentionCharacter('#');
-    this.mentionType.set('channels');
+    this.activateMention('#', 'channels');
+  }
+
+  private activateMention(character: '@' | '#', type: 'users' | 'channels'): void {
+    this.replaceOrAddMentionCharacter(character);
+    this.mentionType.set(type);
     this.mentionSearchText.set('');
   }
 
-  private replaceOrAddMentionCharacter(
-    character: '@' | '#'
-  ): void {
-    const lastCharacter = this.replyText.at(-1);
-
-    if (lastCharacter === '@' || lastCharacter === '#') {
-      this.replyText =
-        this.replyText.slice(0, -1) + character;
+  private replaceOrAddMentionCharacter(character: '@' | '#'): void {
+    if (this.hasTrailingMentionCharacter()) {
+      this.replaceTrailingCharacter(character);
       return;
     }
 
-    const separator =
-      this.replyText.length > 0 &&
-      !this.replyText.endsWith(' ')
-        ? ' '
-        : '';
+    this.appendMentionCharacter(character);
+  }
 
-    this.replyText =
-      `${this.replyText}${separator}${character}`;
+  private hasTrailingMentionCharacter(): boolean {
+    const lastCharacter = this.replyText.at(-1);
+
+    return lastCharacter === '@' || lastCharacter === '#';
+  }
+
+  private replaceTrailingCharacter(character: '@' | '#'): void {
+    this.replyText = this.replyText.slice(0, -1) + character;
+  }
+
+  private appendMentionCharacter(character: '@' | '#'): void {
+    const separator = this.getMentionSeparator();
+    this.replyText =`${this.replyText}${separator}${character}`;
+  }
+
+  private getMentionSeparator(): string {
+    return this.replyText.length > 0 &&
+      !this.replyText.endsWith(' ')
+      ? ' '
+      : '';
   }
 
   selectMentionUser(user: Profile): void {
@@ -138,17 +147,8 @@ export class ThreadInput {
   }
 
   private replaceLastMention(replacement: string): void {
-    const lastAtIndex = this.replyText.lastIndexOf('@');
-    const lastHashIndex = this.replyText.lastIndexOf('#');
-
-    const mentionIndex = Math.max(
-      lastAtIndex,
-      lastHashIndex
-    );
-
-    if (mentionIndex === -1) {
-      return;
-    }
+    const mentionIndex = this.getLastMentionIndex();
+    if (mentionIndex === -1) return;
 
     const textBeforeMention =
       this.replyText.slice(0, mentionIndex);
@@ -159,37 +159,45 @@ export class ThreadInput {
     this.closeMentionDropdown();
   }
 
+  private getLastMentionIndex(): number {
+    const lastAtIndex = this.replyText.lastIndexOf('@');
+    const lastHashIndex = this.replyText.lastIndexOf('#');
+
+    return Math.max(lastAtIndex, lastHashIndex);
+  }
+
   private closeMentionDropdown(): void {
     this.mentionType.set(null);
     this.mentionSearchText.set('');
   }
 
   @HostListener('document:click', ['$event'])
-  closeEmojiPickerOnOutsideClick(event: MouseEvent): void {
-    const threadClickedInside =
+  closeOverlaysOnOutsideClick(event: MouseEvent): void {
+    const clickedInside =
       this.elementRef.nativeElement.contains(event.target);
 
-    if (!threadClickedInside) {
-      this.showEmojiPicker = false;
-      this.closeMentionDropdown();
-    }
+    if (!clickedInside) this.closeOverlays();
   }
 
   @HostListener('document:keydown.escape')
-  closeEmojiPickerOnEscape(): void {
+  closeOverlaysOnEscape(): void {
+    this.closeOverlays();
+  }
+
+  private closeOverlays(): void {
     this.showEmojiPicker = false;
     this.closeMentionDropdown();
   }
 
   async sendReply(): Promise<void> {
     const text = this.replyText.trim();
+    if (!text) return;
 
-    if (!text) {
-      return;
-    }
+    await this.messageService.sendThreadMessage(text);
+    this.resetInput();
+  }
 
-    await this.messsageServis.sendThreadMessage(text);
-
+  private resetInput(): void {
     this.replyText = '';
     this.showEmojiPicker = false;
     this.closeMentionDropdown();
@@ -201,12 +209,14 @@ export class ThreadInput {
   }
 
   addEmoji(event: any): void {
-    const emoji =
-      event.emoji.native ||
-      event.emoji.colons ||
-      '';
-
+    const emoji =  event.emoji.native || event.emoji.colons || '';
     this.replyText += emoji;
     this.showEmojiPicker = false;
+  }
+
+  private getMentionSearch(): string {
+    return this.mentionSearchText()
+      .toLowerCase()
+      .trim();
   }
 }

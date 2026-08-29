@@ -1,112 +1,115 @@
-import { ElementRef, HostListener, Component, inject, signal } from '@angular/core';
-import { MessageService } from '../../../core/services/message.service'
-import { ThreadHeader } from '../../../features/workspace/thread-panel/thread-header/thread-header'
-import { ThreadInput } from '../../../features/workspace/thread-panel/thread-input/thread-input'
-import { ThreadMessages } from '../../../features/workspace/thread-panel/thread-messages/thread-messages'
-import { ReactionService } from '../../../core/services/reaction.service';
+import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { MessageService } from '../../../core/services/message.service';
+import { ReactionService } from '../../../core/services/reaction.service';
 import { MessageView } from '../../../core/models/message-view.model';
 import { ReactionSummary } from '../../../core/models/reaction-summary.model';
+import { ThreadHeader } from './thread-header/thread-header';
+import { ThreadInput } from './thread-input/thread-input';
+import { ThreadMessages } from './thread-messages/thread-messages';
 
 @Component({
   selector: 'app-thread-panel',
-  imports: [ThreadHeader, ThreadInput, ThreadMessages, PickerComponent],
+  imports: [ThreadHeader, ThreadInput, PickerComponent],
   templateUrl: './thread-panel.html',
   styleUrl: './thread-panel.scss',
 })
+
 export class ThreadPanel {
   messageService = inject(MessageService);
   reactionService = inject(ReactionService);
-  elementRef = inject(ElementRef);
+
+  private elementRef = inject(ElementRef);
+
   openedReactionPickerId = signal<string | null>(null);
   isMessageEdited = signal(false);
   editingThreadMessageId = signal<string | null>(null);
-  editingThreadText = signal<string>('');
-  readonly threadReactionLimit = 7;
+  editingThreadText = signal('');
   expandedThreadReactionMessageIds = signal<Set<string>>(new Set());
 
+  readonly threadReactionLimit = 7;
 
   toggleAllThreadReactions(messageId: string): void {
-  this.expandedThreadReactionMessageIds.update((current) => {
+    this.expandedThreadReactionMessageIds.update((current) =>
+      this.toggleMessageId(current, messageId)
+    );
+  }
+
+  private toggleMessageId(current: Set<string>, messageId: string): Set<string> {
     const updated = new Set(current);
 
-    if (updated.has(messageId)) {
-      updated.delete(messageId);
-    } else {
-      updated.add(messageId);
-    }
+    updated.has(messageId)
+      ? updated.delete(messageId)
+      : updated.add(messageId);
 
     return updated;
-  });
-}
-
-isThreadReactionExpanded(messageId: string): boolean {
-  return this.expandedThreadReactionMessageIds().has(messageId);
-}
-
-getVisibleThreadReactions(messageId: string): ReactionSummary[] {
-  const reactions =
-    this.reactionService.getReactionForMessage(messageId);
-
-  if (this.isThreadReactionExpanded(messageId)) {
-    return reactions;
   }
 
-  return reactions.slice(0, this.threadReactionLimit);
-}
-
-getHiddenThreadReactionCount(messageId: string): number {
-  if (this.isThreadReactionExpanded(messageId)) {
-    return 0;
+  async toggleThreadReaction(messageId: string, emoji: string): Promise<void> {
+    await this.reactionService.addReaction(messageId, emoji, false);
   }
 
-  const total =this.reactionService.getReactionForMessage(messageId).length;
+  isThreadReactionExpanded(messageId: string): boolean {
+    return this.expandedThreadReactionMessageIds()
+      .has(messageId);
+  }
 
-  return Math.max(
-    0,
-    total - this.threadReactionLimit
-  );
-}
+  getVisibleThreadReactions(messageId: string): ReactionSummary[] {
+    const reactions =
+      this.reactionService.getReactionForMessage(messageId);
+
+    if (this.isThreadReactionExpanded(messageId)) {
+      return reactions;
+    }
+    return reactions.slice(0, this.threadReactionLimit);
+  }
+
+  getHiddenThreadReactionCount(messageId: string): number {
+    if (this.isThreadReactionExpanded(messageId)) return 0;
+
+    const reactions =
+      this.reactionService.getReactionForMessage(messageId);
+
+    return Math.max(
+      0,
+      reactions.length - this.threadReactionLimit
+    );
+  }
 
   toggleThreadEmojiPicker(messageId: string, event: Event): void {
-    this.openedReactionPickerId.update((currentID) =>
-      currentID === messageId ? null : messageId)
+    event.stopPropagation();
+
+    this.openedReactionPickerId.update((currentId) =>
+      currentId === messageId ? null : messageId
+    );
   }
 
-async addThreadEmojiReaction(
-  event: any,
-  messageId: string
-): Promise<void> {
-  const emoji = event.emoji.native;
-
-  await this.reactionService.addReaction(
-    messageId,
-    emoji,
-    false
-  );
-
-  this.openedReactionPickerId.set(null);
-}
+  async addThreadEmojiReaction(event: any, messageId: string): Promise<void> {
+    const emoji = event.emoji.native;
+    await this.reactionService.addReaction(messageId, emoji, false);
+    this.openedReactionPickerId.set(null);
+  }
 
   @HostListener('document:click', ['$event'])
-  closeEmojiPickerOnOutsideClick(event: Event): void {
-    const clickedOutside = this.elementRef.nativeElement.contains(event?.target)
-    if (!clickedOutside) {
-      this.openedReactionPickerId.set(null);
-      this.isMessageEdited.set(false);
-      this.cancelThreadEdit();
-    }
+  closeThreadOverlaysOnOutsideClick(event: Event): void {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+
+    if (!clickedInside) this.closeThreadOverlays();
   }
 
   @HostListener('document:keydown.escape')
-  closeEmojiPickerOnEscape(): void {
+  closeThreadOverlaysOnEscape(): void {
+    this.closeThreadOverlays();
+  }
+
+  private closeThreadOverlays(): void {
     this.openedReactionPickerId.set(null);
     this.isMessageEdited.set(false);
     this.cancelThreadEdit();
   }
 
   toggleMessageEdited(): void {
-    this.isMessageEdited.update(value => !value)
+    this.isMessageEdited.update((value) => !value);
   }
 
   startEditingThreadMessage(reply: MessageView, event: Event): void {
@@ -123,35 +126,41 @@ async addThreadEmojiReaction(
   }
 
   async saveThreadEditedMessage(): Promise<void> {
-
     const messageId = this.editingThreadMessageId();
-
     if (!messageId) return;
-    this.messageService.updateMessage(messageId, this.editingThreadText());
 
-    this.editingThreadMessageId.set(null);
-    this.editingThreadText.set('');
+    await this.messageService.updateMessage(
+      messageId,
+      this.editingThreadText()
+    );
+
+    this.cancelThreadEdit();
   }
 
   async saveOnEnter(event: KeyboardEvent): Promise<void> {
-    if (event.shiftKey) {
-      return;
-    }
+    if (event.shiftKey) return;
+
     event.preventDefault();
-    this.saveThreadEditedMessage();
+    await this.saveThreadEditedMessage();
   }
 
   getReactionUsersNames(userNames: string[]): string {
-    if (userNames.length === 1) {
-      return userNames[0];
-    }
+    if (userNames.length === 1) return userNames[0];
+
     if (userNames.length === 2) {
-      return `${userNames[0]} und ${userNames[1]}`
+      return `${userNames[0]} und ${userNames[1]}`;
     }
-    return `${userNames[0]} und ${userNames[1]} und ${userNames.length - 2} weitere`
+    return this.getMultipleReactionNames(userNames);
+  }
+
+  private getMultipleReactionNames(userNames: string[]): string {
+    const remainingUsers = userNames.length - 2;
+    return `${userNames[0]} und ${userNames[1]} und ${remainingUsers} weitere`;
   }
 
   getReactionVerb(userNames: string[]): string {
-    return userNames.length === 1 ? 'hat reagiert' : 'haben reagiert'
+    return userNames.length === 1
+      ? 'hat reagiert'
+      : 'haben reagiert';
   }
 }

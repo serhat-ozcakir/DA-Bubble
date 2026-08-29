@@ -58,11 +58,9 @@ export class WorkspaceLayout {
     })
   }
 
-
   async ngOnInit(): Promise<void> {
     await this.auth.loadCurrentUser();
     await this.channelService.loadChannels();
-
     const channels = this.channelService.channels();
 
     if (channels.length > 0) {
@@ -118,7 +116,6 @@ export class WorkspaceLayout {
     if (search.startsWith('#')) {
       return [];
     }
-
     const userSearch = search.startsWith('@') ? search.slice(1).trim() : search;
 
     if (!userSearch) {
@@ -139,7 +136,6 @@ export class WorkspaceLayout {
     if (!channelSearch) {
       return this.channelService.channels()
     }
-
     return this.channelService.channels().filter((channel) => {
       channel.name.toLowerCase().includes(channelSearch)
     })
