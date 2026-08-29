@@ -29,14 +29,12 @@ export class DirectMessageService {
     this.setDirectMessages(data, currentUser, selectedUser);
   }
 
-  private async fetchDirectMessages(
-    currentUser: Profile,
-    selectedUser: Profile
-  ): Promise<any[] | null> {
+  private async fetchDirectMessages(currentUser: Profile,selectedUser: Profile):
+   Promise<any[] | null> {
     const filter = this.createConversationFilter(currentUser, selectedUser);
     const { data, error } = await this.supabase.supabase
       .from('direct_messages')
-      .select('*')
+      .select('id,sender_id,receiver_id,text,created_at')
       .or(filter)
       .order('created_at', { ascending: true });
 
@@ -45,47 +43,31 @@ export class DirectMessageService {
     return null;
   }
 
-  private createConversationFilter(
-    currentUser: Profile,
-    selectedUser: Profile
-  ): string {
+  private createConversationFilter(currentUser: Profile,selectedUser: Profile):string{
     return `and(sender_id.eq.${currentUser.id},receiver_id.eq.${selectedUser.id}),`
       + `and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUser.id})`;
   }
 
-  private setDirectMessages(
-    data: any[],
-    currentUser: Profile,
-    selectedUser: Profile
-  ): void {
+  private setDirectMessages(data: any[], currentUser: Profile,selectedUser: Profile): 
+  void {
     const messages = data.map((message) =>
       this.mapDirectMessage(message, currentUser, selectedUser)
     );
     this.directMessages.set(messages);
   }
 
-  async updateDirectMessage(
-    messageId: string,
-    newText: string
-  ): Promise<void> {
+  async updateDirectMessage(messageId: string, newText: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
     const text = newText.trim();
 
     if (!currentUser || !text) return;
 
-    const data = await this.updateDirectMessageRecord(
-      messageId,
-      text,
-      currentUser.id
-    );
+    const data = await this.updateDirectMessageRecord(messageId,text,currentUser.id);
     this.updateDirectMessageState(messageId, data.text);
   }
 
-  private async updateDirectMessageRecord(
-    messageId: string,
-    text: string,
-    userId: string
-  ): Promise<any> {
+  private async updateDirectMessageRecord(messageId: string, text: string,
+    userId: string): Promise<any> {
     const { data, error } = await this.supabase.supabase
       .from('direct_messages')
       .update({ text })
@@ -99,22 +81,14 @@ export class DirectMessageService {
   }
 
   private throwUpdateError(error: unknown): never {
-    console.error(
-      'Fehler beim Bearbeiten der Direktnachricht:',
-      error
-    );
+    console.error('Fehler beim Bearbeiten der Direktnachricht:', error);
     throw error;
   }
 
-  private updateDirectMessageState(
-    messageId: string,
-    text: string
-  ): void {
+  private updateDirectMessageState(messageId: string,text: string): void {
     this.directMessages.update((messages) =>
       messages.map((message) =>
-        message.id === messageId ? { ...message, text } : message
-      )
-    );
+        message.id === messageId ? { ...message, text } : message));
   }
 
   async sendDirectMessage(text: string): Promise<void> {
@@ -126,21 +100,13 @@ export class DirectMessageService {
       console.error('Kein Benutzer oder DM-Partner ausgewählt');
       return;
     }
-
-    const data = await this.insertDirectMessage(
-      authUser.id,
-      selectedUser.id,
-      text
-    );
+    const data = await this.insertDirectMessage( authUser.id,selectedUser.id,text);
     if (!data) return;
     this.addSentMessage(data, currentUser, selectedUser);
   }
 
-  private async insertDirectMessage(
-    senderId: string,
-    receiverId: string,
-    text: string
-  ): Promise<any | null> {
+  private async insertDirectMessage(senderId: string,receiverId: string,
+    text: string): Promise<any | null> {
     const { data, error } = await this.supabase.supabase
       .from('direct_messages')
       .insert({ sender_id: senderId, receiver_id: receiverId, text })
@@ -152,16 +118,8 @@ export class DirectMessageService {
     return null;
   }
 
-  private addSentMessage(
-    data: any,
-    currentUser: Profile,
-    selectedUser: Profile
-  ): void {
-    const message = this.mapDirectMessage(
-      data,
-      currentUser,
-      selectedUser
-    );
+  private addSentMessage(data: any,currentUser: Profile,selectedUser: Profile): void {
+    const message = this.mapDirectMessage(data,currentUser,selectedUser);
     this.addMessageIfMissing(message);
   }
 
@@ -177,29 +135,15 @@ export class DirectMessageService {
     const selectedUser = this.currentDmUser();
 
     if (!currentUser || !selectedUser) return;
-
     this.removeDmRealtimeChannel();
-    this.dmRealtimeChannel = this.createDmRealtimeChannel(
-      currentUser,
-      selectedUser
-    );
+    this.dmRealtimeChannel = this.createDmRealtimeChannel(currentUser,selectedUser);
   }
 
-  private createDmRealtimeChannel(
-    currentUser: Profile,
-    selectedUser: Profile
-  ): RealtimeChannel {
+  private createDmRealtimeChannel(currentUser: Profile,selectedUser: Profile): RealtimeChannel {
     return this.supabase.supabase
       .channel(`direct-messages-${currentUser.id}-${selectedUser.id}`)
-      .on(
-        'postgres_changes',
-        this.getDmRealtimeConfig(),
-        (payload) => this.handleDmRealtimePayload(
-          payload,
-          currentUser,
-          selectedUser
-        )
-      )
+      .on('postgres_changes', this.getDmRealtimeConfig(),
+      (payload) => this.handleDmRealtimePayload(payload,currentUser,selectedUser))
       .subscribe();
   }
 
@@ -211,27 +155,17 @@ export class DirectMessageService {
     };
   }
 
-  private handleDmRealtimePayload(
-    payload: any,
-    currentUser: Profile,
-    selectedUser: Profile
-  ): void {
+  private handleDmRealtimePayload(payload: any, currentUser: Profile,
+    selectedUser: Profile): void {
     const changedMessage = payload.new as any;
     if (!changedMessage?.id) return;
     if (!this.belongsToCurrentConversation(changedMessage)) return;
 
-    const message = this.mapDirectMessage(
-      changedMessage,
-      currentUser,
-      selectedUser
-    );
+    const message = this.mapDirectMessage(changedMessage,currentUser,selectedUser);
     this.applyRealtimeChange(payload.eventType, message);
   }
 
-  private applyRealtimeChange(
-    eventType: string,
-    message: MessageView
-  ): void {
+  private applyRealtimeChange(eventType: string, message: MessageView): void {
     if (eventType === 'INSERT') {
       this.addMessageIfMissing(message);
       return;
@@ -245,9 +179,7 @@ export class DirectMessageService {
   private replaceDirectMessage(message: MessageView): void {
     this.directMessages.update((messages) =>
       messages.map((item) =>
-        item.id === message.id ? message : item
-      )
-    );
+        item.id === message.id ? message : item));
   }
 
   removeDmRealtimeChannel(): void {
@@ -262,19 +194,11 @@ export class DirectMessageService {
     const selectedUser = this.currentDmUser();
 
     if (!currentUser || !selectedUser) return false;
-
-    return this.isMessageBetweenUsers(
-      message,
-      currentUser.id,
-      selectedUser.id
-    );
+    return this.isMessageBetweenUsers(message, currentUser.id,selectedUser.id);
   }
 
-  private isMessageBetweenUsers(
-    message: any,
-    currentUserId: string,
-    selectedUserId: string
-  ): boolean {
+  private isMessageBetweenUsers(message: any,currentUserId: string,
+    selectedUserId: string): boolean {
     const sentByCurrentUser =
       message.sender_id === currentUserId &&
       message.receiver_id === selectedUserId;
@@ -286,21 +210,14 @@ export class DirectMessageService {
     return sentByCurrentUser || sentBySelectedUser;
   }
 
-  private mapDirectMessage(
-    message: any,
-    currentUser: Profile,
-    selectedUser: Profile
-  ): MessageView {
+  private mapDirectMessage(message: any, currentUser: Profile,selectedUser: Profile):
+   MessageView {
     const isOwnMessage = message.sender_id === currentUser.id;
 
     return {
       id: message.id,
       authorName: isOwnMessage ? currentUser.name : selectedUser.name,
-      avatar: this.getMessageAvatar(
-        isOwnMessage,
-        currentUser,
-        selectedUser
-      ),
+      avatar: this.getMessageAvatar(isOwnMessage,currentUser,selectedUser),
       text: message.text,
       time: this.formatTime(message.created_at),
       createdAt: message.created_at,
@@ -308,11 +225,8 @@ export class DirectMessageService {
     };
   }
 
-  private getMessageAvatar(
-    isOwnMessage: boolean,
-    currentUser: Profile,
-    selectedUser: Profile
-  ): string {
+  private getMessageAvatar(isOwnMessage: boolean,currentUser: Profile,
+    selectedUser: Profile): string {
     const fallback = 'assets/img/avatar/avatar-3.png';
     return isOwnMessage
       ? currentUser.avatar || fallback

@@ -12,6 +12,7 @@ export class ChannelService {
   private supabase = inject(Supabase);
   private authService = inject(Auth);
   private channelMembersRealtimeChannel: RealtimeChannel | null = null;
+  private channelRealtimeChannel: RealtimeChannel | null = null;
 
   channels = signal<Channel[]>([]);
   currentChannel = signal<Channel | null>(null);
@@ -25,7 +26,6 @@ export class ChannelService {
       this.clearChannelState();
       return;
     }
-
     const data = await this.fetchUserChannels(currentUser.id);
     this.setLoadedChannels(data);
   }
@@ -33,11 +33,7 @@ export class ChannelService {
   private async fetchUserChannels(profileId: string): Promise<any[]> {
     const { data, error } = await this.supabase.supabase
       .from('channel_members')
-      .select(`
-        channels (
-          id, name, description, created_by, created_at
-        )
-      `)
+      .select(`channels (id, name, description, created_by, created_at)`)
       .eq('profile_id', profileId)
       .order('created_at', { ascending: true });
 
@@ -45,7 +41,6 @@ export class ChannelService {
       console.error('Fehler beim Laden der Kanäle:', error);
       return [];
     }
-
     return data;
   }
 
@@ -72,7 +67,7 @@ export class ChannelService {
   async loadChannelCreator(profileId: string): Promise<void> {
     const { data, error } = await this.supabase.supabase
       .from('profiles')
-      .select('*')
+      .select('id,email, name, avatar, status, is_guest')
       .eq('id', profileId)
       .single();
 
@@ -80,7 +75,6 @@ export class ChannelService {
       console.error('Fehler beim Laden des Channel-Erstellers:', error);
       return;
     }
-
     this.creator.set(data);
   }
 
@@ -91,25 +85,19 @@ export class ChannelService {
     const members = data
       .map((member: any) => member.profiles)
       .filter((profile) => profile !== null);
-
     this.channelMembers.set(members);
   }
 
   private async fetchChannelMembers(channelId: string): Promise<any[] | null> {
     const { data, error } = await this.supabase.supabase
       .from('channel_members')
-      .select(`
-        profiles (
-          id, name, email, avatar, status, created_at
-        )
-      `)
+      .select(`profiles (id, name, email, avatar, status, created_at)`)
       .eq('channel_id', channelId);
 
     if (error) {
       console.error('Fehler beim Laden der Kanalmitglieder:', error);
       return null;
     }
-
     return data;
   }
 
@@ -118,6 +106,42 @@ export class ChannelService {
     this.loadChannelMembers(channel.id);
     this.loadChannelCreator(channel.createdBy);
     this.subscribeToCurrentChannelMembers();
+    this.subscribeToCurrentChannel();
+  }
+
+  private subscribeToCurrentChannel(): void {
+    const channel = this.currentChannel();
+    if (!channel) return;
+    this.removeChannelRealtimeChannel();
+    this.channelRealtimeChannel = this.createChannelRealtimeChannel(channel.id);
+  }
+
+  private createChannelRealtimeChannel(channelId: string): RealtimeChannel {
+    return this.supabase.supabase
+      .channel(`channel-live-${channelId}`)
+      .on('postgres_changes', this.getChannelRealtimeConfig(channelId),
+        (payload) => this.handleChannelUpdate(payload.new))
+      .subscribe();
+  }
+
+  private handleChannelUpdate(channel: any): void {
+    if (!channel?.id) return;
+    this.updateChannelState(this.mapChannel(channel));
+  }
+
+  private removeChannelRealtimeChannel(): void {
+    if (!this.channelRealtimeChannel) return;
+    this.supabase.supabase.removeChannel(this.channelRealtimeChannel);
+    this.channelRealtimeChannel = null;
+  }
+
+  private getChannelRealtimeConfig(channelId: string) {
+    return {
+      event: 'UPDATE' as const,
+      schema: 'public',
+      table: 'channels',
+      filter: `id=eq.${channelId}`,
+    };
   }
 
   async createChannel(name: string, description: string): Promise<void> {
@@ -125,12 +149,7 @@ export class ChannelService {
     if (!currentUser) return;
 
     await this.ensureChannelNameAvailable(name);
-    const channel = await this.createChannelRecord(
-      name,
-      description,
-      currentUser.id
-    );
-
+    const channel = await this.createChannelRecord(name,description,currentUser.id);
     await this.addChannelOwner(channel.id, currentUser.id);
     this.addCreatedChannelToState(channel);
   }
@@ -145,11 +164,8 @@ export class ChannelService {
     if (data) throw new Error('CHANNEL_ALREADY_EXISTS');
   }
 
-  private async createChannelRecord(
-    name: string,
-    description: string,
-    userId: string
-  ): Promise<any> {
+  private async createChannelRecord(name: string,description: string,
+     userId: string): Promise<any> {
     const { data, error } = await this.supabase.supabase
       .from('channels')
       .insert([{ name, description, created_by: userId }])
@@ -167,17 +183,10 @@ export class ChannelService {
     );
   }
 
-  private async addChannelOwner(
-    channelId: string,
-    profileId: string
-  ): Promise<void> {
+  private async addChannelOwner(channelId: string, profileId: string): Promise<void> {
     await this.supabase.supabase
       .from('channel_members')
-      .insert([{
-        channel_id: channelId,
-        profile_id: profileId,
-        role: 'owner',
-      }]);
+      .insert([{channel_id: channelId, profile_id: profileId,role: 'owner',}]);
   }
 
   private addCreatedChannelToState(channel: any): void {
@@ -185,10 +194,7 @@ export class ChannelService {
     this.currentChannel.set(channel);
   }
 
-  async addMembersToChannel(
-    channelId: string,
-    profileIds: string[]
-  ): Promise<void> {
+  async addMembersToChannel(channelId: string, profileIds: string[]): Promise<void> {
     const members = this.createMemberRecords(channelId, profileIds);
     const { error } = await this.supabase.supabase
       .from('channel_members')
@@ -198,7 +204,6 @@ export class ChannelService {
       console.error('Error adding the member to the channel:', error);
       throw error;
     }
-
     this.loadChannelMembers(channelId);
   }
 
@@ -213,7 +218,6 @@ export class ChannelService {
   subscribeToCurrentChannelMembers(): void {
     const channel = this.currentChannel();
     if (!channel) return;
-
     this.removeMembersRealtimeChannel();
     this.channelMembersRealtimeChannel = this.createMembersRealtimeChannel(
       channel.id
@@ -222,20 +226,14 @@ export class ChannelService {
 
   private removeMembersRealtimeChannel(): void {
     if (!this.channelMembersRealtimeChannel) return;
-
-    this.supabase.supabase.removeChannel(
-      this.channelMembersRealtimeChannel
-    );
+    this.supabase.supabase.removeChannel(this.channelMembersRealtimeChannel);
   }
 
   private createMembersRealtimeChannel(channelId: string): RealtimeChannel {
     return this.supabase.supabase
       .channel(`channel-members-live-${channelId}`)
-      .on(
-        'postgres_changes',
-        this.getChannelMembersRealtimeConfig(),
-        () => this.reloadActiveChannelMembers()
-      )
+      .on('postgres_changes', this.getChannelMembersRealtimeConfig(),
+        () => this.reloadActiveChannelMembers())
       .subscribe();
   }
 
@@ -250,7 +248,6 @@ export class ChannelService {
   private async reloadActiveChannelMembers(): Promise<void> {
     const activeChannel = this.currentChannel();
     if (!activeChannel) return;
-
     await this.loadChannelMembers(activeChannel.id);
   }
 
@@ -260,15 +257,11 @@ export class ChannelService {
     if (!currentUser) {
       throw new Error('User not found');
     }
-
     await this.deleteChannelMembership(channelId, currentUser.id);
     this.removeChannelFromState(channelId);
   }
 
-  private async deleteChannelMembership(
-    channelId: string,
-    profileId: string
-  ): Promise<void> {
+  private async deleteChannelMembership(channelId: string, profileId: string): Promise<void> {
     const { error } = await this.supabase.supabase
       .from('channel_members')
       .delete()
@@ -295,29 +288,17 @@ export class ChannelService {
       this.loadChannelMembers(channel.id);
       return;
     }
-
     this.channelMembers.set([]);
   }
 
-  async updateChannelName(
-    channelId: string,
-    newName: string
-  ): Promise<void> {
+  async updateChannelName(channelId: string, newName: string): Promise<void> {
     const trimmedName = newName.trim();
-
     await this.ensureUpdatedNameAvailable(channelId, trimmedName);
-    const data = await this.updateChannelNameRecord(
-      channelId,
-      trimmedName
-    );
-
+    const data = await this.updateChannelNameRecord(channelId, trimmedName);
     this.updateChannelState(this.mapChannel(data));
   }
 
-  private async ensureUpdatedNameAvailable(
-    channelId: string,
-    name: string
-  ): Promise<void> {
+  private async ensureUpdatedNameAvailable(channelId: string,name: string): Promise<void> {
     const { data, error } = await this.supabase.supabase
       .from('channels')
       .select('id')
@@ -329,10 +310,7 @@ export class ChannelService {
     if (data) throw new Error('CHANNEL_ALREADY_EXISTS');
   }
 
-  private async updateChannelNameRecord(
-    channelId: string,
-    name: string
-  ): Promise<any> {
+  private async updateChannelNameRecord(channelId: string, name: string): Promise<any> {
     const { data, error } = await this.supabase.supabase
       .from('channels')
       .update({ name })
@@ -344,23 +322,13 @@ export class ChannelService {
     return data;
   }
 
-  async updateChannelDescription(
-    channelId: string,
-    newDescription: string
-  ): Promise<void> {
+  async updateChannelDescription(channelId: string, newDescription: string): Promise<void> {
     const description = newDescription.trim();
-    const data = await this.updateDescriptionRecord(
-      channelId,
-      description
-    );
-
+    const data = await this.updateDescriptionRecord(channelId, description);
     this.updateChannelState(this.mapChannel(data));
   }
 
-  private async updateDescriptionRecord(
-    channelId: string,
-    description: string
-  ): Promise<any> {
+  private async updateDescriptionRecord(channelId: string,description: string): Promise<any> {
     const { data, error } = await this.supabase.supabase
       .from('channels')
       .update({ description })
@@ -372,17 +340,13 @@ export class ChannelService {
       console.error('Channel description update error:', error);
       throw error;
     }
-
     return data;
   }
 
   private updateChannelState(updatedChannel: Channel): void {
     this.channels.update((channels) =>
       channels.map((channel) =>
-        channel.id === updatedChannel.id ? updatedChannel : channel
-      )
-    );
-
+        channel.id === updatedChannel.id ? updatedChannel : channel));
     this.currentChannel.set(updatedChannel);
   }
 

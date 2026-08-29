@@ -48,44 +48,25 @@ export class ReactionService {
     const currentUser = this.authService.currentUserProfile();
 
     for (const reaction of this.reactions()) {
-      this.addReactionToSummary(
-        groupedReactions,
-        reaction,
-        currentUser?.id
-      );
+      this.addReactionToSummary(groupedReactions, reaction, currentUser?.id);
     }
-
     return Array.from(groupedReactions.values());
   }
 
-  private addReactionToSummary(
-    summaries: Map<string, ReactionSummary>,
-    reaction: MessageReaction,
-    currentUserId?: string
-  ): void {
+  private addReactionToSummary(summaries: Map<string, ReactionSummary>,
+    reaction: MessageReaction, currentUserId?: string): void {
     const messageId = this.getReactionMessageId(reaction);
     if (!messageId) return;
-
-    const summary = this.getOrCreateSummary(
-      summaries,
-      messageId,
-      reaction.emoji
-    );
-
+    const summary = this.getOrCreateSummary(summaries,messageId,reaction.emoji);
     this.updateSummary(summary, reaction, currentUserId);
   }
 
-  private getReactionMessageId(
-    reaction: MessageReaction
-  ): string | null {
+  private getReactionMessageId(reaction: MessageReaction): string | null {
     return reaction.message_id ?? reaction.direct_message_id;
   }
 
-  private getOrCreateSummary(
-    summaries: Map<string, ReactionSummary>,
-    messageId: string,
-    emoji: string
-  ): ReactionSummary {
+  private getOrCreateSummary(summaries: Map<string, ReactionSummary>,
+    messageId: string, emoji: string): ReactionSummary {
     const key = `${messageId}_${emoji}`;
     const existingSummary = summaries.get(key);
 
@@ -96,10 +77,7 @@ export class ReactionService {
     return summary;
   }
 
-  private createReactionSummary(
-    messageId: string,
-    emoji: string
-  ): ReactionSummary {
+  private createReactionSummary(messageId: string, emoji: string): ReactionSummary {
     return {
       messageId,
       emoji,
@@ -109,11 +87,8 @@ export class ReactionService {
     };
   }
 
-  private updateSummary(
-    summary: ReactionSummary,
-    reaction: MessageReaction,
-    currentUserId?: string
-  ): void {
+  private updateSummary(summary: ReactionSummary, reaction: MessageReaction,
+    currentUserId?: string): void {
     summary.count++;
 
     if (reaction.profiles?.name) {
@@ -135,25 +110,21 @@ export class ReactionService {
       console.log('Error', error);
       return;
     }
-
     this.reactions.set(data);
   }
 
   private async removeReaction(reactionId: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
-
     const { error } = await this.supabase.supabase
       .from('message_reactions')
       .delete()
       .eq('id', reactionId)
       .eq('user_id', currentUser?.id)
-      .select();
 
     if (error) {
       console.error('Fehler beim Entfernen der Reaction:', error);
       return;
     }
-
     this.removeReactionFromState(reactionId);
   }
 
@@ -163,11 +134,8 @@ export class ReactionService {
     );
   }
 
-  async addReaction(
-    messageId: string,
-    emoji: string,
-    isDirectMessage: boolean
-  ): Promise<void> {
+  async addReaction(messageId: string,emoji:string,isDirectMessage: boolean): 
+  Promise<void> {
     const currentUser = this.authService.currentUserProfile();
     if (!currentUser) return;
 
@@ -183,29 +151,13 @@ export class ReactionService {
       return;
     }
 
-    await this.insertReaction(
-      messageId,
-      emoji,
-      isDirectMessage,
-      currentUser.id
-    );
+    await this.insertReaction(messageId, emoji, isDirectMessage, currentUser.id);
   }
 
-  private findExistingReaction(
-    messageId: string,
-    emoji: string,
-    isDirectMessage: boolean,
-    userId: string
-  ): MessageReaction | undefined {
+  private findExistingReaction(messageId: string, emoji: string,
+    isDirectMessage: boolean, userId: string): MessageReaction | undefined {
     return this.reactions().find((reaction) =>
-      this.matchesReaction(
-        reaction,
-        messageId,
-        emoji,
-        isDirectMessage,
-        userId
-      )
-    );
+      this.matchesReaction(reaction,messageId,emoji,isDirectMessage,userId));
   }
 
   private matchesReaction(
@@ -224,18 +176,10 @@ export class ReactionService {
       reaction.emoji === emoji;
   }
 
-  private async insertReaction(
-    messageId: string,
-    emoji: string,
-    isDirectMessage: boolean,
-    userId: string
-  ): Promise<void> {
-    const reactionData = this.buildReactionData(
-      messageId,
-      emoji,
-      isDirectMessage,
-      userId
-    );
+  private async insertReaction(messageId: string,emoji: string,
+    isDirectMessage: boolean, userId: string): Promise<void> {
+    const reactionData = this.buildReactionData(messageId,emoji,
+      isDirectMessage,userId);
 
     const { error } = await this.supabase.supabase
       .from('message_reactions')
@@ -274,27 +218,20 @@ export class ReactionService {
     );
   }
 
-  getLimitedReactionsForMessage(
-    messageId: string,
-    limit: number
-  ): ReactionSummary[] {
+  getLimitedReactionsForMessage(messageId: string,limit: number): ReactionSummary[] {
     return this.getReactionForMessage(messageId).slice(0, limit);
   }
 
   subscribeToReactions(): void {
     this.removeReactionsRealtimeChannel();
-    this.reactionsRealtimeChannel =
-      this.createReactionsRealtimeChannel();
+    this.reactionsRealtimeChannel = this.createReactionsRealtimeChannel();
   }
 
   private createReactionsRealtimeChannel(): RealtimeChannel {
     return this.supabase.supabase
       .channel('message-reactions-realtime')
-      .on(
-        'postgres_changes',
-        this.getReactionsRealtimeConfig(),
-        () => this.loadReactions()
-      )
+      .on('postgres_changes',this.getReactionsRealtimeConfig(),
+          () => this.loadReactions())
       .subscribe();
   }
 
@@ -312,7 +249,6 @@ export class ReactionService {
     this.supabase.supabase.removeChannel(
       this.reactionsRealtimeChannel
     );
-
     this.reactionsRealtimeChannel = null;
   }
 }

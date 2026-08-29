@@ -22,6 +22,7 @@ const GUEST_AVATARS = [
 @Injectable({
   providedIn: 'root',
 })
+
 export class Auth {
   private registerData?: RegisterData;
   currentUser = signal<User | null>(null);
@@ -85,7 +86,6 @@ export class Auth {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-
     if (error) throw error;
   }
 
@@ -154,14 +154,11 @@ export class Auth {
     this.clearRegisterData();
   }
 
-  private async createRegisteredProfile(
-    userId: string,
-    data: RegisterData
-  ): Promise<void> {
+  private async createRegisteredProfile(userId: string, data: RegisterData): 
+  Promise<void> {
     const { error } = await this.supabase.supabase
       .from('profiles')
       .insert(this.buildRegisteredProfile(userId, data));
-
     if (error) throw error;
   }
 
@@ -184,10 +181,8 @@ export class Auth {
 
   async login(email: string, password: string) {
     this.clearCurrentSession();
-    const { data, error } =
-      await this.supabase.supabase.auth.signInWithPassword({
-        email,
-        password,
+    const { data, error } = await this.supabase.supabase.auth.signInWithPassword({
+        email, password,
       });
 
     if (error) throw error;
@@ -203,9 +198,7 @@ export class Auth {
 
   async logout(): Promise<void> {
     await this.updateStatus('offline');
-    const { error } =
-      await this.supabase.supabase.auth.signOut();
-
+    const { error } = await this.supabase.supabase.auth.signOut();
     if (error) throw error;
     this.clearCurrentSession();
   }
@@ -226,8 +219,7 @@ export class Auth {
   }
 
   async updatePassword(newPassword: string) {
-    const { data, error } =
-      await this.supabase.supabase.auth.updateUser({
+    const { data, error } = await this.supabase.supabase.auth.updateUser({
         password: newPassword,
       });
 
@@ -251,9 +243,7 @@ export class Auth {
 
   private getEditableCurrentUser(): User {
     if (this.isGuestUser()) {
-      throw new Error(
-        'Gastbenutzer können ihr Profil nicht bearbeiten.'
-      );
+      throw new Error('Gastbenutzer können ihr Profil nicht bearbeiten.');
     }
 
     const user = this.currentUser();
@@ -278,17 +268,12 @@ export class Auth {
   }
 
   async updateCurrentUserAvatar(avatar: string): Promise<void> {
-    const user = await this.getAuthenticatedUser(
-      'No authenticated user found.'
-    );
+    const user = await this.getAuthenticatedUser('No authenticated user found.');
     const profile = await this.updateUserAvatar(user.id, avatar);
     this.setCurrentSession(user, profile);
   }
 
-  private async updateUserAvatar(
-    userId: string,
-    avatar: string
-  ): Promise<Profile> {
+  private async updateUserAvatar(userId: string, avatar: string): Promise<Profile> {
     const { data, error } = await this.supabase.supabase
       .from('profiles')
       .update({ avatar, status: 'online' })
@@ -312,13 +297,9 @@ export class Auth {
   }
 
   private async signInGuest(): Promise<User> {
-    const { data, error } =
-      await this.supabase.supabase.auth.signInAnonymously();
-
+    const { data, error } = await this.supabase.supabase.auth.signInAnonymously();
     if (error) throw error;
-    if (!data.user) {
-      throw new Error('Gastbenutzer konnte nicht erstellt werden.');
-    }
+    if (!data.user) {throw new Error('Gastbenutzer konnte nicht erstellt werden.');}
     return data.user;
   }
 
@@ -360,9 +341,7 @@ export class Auth {
     }
   }
 
-  private async addGuestToWelcomeChannel(
-    guestUserId: string
-  ): Promise<void> {
+  private async addGuestToWelcomeChannel(guestUserId: string): Promise<void> {
     const channelId = await this.getWelcomeChannelId();
     await this.createGuestMembership(channelId, guestUserId);
   }
@@ -381,33 +360,20 @@ export class Auth {
     return data.id;
   }
 
-  private async createGuestMembership(
-    channelId: string,
-    guestUserId: string
-  ): Promise<void> {
+  private async createGuestMembership(channelId: string, guestUserId: string): Promise<void> {
     const { error } = await this.supabase.supabase
       .from('channel_members')
-      .insert({
-        channel_id: channelId,
-        profile_id: guestUserId,
-        role: 'member',
-      });
-
+      .insert({channel_id: channelId, profile_id: guestUserId,role: 'member'});
     if (error) this.throwMembershipError(error);
   }
 
   private throwMembershipError(error: unknown): never {
-    console.error(
-      'Fehler beim Hinzufügen zum Willkommen-Channel:',
-      error
-    );
+    console.error('Fehler beim Hinzufügen zum Willkommen-Channel:', error);
     throw error;
   }
 
   private async getAuthenticatedUser(missingUserMessage: string): Promise<User> {
-    const { data, error } =
-      await this.supabase.supabase.auth.getUser();
-
+    const { data, error } = await this.supabase.supabase.auth.getUser();
     if (error) throw error;
     if (!data.user) throw new Error(missingUserMessage);
     return data.user;
