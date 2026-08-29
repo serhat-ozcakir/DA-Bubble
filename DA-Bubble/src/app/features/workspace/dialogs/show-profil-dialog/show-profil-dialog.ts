@@ -22,6 +22,7 @@ export class ShowProfilDialog {
     if (!user) {
       return;
     }
+    
     await this.directMessageService.selectDmUser(user);
     this.closeDialog();
   }

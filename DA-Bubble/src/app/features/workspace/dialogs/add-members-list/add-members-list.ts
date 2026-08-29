@@ -8,6 +8,7 @@ import { Auth } from "../../../../core/services/auth.service";
   templateUrl: './add-members-list.html',
   styleUrl: './add-members-list.scss',
 })
+
 export class AddMembersList {
   channelService = inject(ChannelService);
   authService = inject(Auth);

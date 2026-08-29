@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { Auth } from '../../../../core/services/auth.service';
 
-
 @Component({
   selector: 'app-user-menu',
   imports: [],
@@ -22,5 +21,4 @@ export class UserMenu {
   LogoutButtonClicked(): void {
     this.LogoutClick.emit();
   }
-
 }

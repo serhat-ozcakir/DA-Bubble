@@ -1,25 +1,37 @@
-import { HostListener, Component, output, Host, signal, input } from '@angular/core';
-import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {Component, HostListener, input, output, signal} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ChannelService } from '../../../../core/services/channel.service';
 
 @Component({
   selector: 'app-channel-create-dialog',
-  imports: [FormsModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './channel-create-dialog.html',
   styleUrl: './channel-create-dialog.scss',
 })
 export class ChannelCreateDialog {
+  private channelService: ChannelService;
+
   closeDialog = output<void>();
-  channelForm = new FormGroup({
-    channelName: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-    channelDescription: new FormControl('', [Validators.maxLength(200)]),
-  });
+
   isLoading = signal(false);
   errorMessage = signal('');
+
   SidebarClosed = input<boolean>(false);
   mobileFullPage = input<boolean>(false);
 
-  constructor(private channelService: ChannelService) { }
+  channelForm = new FormGroup({
+    channelName: new FormControl('', [
+      Validators.required,
+      Validators.maxLength(50),
+    ]),
+    channelDescription: new FormControl('', [
+      Validators.maxLength(200),
+    ]),
+  });
+
+  constructor(channelService: ChannelService) {
+    this.channelService = channelService;
+  }
 
   close(): void {
     this.closeDialog.emit();
@@ -32,34 +44,52 @@ export class ChannelCreateDialog {
 
   async createChannel(): Promise<void> {
     if (this.channelForm.invalid) {
-      this.channelForm.markAllAsTouched();
+      this.markFormAsInvalid();
       return;
     }
-
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    const { channelName, channelDescription } = this.channelForm.getRawValue();
+    this.startLoading();
 
     try {
-      await this.channelService.createChannel(
-        channelName?.trim() ?? '',
-        channelDescription?.trim() ?? ''
-      );
-
+      await this.createChannelFromForm();
       this.close();
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === 'CHANNEL_ALREADY_EXISTS'
-      ) {
-        this.errorMessage.set('Dieser Channel existiert bereits.');
-      } else {
-        this.errorMessage.set('Channel konnte nicht erstellt werden.');
-      }
+      this.handleCreateError(error);
     } finally {
       this.isLoading.set(false);
     }
   }
 
+  private markFormAsInvalid(): void {
+    this.channelForm.markAllAsTouched();
+  }
+
+  private startLoading(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+  }
+
+  private async createChannelFromForm(): Promise<void> {
+    const { channelName, channelDescription } =
+      this.channelForm.getRawValue();
+
+    await this.channelService.createChannel(
+      channelName?.trim() ?? '',
+      channelDescription?.trim() ?? ''
+    );
+  }
+
+  private handleCreateError(error: unknown): void {
+    const message = this.isDuplicateChannelError(error)
+      ? 'Dieser Channel existiert bereits.'
+      : 'Channel konnte nicht erstellt werden.';
+
+    this.errorMessage.set(message);
+  }
+
+  private isDuplicateChannelError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      error.message === 'CHANNEL_ALREADY_EXISTS'
+    );
+  }
 }

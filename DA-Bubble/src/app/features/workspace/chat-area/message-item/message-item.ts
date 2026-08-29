@@ -1,12 +1,11 @@
-import { ElementRef, HostListener, Component, inject, input, Input, signal } from '@angular/core';
+import {Component, ElementRef, HostListener, inject, input, signal} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { MessageView } from '../../../../core/models/message-view.model';
+import { ReactionSummary } from '../../../../core/models/reaction-summary.model';
 import { MessageService } from '../../../../core/services/message.service';
 import { ReactionService } from '../../../../core/services/reaction.service';
-import { PickerComponent } from '@ctrl/ngx-emoji-mart';
-import { FormsModule } from '@angular/forms';
-import { ReactionSummary } from '../../../../core/models/reaction-summary.model';
 import { DirectMessageService } from '../../../../core/services/direct-message.service';
-
 
 @Component({
   selector: 'app-message-item',
@@ -15,20 +14,20 @@ import { DirectMessageService } from '../../../../core/services/direct-message.s
   styleUrl: './message-item.scss',
 })
 export class MessageItemComponent {
-
   message = input.required<MessageView>();
   private messageService = inject(MessageService);
+  private elementRef = inject(ElementRef);
   directMessageService = inject(DirectMessageService);
   reactionService = inject(ReactionService);
   isShowEmojiPicker = signal(false);
-  private elementRef = inject(ElementRef);
   isMessageEdited = signal(false);
   editingMessageID = signal<string | null>(null);
-  editingText = signal<string>('');
-  readonly desktopReactionLimit = 20;
-  readonly mobileReactionLimit = 7;
+  editingText = signal('');
   isMobile = signal(window.innerWidth <= 1024);
   expandedReactionMessageIds = signal<Set<string>>(new Set());
+
+  readonly desktopReactionLimit = 20;
+  readonly mobileReactionLimit = 7;
 
   @HostListener('window:resize')
   onResize(): void {
@@ -41,90 +40,94 @@ export class MessageItemComponent {
       : this.desktopReactionLimit;
   }
 
-getVisibleReactions(messageId: string): ReactionSummary[] {
-  const reactions =
-    this.reactionService.getReactionForMessage(messageId);
-
-  if (this.expandedReactionMessageIds().has(messageId)) {
-    return reactions;
-  }
-
-  return this.reactionService.getLimitedReactionsForMessage(
-    messageId,
-    this.getReactionLimit()
-  );
-}
-
-  getTotalReactionCount(messageId: string): number {
-    return this.reactionService.getReactionForMessage(messageId).length;
-  }
-
-getHiddenReactionCount(messageId: string): number {
-  if (this.expandedReactionMessageIds().has(messageId)) {
-    return 0;
-  }
-
-  return Math.max(0,this.getTotalReactionCount(messageId) - this.getReactionLimit()
-  );
-}
-
-  toggleAllReactions(messageId: string): void {
-  this.expandedReactionMessageIds.update((current) => {
-    const updated = new Set(current);
-
-    if (updated.has(messageId)) {
-      updated.delete(messageId);
-    } else {
-      updated.add(messageId);
+  getVisibleReactions(messageId: string): ReactionSummary[] {
+    if (this.isReactionExpanded(messageId)) {
+      return this.reactionService.getReactionForMessage(messageId);
     }
 
-    return updated;
-  });
-}
+    return this.reactionService.getLimitedReactionsForMessage(
+      messageId,
+      this.getReactionLimit()
+    );
+  }
 
-isReactionExpanded(messageId: string): boolean {
-  return this.expandedReactionMessageIds().has(messageId);
-}
+  getTotalReactionCount(messageId: string): number {
+    return this.reactionService
+      .getReactionForMessage(messageId)
+      .length;
+  }
+
+  getHiddenReactionCount(messageId: string): number {
+    if (this.isReactionExpanded(messageId)) return 0;
+
+    const hiddenCount =
+      this.getTotalReactionCount(messageId) -
+      this.getReactionLimit();
+
+    return Math.max(0, hiddenCount);
+  }
+
+  toggleAllReactions(messageId: string): void {
+    this.expandedReactionMessageIds.update((current) =>
+      this.toggleReactionId(current, messageId)
+    );
+  }
+
+  private toggleReactionId(current: Set<string>,messageId: string): Set<string> {
+    const updated = new Set(current);
+
+    updated.has(messageId)
+      ? updated.delete(messageId)
+      : updated.add(messageId);
+
+    return updated;
+  }
+
+  isReactionExpanded(messageId: string): boolean {
+    return this.expandedReactionMessageIds().has(messageId);
+  }
 
   @HostListener('document:click', ['$event'])
-  closeEmojiPickerOnOutsideClick(event: Event) {
-    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+  closeEmojiPickerOnOutsideClick(event: Event): void {
+    const clickedInside =
+      this.elementRef.nativeElement.contains(event.target);
 
     if (!clickedInside) {
-      this.isShowEmojiPicker.set(false);
-      this.isMessageEdited.set(false);
-
+      this.closeMessageActions();
     }
   }
 
   @HostListener('document:keydown.escape')
   closeEmojiPickerOnEscape(): void {
-    this.isShowEmojiPicker.set(false);
-    this.isMessageEdited.set(false);
+    this.closeMessageActions();
     this.cancelEditMessage();
   }
 
+  private closeMessageActions(): void {
+    this.isShowEmojiPicker.set(false);
+    this.isMessageEdited.set(false);
+  }
+
   openThread(): void {
-    const isDirectMessage = this.directMessageService.currentDmUser() !== null;
-    if (isDirectMessage) {
-      return;
-    }
-    this.messageService.openThread(this.message())
+    if (this.isDirectMessage()) return;
+    this.messageService.openThread(this.message());
+  }
+
+  private isDirectMessage(): boolean {
+    return this.directMessageService.currentDmUser() !== null;
   }
 
   toggleEmojiPicker(): void {
-    this.isShowEmojiPicker.update(value => !value)
+    this.isShowEmojiPicker.update((value) => !value);
   }
+
   async addEmojiReaction(event: any): Promise<void> {
     const emoji = event.emoji.native;
-
-    const isDirectMessage =
-      this.directMessageService.currentDmUser() !== null;
 
     await this.reactionService.addReaction(
       this.message().id,
       emoji,
-      isDirectMessage
+      this.isDirectMessage()
     );
 
     this.isShowEmojiPicker.set(false);
@@ -132,7 +135,7 @@ isReactionExpanded(messageId: string): boolean {
 
   toggleMessageEdited(event: Event): void {
     event.stopPropagation();
-    this.isMessageEdited.update(value => !value)
+    this.isMessageEdited.update((value) => !value);
   }
 
   startEditingMessage(event: Event): void {
@@ -152,56 +155,68 @@ isReactionExpanded(messageId: string): boolean {
     const newText = this.editingText().trim();
     const currentMessage = this.message();
 
-    if (!newText || newText === currentMessage.text) {
+    if (!this.shouldSaveEdit(newText, currentMessage)) {
       this.cancelEditMessage();
       return;
     }
 
-    if (this.directMessageService.currentDmUser()) {
-      await this.directMessageService.updateDirectMessage(
-        currentMessage.id,
-        newText
-      );
-    } else {
-      await this.messageService.updateMessage(
-        currentMessage.id,
-        newText
-      );
-    }
-
+    await this.updateCurrentMessage(currentMessage.id, newText);
     this.cancelEditMessage();
   }
 
-  async saveOnEnter(event: KeyboardEvent): Promise<void> {
-    if (event.shiftKey) {
+  private shouldSaveEdit(
+    newText: string,
+    message: MessageView
+  ): boolean {
+    return !!newText && newText !== message.text;
+  }
+
+  private async updateCurrentMessage(messageId: string, text: string): Promise<void> {
+    if (this.isDirectMessage()) {
+      await this.directMessageService.updateDirectMessage(
+        messageId,
+        text
+      );
       return;
     }
+
+    await this.messageService.updateMessage(messageId, text);
+  }
+
+  async saveOnEnter(event: KeyboardEvent): Promise<void> {
+    if (event.shiftKey) return;
+
     event.preventDefault();
     await this.saveEditedMessage();
   }
 
   getReactionUsersNames(userNames: string[]): string {
-    if (userNames.length === 1) {
-      return userNames[0];
-    }
+    if (userNames.length === 1) return userNames[0];
     if (userNames.length === 2) {
-      return `${userNames[0]} und ${userNames[1]}`
+      return `${userNames[0]} und ${userNames[1]}`;
     }
-    return `${userNames[0]} und ${userNames[1]} und ${userNames.length - 2} weitere`
+
+    return this.getMultipleReactionNames(userNames);
+  }
+
+  private getMultipleReactionNames(userNames: string[]): string {
+    const additionalUsers = userNames.length - 2;
+
+    return `${userNames[0]} und ${userNames[1]} und ` +
+      `${additionalUsers} weitere`;
   }
 
   getReactionVerb(userNames: string[]): string {
-    return userNames.length === 1 ? 'hat reagiert' : 'haben reagiert'
+    return userNames.length === 1
+      ? 'hat reagiert'
+      : 'haben reagiert';
   }
 
   async toggleQuickReaction(emoji: string): Promise<void> {
-    const isDirectMessage =
-      this.directMessageService.currentDmUser() !== null;
-
     await this.reactionService.addReaction(
       this.message().id,
       emoji,
-      isDirectMessage
+      this.isDirectMessage()
     );
   }
 }

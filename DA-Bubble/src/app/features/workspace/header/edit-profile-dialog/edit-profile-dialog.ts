@@ -9,6 +9,7 @@ import { ToastService } from '../../../../core/services/toast.service';
   templateUrl: './edit-profile-dialog.html',
   styleUrl: './edit-profile-dialog.scss',
 })
+
 export class EditProfileDialog {
   @Output() closeDialogEvent = new EventEmitter<void>();
 
@@ -19,10 +20,9 @@ export class EditProfileDialog {
       {
         validators: [Validators.required, Validators.minLength(3)],
         nonNullable: true,
-
       });
-
   }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.close();

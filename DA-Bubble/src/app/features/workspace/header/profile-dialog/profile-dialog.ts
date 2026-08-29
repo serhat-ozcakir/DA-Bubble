@@ -1,4 +1,4 @@
-import {ElementRef, HostListener, Component, EventEmitter, inject, Output } from '@angular/core';
+import { ElementRef, HostListener, Component, EventEmitter, inject, Output } from '@angular/core';
 import { Auth } from '../../../../core/services/auth.service';
 
 @Component({
@@ -19,7 +19,7 @@ export class ProfileDialog {
     this.close();
   }
 
-    @HostListener('document:click', ['$event'])
+  @HostListener('document:click', ['$event'])
   onOutsideClick(event: MouseEvent): void {
     const target = event.target as Node;
 

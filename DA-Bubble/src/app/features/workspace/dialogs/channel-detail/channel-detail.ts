@@ -1,6 +1,6 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import {Component, inject, input, output, signal} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ChannelService } from '../../../../core/services/channel.service';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators, } from '@angular/forms';
 import { Auth } from '../../../../core/services/auth.service';
 
 @Component({
@@ -10,20 +10,26 @@ import { Auth } from '../../../../core/services/auth.service';
   styleUrl: './channel-detail.scss',
 })
 export class ChannelDetail {
-  closeChannelSettings = output<void>();
   channelService = inject(ChannelService);
-  authService = inject(Auth)
-  isLeaving = signal(false);
-  leaveErrorMessage = signal('');
-  isEditingName = signal(false);
-  isEditingDescriptionName = signal(false);
-  nameErrorMessage = signal('');
-  isSavingName = signal(false);
-  isSavingDescription = signal(false);
-  descriptionErrorMessage = signal('');
+  authService = inject(Auth);
+
+  closeChannelSettings = output<void>();
+  openAddMembersDialog = output<void>();
+
   SidebarClosed = input<boolean>(false);
   mobileFullPage = input<boolean>(false);
-  openAddMembersDialog = output<void>();
+
+  isLeaving = signal(false);
+  leaveErrorMessage = signal('');
+
+  isEditingName = signal(false);
+  isEditingDescriptionName = signal(false);
+
+  isSavingName = signal(false);
+  isSavingDescription = signal(false);
+
+  nameErrorMessage = signal('');
+  descriptionErrorMessage = signal('');
 
   channelEditForm = new FormGroup({
     name: new FormControl('', {
@@ -47,21 +53,19 @@ export class ChannelDetail {
 
   startEditingName(): void {
     const channel = this.channelService.currentChannel();
-
     if (!channel) return;
+
     this.channelEditForm.controls.name.setValue(channel.name);
-    this.isEditingName.set(true)
+    this.nameErrorMessage.set('');
+    this.isEditingName.set(true);
   }
 
   startEditingDescription(): void {
-    const currentChannel = this.channelService.currentChannel();
-
-    if (!currentChannel) {
-      return;
-    }
+    const channel = this.channelService.currentChannel();
+    if (!channel) return;
 
     this.channelEditForm.controls.description.setValue(
-      currentChannel.description ?? ''
+      channel.description ?? ''
     );
 
     this.descriptionErrorMessage.set('');
@@ -77,97 +81,129 @@ export class ChannelDetail {
   }
 
   async saveChannelName(): Promise<void> {
-    const nameControl = this.channelEditForm.controls.name;
-    const currentChannel = this.channelService.currentChannel();
+    const control = this.channelEditForm.controls.name;
+    const channel = this.channelService.currentChannel();
 
-    if (!currentChannel) {
-      return;
-    }
+    if (!channel || !this.isControlValid(control)) return;
 
-    if (nameControl.invalid) {
-      nameControl.markAsTouched();
-      return;
-    }
+    const newName = control.getRawValue().trim();
+    if (this.isSameName(newName, channel.name)) return;
 
-    const newName = nameControl.getRawValue().trim();
+    await this.updateChannelName(channel.id, newName);
+  }
 
-    if (newName === currentChannel.name) {
-      this.isEditingName.set(false);
-      return;
-    }
-
-    this.isSavingName.set(true);
-    this.nameErrorMessage.set('');
+  private async updateChannelName(
+    channelId: string,
+    newName: string
+  ): Promise<void> {
+    this.startNameSaving();
 
     try {
       await this.channelService.updateChannelName(
-        currentChannel.id,
+        channelId,
         newName
       );
 
       this.isEditingName.set(false);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === 'CHANNEL_ALREADY_EXISTS'
-      ) {
-        this.nameErrorMessage.set(
-          'Dieser Channel-Name existiert bereits.'
-        );
-      } else {
-        this.nameErrorMessage.set(
-          'Der Channel-Name konnte nicht gespeichert werden.'
-        );
-      }
+      this.handleNameSaveError(error);
     } finally {
       this.isSavingName.set(false);
     }
   }
 
+  private startNameSaving(): void {
+    this.isSavingName.set(true);
+    this.nameErrorMessage.set('');
+  }
+
+  private handleNameSaveError(error: unknown): void {
+    const message = this.isDuplicateChannelError(error)
+      ? 'Dieser Channel-Name existiert bereits.'
+      : 'Der Channel-Name konnte nicht gespeichert werden.';
+
+    this.nameErrorMessage.set(message);
+  }
+
+  private isDuplicateChannelError(error: unknown): boolean {
+    return (
+      error instanceof Error &&
+      error.message === 'CHANNEL_ALREADY_EXISTS'
+    );
+  }
+
+  private isSameName(
+    newName: string,
+    currentName: string
+  ): boolean {
+    if (newName !== currentName) return false;
+
+    this.isEditingName.set(false);
+    return true;
+  }
+
   async saveChannelDescription(): Promise<void> {
-    const descriptionControl =
-      this.channelEditForm.controls.description;
+    const control = this.channelEditForm.controls.description;
+    const channel = this.channelService.currentChannel();
 
-    const currentChannel =
-      this.channelService.currentChannel();
+    if (!channel || !this.isControlValid(control)) return;
 
-    if (!currentChannel) {
-      return;
-    }
+    const newDescription = control.getRawValue().trim();
+    const currentDescription = channel.description?.trim() ?? '';
 
-    if (descriptionControl.invalid) {
-      descriptionControl.markAsTouched();
-      return;
-    }
+    if (this.isSameDescription(
+      newDescription,
+      currentDescription
+    )) return;
 
-    const newDescription =
-      descriptionControl.getRawValue().trim();
+    await this.updateDescription(
+      channel.id,
+      newDescription
+    );
+  }
 
-    const currentDescription =
-      currentChannel.description?.trim() ?? '';
-
-    if (newDescription === currentDescription) {
-      this.isEditingDescriptionName.set(false);
-      return;
-    }
-
-    this.isSavingDescription.set(true);
-    this.descriptionErrorMessage.set('');
+  private async updateDescription(channelId: string, description: string): Promise<void> {
+    this.startDescriptionSaving();
 
     try {
       await this.channelService.updateChannelDescription(
-        currentChannel.id,
-        newDescription
+        channelId,
+        description
       );
 
       this.isEditingDescriptionName.set(false);
-    } catch (error) {
-      this.descriptionErrorMessage.set(
-        'Die Beschreibung konnte nicht gespeichert werden.'
-      );
+    } catch {
+      this.setDescriptionSaveError();
     } finally {
       this.isSavingDescription.set(false);
     }
+  }
+
+  private startDescriptionSaving(): void {
+    this.isSavingDescription.set(true);
+    this.descriptionErrorMessage.set('');
+  }
+
+  private setDescriptionSaveError(): void {
+    this.descriptionErrorMessage.set(
+      'Die Beschreibung konnte nicht gespeichert werden.'
+    );
+  }
+
+  private isSameDescription(
+    newDescription: string,
+    currentDescription: string
+  ): boolean {
+    if (newDescription !== currentDescription) return false;
+
+    this.isEditingDescriptionName.set(false);
+    return true;
+  }
+
+  private isControlValid( control: FormControl<string>): boolean {
+    if (!control.invalid) return true;
+    control.markAsTouched();
+    return false;
   }
 
   close(): void {
@@ -175,20 +211,28 @@ export class ChannelDetail {
   }
 
   async leaveChannel(): Promise<void> {
-    const currentChannel = this.channelService.currentChannel();
+    const channel = this.channelService.currentChannel();
+    if (!channel) return;
 
-    if (!currentChannel) {
-      return;
-    }
+    this.startLeaving();
 
     try {
-      await this.channelService.leaveChannel(currentChannel.id);
+      await this.channelService.leaveChannel(channel.id);
       this.close();
     } catch (error) {
-      console.log('Unable to leave the channel:', error);
-      this.leaveErrorMessage.set('Unable to leave the channel')
+      this.handleLeaveError(error);
     } finally {
-      this.isLeaving.set(false)
+      this.isLeaving.set(false);
     }
+  }
+
+  private startLeaving(): void {
+    this.isLeaving.set(true);
+    this.leaveErrorMessage.set('');
+  }
+
+  private handleLeaveError(error: unknown): void {
+    console.log('Unable to leave the channel:', error);
+    this.leaveErrorMessage.set('Unable to leave the channel');
   }
 }
