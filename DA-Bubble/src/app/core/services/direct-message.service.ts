@@ -43,6 +43,8 @@ export class DirectMessageService {
     return null;
   }
 
+  // Builds a bidirectional filter so both sent and received
+  // messages belong to the same DM conversation.
   private createConversationFilter(currentUser: Profile,selectedUser: Profile):string{
     return `and(sender_id.eq.${currentUser.id},receiver_id.eq.${selectedUser.id}),`
       + `and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUser.id})`;
@@ -123,6 +125,8 @@ export class DirectMessageService {
     this.addMessageIfMissing(message);
   }
 
+  // Prevents duplicate messages when the sender receives
+  // the same insert again through the realtime subscription.
   private addMessageIfMissing(message: MessageView): void {
     this.directMessages.update((messages) => {
       const exists = messages.some((item) => item.id === message.id);
@@ -130,6 +134,8 @@ export class DirectMessageService {
     });
   }
 
+  // Replaces the previous DM listener whenever
+  // the active conversation changes.
   listenToDirectMessages(): void {
     const currentUser = this.authService.currentUserProfile();
     const selectedUser = this.currentDmUser();
@@ -147,6 +153,8 @@ export class DirectMessageService {
       .subscribe();
   }
 
+  // Listen for both inserts and updates so new messages
+  // and edits can be synchronized in realtime.
   private getDmRealtimeConfig() {
     return {
       event: '*' as const,
@@ -155,6 +163,8 @@ export class DirectMessageService {
     };
   }
 
+  // Ignores realtime events that do not belong
+  // to the currently selected DM conversation.
   private handleDmRealtimePayload(payload: any, currentUser: Profile,
     selectedUser: Profile): void {
     const changedMessage = payload.new as any;
@@ -210,6 +220,8 @@ export class DirectMessageService {
     return sentByCurrentUser || sentBySelectedUser;
   }
 
+  // Converts the database record into the UI model
+  // using the correct participant identity for each message.
   private mapDirectMessage(message: any, currentUser: Profile,selectedUser: Profile):
    MessageView {
     const isOwnMessage = message.sender_id === currentUser.id;
@@ -240,6 +252,8 @@ export class DirectMessageService {
     });
   }
 
+  // Loads the selected conversation first, then starts
+  // its realtime synchronization.
   async selectDmUser(user: Profile): Promise<void> {
     this.currentDmUser.set(user);
     await this.loadDirectMessages();

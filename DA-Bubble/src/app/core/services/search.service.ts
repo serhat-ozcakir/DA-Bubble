@@ -15,6 +15,8 @@ export class Search {
   isLoading = signal(false);
   errorMessage = signal('');
 
+  // Combines channel and direct-message matches into
+  // a single search result list for the workspace.
   async searchChannelMessages(searchTerm: string): Promise<void> {
     const term = searchTerm.trim();
 
@@ -42,11 +44,12 @@ export class Search {
     this.isLoading.set(false);
   }
 
+  // Limits channel-message matches to the most recent
+  // results to keep workspace search lightweight.
   private async fetchChannelResults(term: string): Promise<SearchResult[] | null> {
     const { data, error } = await this.supabase.supabase
       .from('messages')
-      .select(`id, text,  created_at, channel_id, profiles (
-          id, name, avatar )`)
+      .select(`id, text,  created_at, channel_id, profiles(id, name, avatar )`)
       .ilike('text', `%${term}%`)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -90,6 +93,8 @@ export class Search {
     this.isLoading.set(false);
   }
 
+  // Searches only conversations that involve the current user
+  // before mapping them to shared search-result models.
   async searchDirectMessages(searchTerm: string): Promise<SearchResult[]> {
     const currentUser = this.authService.currentUserProfile();
     const term = searchTerm.trim();
@@ -118,6 +123,8 @@ export class Search {
     return data;
   }
 
+  // Represents a DM result with the conversation partner's
+  // identity rather than the current user's own profile.
   private mapDirectSearchResult( message: any, currentUserId: string,users: Profile[]): SearchResult {
     const otherUserId = this.getOtherUserId(
       message,
@@ -141,7 +148,9 @@ export class Search {
       ? message.receiver_id
       : message.sender_id;
   }
-
+  
+  // Loads profile data separately because direct-message rows
+  // only contain participant IDs, not display information.
   private async loadProfiles(): Promise<Profile[]> {
     const { data, error } = await this.supabase.supabase
       .from('profiles')

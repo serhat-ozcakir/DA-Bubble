@@ -26,6 +26,8 @@ export class ReactionService {
     this.buildReactionSummaries()
   );
 
+  // Prioritizes recently used reactions while keeping
+  // the quick-action list limited to two emojis.
   private buildReactionOptions(): string[] {
     const lastUsed = this.lastUsedReactions();
     if (lastUsed.length === 0) return this.defaultReactionOptions;
@@ -43,6 +45,8 @@ export class ReactionService {
     );
   }
 
+  // Aggregates individual reaction records into UI summaries
+  // grouped by message and emoji.
   private buildReactionSummaries(): ReactionSummary[] {
     const groupedReactions = new Map<string, ReactionSummary>();
     const currentUser = this.authService.currentUserProfile();
@@ -57,10 +61,12 @@ export class ReactionService {
     reaction: MessageReaction, currentUserId?: string): void {
     const messageId = this.getReactionMessageId(reaction);
     if (!messageId) return;
-    const summary = this.getOrCreateSummary(summaries,messageId,reaction.emoji);
+    const summary = this.getOrCreateSummary(summaries, messageId, reaction.emoji);
     this.updateSummary(summary, reaction, currentUserId);
   }
 
+  // Reactions can belong to either a channel message
+  // or a direct message through separate foreign keys.
   private getReactionMessageId(reaction: MessageReaction): string | null {
     return reaction.message_id ?? reaction.direct_message_id;
   }
@@ -134,8 +140,10 @@ export class ReactionService {
     );
   }
 
-  async addReaction(messageId: string,emoji:string,isDirectMessage: boolean): 
-  Promise<void> {
+  // Toggles a reaction: an existing user reaction is removed,
+  // otherwise a new reaction is created.
+  async addReaction(messageId: string, emoji: string, isDirectMessage: boolean):
+    Promise<void> {
     const currentUser = this.authService.currentUserProfile();
     if (!currentUser) return;
 
@@ -157,7 +165,7 @@ export class ReactionService {
   private findExistingReaction(messageId: string, emoji: string,
     isDirectMessage: boolean, userId: string): MessageReaction | undefined {
     return this.reactions().find((reaction) =>
-      this.matchesReaction(reaction,messageId,emoji,isDirectMessage,userId));
+      this.matchesReaction(reaction, messageId, emoji, isDirectMessage, userId));
   }
 
   private matchesReaction(
@@ -176,10 +184,10 @@ export class ReactionService {
       reaction.emoji === emoji;
   }
 
-  private async insertReaction(messageId: string,emoji: string,
+  private async insertReaction(messageId: string, emoji: string,
     isDirectMessage: boolean, userId: string): Promise<void> {
-    const reactionData = this.buildReactionData(messageId,emoji,
-      isDirectMessage,userId);
+    const reactionData = this.buildReactionData(messageId, emoji,
+      isDirectMessage, userId);
 
     const { error } = await this.supabase.supabase
       .from('message_reactions')
@@ -193,12 +201,10 @@ export class ReactionService {
     await this.finishReactionInsert(emoji);
   }
 
-  private buildReactionData(
-    messageId: string,
-    emoji: string,
-    isDirectMessage: boolean,
-    userId: string
-  ) {
+  // Sets exactly one message reference depending on whether
+  // the reaction belongs to a channel message or a DM.
+  private buildReactionData(messageId: string, emoji: string, 
+    isDirectMessage: boolean,userId: string) {
     return {
       message_id: isDirectMessage ? null : messageId,
       direct_message_id: isDirectMessage ? messageId : null,
@@ -218,10 +224,12 @@ export class ReactionService {
     );
   }
 
-  getLimitedReactionsForMessage(messageId: string,limit: number): ReactionSummary[] {
+  getLimitedReactionsForMessage(messageId: string, limit: number): ReactionSummary[] {
     return this.getReactionForMessage(messageId).slice(0, limit);
   }
 
+  // Reloads reaction state for every reaction change so counts,
+  // users and current-user flags remain synchronized.
   subscribeToReactions(): void {
     this.removeReactionsRealtimeChannel();
     this.reactionsRealtimeChannel = this.createReactionsRealtimeChannel();
@@ -230,8 +238,8 @@ export class ReactionService {
   private createReactionsRealtimeChannel(): RealtimeChannel {
     return this.supabase.supabase
       .channel('message-reactions-realtime')
-      .on('postgres_changes',this.getReactionsRealtimeConfig(),
-          () => this.loadReactions())
+      .on('postgres_changes', this.getReactionsRealtimeConfig(),
+        () => this.loadReactions())
       .subscribe();
   }
 

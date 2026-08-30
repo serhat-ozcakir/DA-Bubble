@@ -101,6 +101,8 @@ export class ChannelService {
     return data;
   }
 
+  // Synchronizes channel data and realtime subscriptions
+  // whenever the active channel changes.
   setCurrentChannel(channel: Channel): void {
     this.currentChannel.set(channel);
     this.loadChannelMembers(channel.id);
@@ -109,6 +111,8 @@ export class ChannelService {
     this.subscribeToCurrentChannel();
   }
 
+  // Replaces the previous channel listener to prevent
+  // stale subscriptions when switching channels.
   private subscribeToCurrentChannel(): void {
     const channel = this.currentChannel();
     if (!channel) return;
@@ -135,6 +139,8 @@ export class ChannelService {
     this.channelRealtimeChannel = null;
   }
 
+  // Listen only for updates to the active channel
+  // to avoid processing unrelated channel changes.
   private getChannelRealtimeConfig(channelId: string) {
     return {
       event: 'UPDATE' as const,
@@ -144,6 +150,8 @@ export class ChannelService {
     };
   }
 
+  // Creates the channel and registers its creator
+  // as the initial owner membership.
   async createChannel(name: string, description: string): Promise<void> {
     const currentUser = this.authService.currentUserProfile();
     if (!currentUser) return;
@@ -215,6 +223,8 @@ export class ChannelService {
     }));
   }
 
+  // Keeps member updates bound to the currently active channel
+  // and replaces the previous realtime subscription.
   subscribeToCurrentChannelMembers(): void {
     const channel = this.currentChannel();
     if (!channel) return;
@@ -237,6 +247,8 @@ export class ChannelService {
       .subscribe();
   }
 
+  // Reload the active member list for any membership change
+  // so joins, removals and role changes stay synchronized.
   private getChannelMembersRealtimeConfig() {
     return {
       event: '*' as const,
@@ -273,6 +285,8 @@ export class ChannelService {
     throw error;
   }
 
+  // Selects the next available channel after leaving
+  // so the workspace does not keep a removed channel active.
   private removeChannelFromState(channelId: string): void {
     this.channels.update((channels) =>
       channels.filter((channel) => channel.id !== channelId)
@@ -342,7 +356,9 @@ export class ChannelService {
     }
     return data;
   }
-
+  
+  // Keeps the channel list and active channel in sync
+  // after local or realtime updates.
   private updateChannelState(updatedChannel: Channel): void {
     this.channels.update((channels) =>
       channels.map((channel) =>

@@ -10,6 +10,8 @@ export interface RegisterData {
   avatar?: string;
 }
 
+// Local avatar pool used to give temporary guest accounts
+// a distinct visual identity.
 const GUEST_AVATARS = [
   'assets/img/avatar/avatar-1.png',
   'assets/img/avatar/avatar-2.png',
@@ -30,6 +32,8 @@ export class Auth {
 
   constructor(private supabase: Supabase) {}
 
+  // Ensures OAuth users also have an application profile
+  // because Supabase Auth and profile data are stored separately.
   async ensureGoogleProfile(): Promise<boolean> {
     const user = await this.getAuthenticatedUser(
       'Google user could not be loaded.'
@@ -69,6 +73,8 @@ export class Auth {
     };
   }
 
+  // Falls back from OAuth metadata to the email prefix
+  // when Google does not provide a display name.
   private getGoogleUserName(user: User): string {
     return (
       user.user_metadata?.['full_name'] ??
@@ -89,6 +95,8 @@ export class Auth {
     if (error) throw error;
   }
 
+  // Keeps registration data temporarily between the
+  // sign-up and avatar-selection steps.
   setRegisterData(data: RegisterData): void {
     this.registerData = data;
   }
@@ -190,6 +198,8 @@ export class Auth {
     return data;
   }
 
+  // Reloads the profile after setting the online status
+  // so the local session reflects the persisted profile state.
   private async initializeLoggedInUser(): Promise<void> {
     await this.loadCurrentUser();
     await this.updateStatus('online');
@@ -210,7 +220,7 @@ export class Auth {
 
   async resetPassword(email: string) {
     const { data, error } =
-      await this.supabase.supabase.auth.resetPasswordForEmail(email, {
+     await this.supabase.supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'http://localhost:4200/reset-password',
       });
 
@@ -241,6 +251,8 @@ export class Auth {
     return data;
   }
 
+  // Guest accounts are temporary and therefore cannot
+  // modify persistent profile information.
   private getEditableCurrentUser(): User {
     if (this.isGuestUser()) {
       throw new Error('Gastbenutzer können ihr Profil nicht bearbeiten.');
@@ -285,6 +297,8 @@ export class Auth {
     return data;
   }
 
+  // Creates an isolated anonymous user with its own profile
+  // and grants access only through the guest onboarding flow.
   async guestLogin(): Promise<void> {
     this.clearCurrentSession();
     const guestUser = await this.signInGuest();
@@ -313,7 +327,9 @@ export class Auth {
     if (error) await this.handleGuestProfileError(error);
     return data;
   }
-
+  
+  // Builds a friendly temporary identity for anonymous users
+  // using a short guest name and a random local avatar.
   private buildGuestProfile(user: User) {
     return {
       id: user.id,
@@ -325,11 +341,15 @@ export class Auth {
     };
   }
 
+  // Gives each temporary guest identity a random avatar
+  // from the predefined local avatar collection.
   private getRandomGuestAvatar(): string {
     const index = Math.floor(Math.random() * GUEST_AVATARS.length);
     return GUEST_AVATARS[index];
   }
 
+  // Roll back anonymous authentication when profile creation
+  // fails to avoid leaving an incomplete guest session.
   private async handleGuestProfileError(error: unknown): Promise<never> {
     await this.supabase.supabase.auth.signOut();
     throw error;
@@ -341,6 +361,8 @@ export class Auth {
     }
   }
 
+  // Every guest joins the welcome channel automatically
+  // so the demo has usable content immediately after login.
   private async addGuestToWelcomeChannel(guestUserId: string): Promise<void> {
     const channelId = await this.getWelcomeChannelId();
     await this.createGuestMembership(channelId, guestUserId);

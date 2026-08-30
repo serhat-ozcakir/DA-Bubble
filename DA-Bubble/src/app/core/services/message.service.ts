@@ -53,39 +53,43 @@ export class MessageService {
     return null;
   }
 
-private buildMessageViews(data: any[], profileId: string): MessageView[] {
-  const mainMessages = data.filter(
-    (message) => !message.parent_message_id);
-  const repliesByParent = this.groupRepliesByParent(data);
-  return mainMessages.map((message) =>
-    this.mapMainMessage(message, repliesByParent, profileId));
-}
-
-private groupRepliesByParent(data: any[]): Map<string, any[]> {
-  const grouped = new Map<string, any[]>();
-  for (const message of data) {
-    this.addReplyToGroup(grouped, message);
+  // Separates top-level messages from replies and derives
+  // thread metadata before building the message view models.
+  private buildMessageViews(data: any[], profileId: string): MessageView[] {
+    const mainMessages = data.filter(
+      (message) => !message.parent_message_id);
+    const repliesByParent = this.groupRepliesByParent(data);
+    return mainMessages.map((message) =>
+      this.mapMainMessage(message, repliesByParent, profileId));
   }
-  return grouped;
-}
 
-private addReplyToGroup(grouped: Map<string, any[]>,message: any): void {
-  const parentId = message.parent_message_id;
-  if (!parentId) return;
-  const replies = grouped.get(parentId) ?? [];
-  replies.push(message);
-  grouped.set(parentId, replies);
-}
+  // Groups replies once by parent ID to avoid repeatedly
+  // scanning all messages when calculating thread metadata.
+  private groupRepliesByParent(data: any[]): Map<string, any[]> {
+    const grouped = new Map<string, any[]>();
+    for (const message of data) {
+      this.addReplyToGroup(grouped, message);
+    }
+    return grouped;
+  }
 
-private mapMainMessage(message: any, repliesByParent: Map<string, any[]>,
-  profileId: string): MessageView {
-  const replies = repliesByParent.get(message.id) ?? [];
-  const lastReply = replies.at(-1) ?? null;
-  return this.createMessageView(message,profileId, replies.length,lastReply);
-}
+  private addReplyToGroup(grouped: Map<string, any[]>, message: any): void {
+    const parentId = message.parent_message_id;
+    if (!parentId) return;
+    const replies = grouped.get(parentId) ?? [];
+    replies.push(message);
+    grouped.set(parentId, replies);
+  }
 
-  private createMessageView(message: any, profileId: string, 
-    threadCount = 0,lastReply: any = null ): MessageView {
+  private mapMainMessage(message: any, repliesByParent: Map<string, any[]>,
+    profileId: string): MessageView {
+    const replies = repliesByParent.get(message.id) ?? [];
+    const lastReply = replies.at(-1) ?? null;
+    return this.createMessageView(message, profileId, replies.length, lastReply);
+  }
+
+  private createMessageView(message: any, profileId: string,
+    threadCount = 0, lastReply: any = null): MessageView {
     return {
       id: message.id,
       authorName: message.profiles?.name ?? 'Unbekannter Benutzer',
@@ -110,7 +114,7 @@ private mapMainMessage(message: any, repliesByParent: Map<string, any[]>,
     this.incrementSelectedThread(parentMessageId);
   }
 
-  private incrementMatchingThread(message: MessageView,parentId: string): MessageView {
+  private incrementMatchingThread(message: MessageView, parentId: string): MessageView {
     if (message.id !== parentId) return message;
 
     return {
@@ -167,10 +171,11 @@ private mapMainMessage(message: any, repliesByParent: Map<string, any[]>,
     }
   }
 
+  // Replaces the previous message listener whenever
+  // the active channel changes.
   listenToMessages(): void {
     const channel = this.channelService.currentChannel();
     if (!channel) return;
-
     this.removeMessageRealtimeChannel();
     this.realtimeChannel = this.createMessageRealtimeChannel(channel.id);
   }
@@ -180,88 +185,93 @@ private mapMainMessage(message: any, repliesByParent: Map<string, any[]>,
     this.supabase.supabase.removeChannel(this.realtimeChannel);
   }
 
-private createMessageRealtimeChannel(channelId: string) {
-  return this.supabase.supabase
-    .channel(`messages-${channelId}`)
-    .on('postgres_changes', this.getMessageRealtimeConfig(channelId),
-      (payload) => this.handleMessageRealtimePayload(payload)
-    )
-    .subscribe((status) => {
-      console.log('Realtime status:', status);
-    });
-}
-
-private getMessageRealtimeConfig(channelId: string) {
-  return {
-    event: '*' as const,
-    schema: 'public',
-    table: 'messages',
-    filter: `channel_id=eq.${channelId}`,
-  };
-}
-
-private handleRealtimeMessage(newMessage: any): void {
-  if (newMessage.parent_message_id) {
-    this.updateThreadInfo(newMessage);
-    return;
+  private createMessageRealtimeChannel(channelId: string) {
+    return this.supabase.supabase
+      .channel(`messages-${channelId}`)
+      .on('postgres_changes', this.getMessageRealtimeConfig(channelId),
+        (payload) => this.handleMessageRealtimePayload(payload)
+      )
+      .subscribe((status) => {
+        console.log('Realtime status:', status);
+      });
   }
 
-  if (this.messageAlreadyExists(newMessage.id)) return;
+  // Listen to the active channel for both new messages
+  // and edits while ignoring unrelated channel traffic.
+  private getMessageRealtimeConfig(channelId: string) {
+    return {
+      event: '*' as const,
+      schema: 'public',
+      table: 'messages',
+      filter: `channel_id=eq.${channelId}`,
+    };
+  }
 
-  const profile = this.authService.currentUserProfile();
-  if (!profile) return;
-  this.addRealtimeMessage(newMessage, profile.id);
-}
+  // Thread replies update their parent metadata instead of
+  // being rendered as top-level channel messages.
+  private handleRealtimeMessage(newMessage: any): void {
+    if (newMessage.parent_message_id) {
+      this.updateThreadInfo(newMessage);
+      return;
+    }
 
-private updateThreadInfo(newMessage: any): void {
-  const parentId = newMessage.parent_message_id;
-  const replyTime = this.formatTime(newMessage.created_at);
-  this.incrementThreadCount(parentId);
-  this.updateLastThreadReplyTime(parentId, replyTime);
-}
+    // The sender can receive its own insert through realtime,
+    // so ignore messages that are already present locally.
+    if (this.messageAlreadyExists(newMessage.id)) return;
+    const profile = this.authService.currentUserProfile();
+    if (!profile) return;
+    this.addRealtimeMessage(newMessage, profile.id);
+  }
 
-private updateLastThreadReplyTime(parentId: string, replyTime: string): void {
-  this.messages.update((messages) =>
-    messages.map((message) =>
-      this.setLastReplyTime(message, parentId, replyTime))
-  );
-  this.updateSelectedThreadReplyTime(parentId, replyTime);
-}
+  private updateThreadInfo(newMessage: any): void {
+    const parentId = newMessage.parent_message_id;
+    const replyTime = this.formatTime(newMessage.created_at);
+    this.incrementThreadCount(parentId);
+    this.updateLastThreadReplyTime(parentId, replyTime);
+  }
 
-private setLastReplyTime(message: MessageView,parentId: string,replyTime: string)
-: MessageView {
-  if (message.id !== parentId) return message;
-  return {
-    ...message,
-    lastThreadReplyTime: replyTime,
-  };
-}
+  private updateLastThreadReplyTime(parentId: string, replyTime: string): void {
+    this.messages.update((messages) =>
+      messages.map((message) =>
+        this.setLastReplyTime(message, parentId, replyTime))
+    );
+    this.updateSelectedThreadReplyTime(parentId, replyTime);
+  }
 
-private updateSelectedThreadReplyTime(parentId: string,replyTime: string): void {
-  const selectedMessage = this.selectedThreadMessage();
-  if (selectedMessage?.id !== parentId) return;
+  private setLastReplyTime(message: MessageView, parentId: string, replyTime: string)
+    : MessageView {
+    if (message.id !== parentId) return message;
+    return {
+      ...message,
+      lastThreadReplyTime: replyTime,
+    };
+  }
 
-  this.selectedThreadMessage.set({
-    ...selectedMessage,
-    lastThreadReplyTime: replyTime,
-  });
-}
+  private updateSelectedThreadReplyTime(parentId: string, replyTime: string): void {
+    const selectedMessage = this.selectedThreadMessage();
+    if (selectedMessage?.id !== parentId) return;
+
+    this.selectedThreadMessage.set({
+      ...selectedMessage,
+      lastThreadReplyTime: replyTime,
+    });
+  }
 
   private handleMessageRealtimePayload(payload: any): void {
-  if (payload.eventType === 'INSERT') {
-    this.handleRealtimeMessage(payload.new);
-    return;
+    if (payload.eventType === 'INSERT') {
+      this.handleRealtimeMessage(payload.new);
+      return;
+    }
+
+    if (payload.eventType === 'UPDATE') {
+      this.handleRealtimeUpdate(payload.new);
+    }
   }
 
-  if (payload.eventType === 'UPDATE') {
-    this.handleRealtimeUpdate(payload.new);
+  private handleRealtimeUpdate(message: any): void {
+    if (!message?.id) return;
+    this.updateMessageStates(message.id, message.text);
   }
-}
-
-private handleRealtimeUpdate(message: any): void {
-  if (!message?.id) return;
-  this.updateMessageStates(message.id, message.text);
-}
 
   private messageAlreadyExists(messageId: string): boolean {
     return this.messages().some((message) => message.id === messageId);
@@ -269,11 +279,11 @@ private handleRealtimeUpdate(message: any): void {
 
   private addRealtimeMessage(newMessage: any, profileId: string): void {
     const author = this.userService.user().find((user) => user.id === newMessage.author_id);
-    const message = this.createRealtimeMessage(newMessage,profileId,author);
+    const message = this.createRealtimeMessage(newMessage, profileId, author);
     this.messages.update((messages) => [...messages, message]);
   }
 
-  private createRealtimeMessage( message: any,profileId: string,author: any
+  private createRealtimeMessage(message: any, profileId: string, author: any
   ): MessageView {
     return {
       id: message.id,
@@ -287,6 +297,8 @@ private handleRealtimeUpdate(message: any): void {
     };
   }
 
+  // Loads existing replies before subscribing to new ones
+  // for the currently selected thread.
   async openThread(message: MessageView): Promise<void> {
     console.log('Thread geöffnet:', message);
     this.selectedThreadMessage.set(message);
@@ -330,6 +342,8 @@ private handleRealtimeUpdate(message: any): void {
     };
   }
 
+  // Thread replies share the messages table and are linked
+  // to their parent through parent_message_id.
   async sendThreadMessage(text: string): Promise<void> {
     const message = this.selectedThreadMessage();
     const profile = this.authService.currentUserProfile();
@@ -339,17 +353,16 @@ private handleRealtimeUpdate(message: any): void {
       console.error('Thread, Benutzer oder Channel fehlt');
       return;
     }
-    await this.insertThreadMessage(channel.id, profile.id, message.id,text);
+    await this.insertThreadMessage(channel.id, profile.id, message.id, text);
     await this.loadThreadMessages(message.id);
   }
 
   private async insertThreadMessage(channelId: string, authorId: string,
-    parentId: string,
-    text: string
-  ): Promise<void> {
+    parentId: string, text: string): Promise<void> {
     const { error } = await this.supabase.supabase
       .from('messages')
-      .insert({channel_id: channelId, author_id: authorId, text,
+      .insert({
+        channel_id: channelId, author_id: authorId, text,
         parent_message_id: parentId})
 
     if (error) {
@@ -365,7 +378,7 @@ private handleRealtimeUpdate(message: any): void {
   listenToThreadMessage(parentMessageId: string): void {
     this.removeThreadRealtimeChannel();
     this.threadRealtimeChannel =
-    this.createThreadRealtimeChannel(parentMessageId);
+      this.createThreadRealtimeChannel(parentMessageId);
   }
 
   private removeThreadRealtimeChannel(): void {
@@ -373,37 +386,40 @@ private handleRealtimeUpdate(message: any): void {
     this.supabase.supabase.removeChannel(this.threadRealtimeChannel);
   }
 
-private createThreadRealtimeChannel(parentMessageId: string) {
-  return this.supabase.supabase
-    .channel(`thread-messages-${parentMessageId}`)
-    .on('postgres_changes', this.getThreadRealtimeConfig(parentMessageId),
-      (payload) => this.handleRealtimeThreadMessage(payload.new)
-    )
-    .subscribe((status) => {
-      console.log('Thread realtime status:', status);
-    });
-}
-  
-private handleRealtimeThreadMessage(newMessage: any): void {
-  if (this.threadMessageAlreadyExists(newMessage.id)) return;
+  private createThreadRealtimeChannel(parentMessageId: string) {
+    return this.supabase.supabase
+      .channel(`thread-messages-${parentMessageId}`)
+      .on('postgres_changes', this.getThreadRealtimeConfig(parentMessageId),
+        (payload) => this.handleRealtimeThreadMessage(payload.new)
+      )
+      .subscribe((status) => {
+        console.log('Thread realtime status:', status);
+      });
+  }
 
-  const profile = this.authService.currentUserProfile();
-  if (!profile) return;
+  private handleRealtimeThreadMessage(newMessage: any): void {
 
-  const message = this.buildRealtimeThreadMessage(newMessage, profile.id);
-  this.threadMessages.update((messages) => [...messages, message]);
-}
+    // The sender also reloads the thread after inserting a reply,
+    // so ignore the same message if realtime delivers it again.
+    if (this.threadMessageAlreadyExists(newMessage.id)) return;
 
-private threadMessageAlreadyExists(messageId: string): boolean {
-  return this.threadMessages().some((message) => message.id === messageId);
-}
+    const profile = this.authService.currentUserProfile();
+    if (!profile) return;
 
-private buildRealtimeThreadMessage(newMessage: any,profileId: string): MessageView {
-  const author = this.userService.user().find((user) => user.id === newMessage.author_id);
-  return this.createRealtimeMessage(newMessage, profileId, author);
-}
+    const message = this.buildRealtimeThreadMessage(newMessage, profile.id);
+    this.threadMessages.update((messages) => [...messages, message]);
+  }
 
-private getThreadRealtimeConfig(parentMessageId: string) {
+  private threadMessageAlreadyExists(messageId: string): boolean {
+    return this.threadMessages().some((message) => message.id === messageId);
+  }
+
+  private buildRealtimeThreadMessage(newMessage: any, profileId: string): MessageView {
+    const author = this.userService.user().find((user) => user.id === newMessage.author_id);
+    return this.createRealtimeMessage(newMessage, profileId, author);
+  }
+
+  private getThreadRealtimeConfig(parentMessageId: string) {
     return {
       event: 'INSERT' as const,
       schema: 'public',
@@ -421,7 +437,7 @@ private getThreadRealtimeConfig(parentMessageId: string) {
     this.updateMessageStates(messageId, text);
   }
 
-  private async updateMessageRecord(messageId: string,text: string): Promise<boolean> {
+  private async updateMessageRecord(messageId: string, text: string): Promise<boolean> {
     const { error } = await this.supabase.supabase
       .from('messages')
       .update({ text })
@@ -432,19 +448,18 @@ private getThreadRealtimeConfig(parentMessageId: string) {
     return false;
   }
 
+  // Keeps every representation of a message synchronized
+  // after either a local edit or a realtime update.
   private updateMessageStates(messageId: string, text: string): void {
     this.messages.update((messages) =>
       this.replaceMessageText(messages, messageId, text)
     );
-
     this.threadMessages.update((messages) =>
-      this.replaceMessageText(messages, messageId, text)
-    );
-
+      this.replaceMessageText(messages, messageId, text));
     this.updateSelectedThreadText(messageId, text);
   }
 
-  private replaceMessageText(messages: MessageView[],messageId: string,text: string): MessageView[] {
+  private replaceMessageText(messages: MessageView[], messageId: string, text: string): MessageView[] {
     return messages.map((message) =>
       message.id === messageId ? { ...message, text } : message
     );
