@@ -7,6 +7,7 @@ import { Auth } from '../../../../core/services/auth.service';
   templateUrl: './profile-dialog.html',
   styleUrl: './profile-dialog.scss',
 })
+
 export class ProfileDialog {
   constructor(public auth: Auth) { }
   authService = inject(Auth);
@@ -19,6 +20,8 @@ export class ProfileDialog {
     this.close();
   }
 
+  // Closes the profile dialog when the user clicks
+  // anywhere outside the dialog container
   @HostListener('document:click', ['$event'])
   onOutsideClick(event: MouseEvent): void {
     const target = event.target as Node;
@@ -32,6 +35,8 @@ export class ProfileDialog {
     this.closeDialog.emit();
   }
 
+  // Delegates the transition to the edit-profile dialog
+  // to the parent component.
   openEditProfileDialog(): void {
     this.openEditProfileDialogEvent.emit();
   }

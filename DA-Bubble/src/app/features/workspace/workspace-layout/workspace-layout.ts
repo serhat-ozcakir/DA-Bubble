@@ -46,18 +46,22 @@ export class WorkspaceLayout {
   addMembersAsBottomSheet = signal(false);
 
   constructor() {
+    // Keeps mobile navigation synchronized with thread state,
+    // returning to the chat when the active thread closes.
     effect(() => {
-      const threadOpen = !!this.messageService.selectedThreadMessage()
+      const threadOpen = !!this.messageService.selectedThreadMessage();
       if (threadOpen) {
         this.mobileView.set('thread');
         return;
       }
       if (this.mobileView() === 'thread') {
-        this.mobileView.set('chat')
+        this.mobileView.set('chat');
       }
     })
   }
 
+  // Initializes workspace data, selects the first available
+  // channel and starts member synchronization for the active channel.
   async ngOnInit(): Promise<void> {
     await this.auth.loadCurrentUser();
     await this.channelService.loadChannels();
@@ -66,17 +70,18 @@ export class WorkspaceLayout {
     if (channels.length > 0) {
       this.channelService.setCurrentChannel(channels[0]);
     }
-
     this.channelService.subscribeToCurrentChannelMembers();
   }
 
+  // Resets incompatible dialog and navigation state when
+  // switching between mobile and desktop layouts.
   @HostListener('window:resize')
   onResize(): void {
-    const isMobile = window.matchMedia('(max-width:1024px)').matches;
+    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
     if (isMobile) {
       this.closeDesktopDialogs();
       this.mobileView.set('sidebar');
-      this.isSidebarClosed = false
+      this.isSidebarClosed = false;
       return;
     }
     this.closeMobileViews();
@@ -86,9 +91,10 @@ export class WorkspaceLayout {
     this.showChannelSettingsDialog.set(false);
     this.showCreateChannelDialog.set(false);
     this.showMemberListDialog.set(false);
-
   }
 
+  // Clears mobile-only views and overlays when
+  // returning to the desktop layout.
   private closeMobileViews(): void {
     if (this.mobileView() === 'channel-detail' || 'create-channel') {
       this.mobileView.set('sidebar')
@@ -97,14 +103,13 @@ export class WorkspaceLayout {
     this.addMembersAsBottomSheet.set(false);
     this.showMemberListDialog.set(false);
   }
-
+  // Uses # to switch mobile search from users to channels,
+  // matching the desktop search convention.
   mobileSearchMode = computed<'users' | 'channels'>(() => {
     const search = this.mobileSearchText().trim();
-
     if (!search) {
       return 'users';
     }
-
     if (search.startsWith('#')) {
       return 'channels';
     }
@@ -146,6 +151,8 @@ export class WorkspaceLayout {
     this.mobileSearchText.set(input.value);
   }
 
+  // Opens the selected DM and returns mobile navigation
+  // from search to the active chat.
   async selectMobileUser(user: Profile): Promise<void> {
     await this.directMessageService.selectDmUser(user);
     this.mobileSearchText.set('');
@@ -172,6 +179,8 @@ export class WorkspaceLayout {
     this.mobileView.set('chat');
   }
 
+  // Closes the active thread before returning
+  // mobile navigation to the sidebar.
   showMobileSidebar(): void {
     this.messageService.selectedThreadMessage.set(null);
     this.mobileView.set('sidebar');
@@ -199,6 +208,8 @@ export class WorkspaceLayout {
     this.mobileView.set('sidebar');
   }
 
+  // Uses a full mobile view on small screens
+  // and a dialog on desktop.
   openCreateChannelDialog(): void {
     if (window.matchMedia('(max-width:1024px)').matches) {
       this.mobileView.set('create-channel');
@@ -246,6 +257,8 @@ export class WorkspaceLayout {
     this.showChannelSettingsDialog.set(true);
   }
 
+  // Opens member selection as a bottom sheet when
+  // launched from the mobile channel-detail view.
   openAddMembersFromChannelDetail(): void {
     this.addMembersAsBottomSheet.set(true);
     this.showAddMemberDialog.set(true);

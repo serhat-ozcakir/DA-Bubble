@@ -15,6 +15,8 @@ export class EditProfileDialog {
 
   nameControl: FormControl<string>;
 
+  // Initializes the form with the currently stored profile name
+  // so users can edit their existing value.
   constructor(public auth: Auth, private toastService: ToastService) {
     this.nameControl = new FormControl(this.auth.currentUserProfile()?.name ?? '',
       {
@@ -32,6 +34,8 @@ export class EditProfileDialog {
     this.closeDialogEvent.emit();
   }
 
+  // Updates the profile only after validation and closes
+  // the dialog once the change has been saved successfully.
   async onProfileName() {
     if (this.nameControl.invalid) {
       this.nameControl.markAsTouched();

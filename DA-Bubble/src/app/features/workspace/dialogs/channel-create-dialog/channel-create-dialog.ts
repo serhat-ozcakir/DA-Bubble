@@ -8,14 +8,12 @@ import { ChannelService } from '../../../../core/services/channel.service';
   templateUrl: './channel-create-dialog.html',
   styleUrl: './channel-create-dialog.scss',
 })
+
 export class ChannelCreateDialog {
   private channelService: ChannelService;
-
   closeDialog = output<void>();
-
   isLoading = signal(false);
   errorMessage = signal('');
-
   SidebarClosed = input<boolean>(false);
   mobileFullPage = input<boolean>(false);
 
@@ -42,13 +40,14 @@ export class ChannelCreateDialog {
     this.close();
   }
 
+  // Keeps the dialog open on validation or request errors
+  // and closes it only after successful channel creation.
   async createChannel(): Promise<void> {
     if (this.channelForm.invalid) {
       this.markFormAsInvalid();
       return;
     }
     this.startLoading();
-
     try {
       await this.createChannelFromForm();
       this.close();
@@ -68,16 +67,19 @@ export class ChannelCreateDialog {
     this.errorMessage.set('');
   }
 
+  // Normalizes form values before passing them
+  // to the channel creation service.
   private async createChannelFromForm(): Promise<void> {
-    const { channelName, channelDescription } =
-      this.channelForm.getRawValue();
+    const { channelName, channelDescription } = this.channelForm.getRawValue();
 
     await this.channelService.createChannel(
       channelName?.trim() ?? '',
       channelDescription?.trim() ?? ''
     );
   }
-
+  
+  // Maps the known duplicate-channel error to a specific
+  // user message while keeping a fallback for other failures.
   private handleCreateError(error: unknown): void {
     const message = this.isDuplicateChannelError(error)
       ? 'Dieser Channel existiert bereits.'

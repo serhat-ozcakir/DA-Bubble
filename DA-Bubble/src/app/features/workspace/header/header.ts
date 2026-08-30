@@ -19,6 +19,7 @@ import { EditProfileDialog } from './edit-profile-dialog/edit-profile-dialog';
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
+
 export class Header implements OnInit {
   auth = inject(Auth);
   userService = inject(UserService);
@@ -31,6 +32,7 @@ export class Header implements OnInit {
 
   threadOpen = input(false);
   mobileChatOpen = input(false);
+  mobilSearchView = input(false);
 
   mobileBack = output<void>();
   mobileSearchOpen = output<void>();
@@ -42,6 +44,8 @@ export class Header implements OnInit {
   searchText = signal('');
   isSearchOpen = signal(false);
 
+  // Treats # searches as channel-only queries
+  // and keeps @ optional for user filtering.
   filteredUsers = computed(() => {
     const search = this.getNormalizedSearch();
 
@@ -65,6 +69,8 @@ export class Header implements OnInit {
     );
   });
 
+  // Chooses the search strategy from the query prefix:
+  // @ for users, # for channels, plain text for messages.
   searchMode = computed<'users' | 'channels' | 'messages'>(() => {
     const search = this.searchText().trim();
 
@@ -83,11 +89,11 @@ export class Header implements OnInit {
     this.mobileBack.emit();
   }
 
+  // Closes transient header overlays when focus moves
+  // outside the header or Escape is pressed.
   @HostListener('document:click', ['$event'])
   closeMenusOnOutsideClick(event: MouseEvent): void {
-    const clickedInside =
-      this.elementRef.nativeElement.contains(event.target);
-
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
     if (!clickedInside) this.closeHeaderOverlays();
   }
 
@@ -126,7 +132,8 @@ export class Header implements OnInit {
   closeEditProfileDialog(): void {
     this.isEditProfileDialogOpen = false;
   }
-
+  // Completes logout before clearing account UI
+  // and returning the user to the login screen.
   async logout(): Promise<void> {
     await this.auth.logout();
     this.closeAccountMenus();
@@ -138,12 +145,12 @@ export class Header implements OnInit {
     this.isProfileMenuOpen = false;
   }
 
+  // Keeps lightweight user/channel filtering local
+  // and triggers async search only for message queries.
   async onSearchInput(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-
     this.searchText.set(input.value);
     this.isSearchOpen.set(true);
-
     await this.updateMessageSearch(input.value);
   }
 
@@ -152,16 +159,16 @@ export class Header implements OnInit {
       await this.searchService.searchChannelMessages(value);
       return;
     }
-
     this.searchService.clearSearch();
   }
 
+  // Delegates mobile search to the workspace layout,
+  // while desktop search opens directly in the header
   openSearch(): void {
     if (this.isMobileSearch()) {
       this.mobileSearchOpen.emit();
       return;
     }
-
     this.isSearchOpen.set(true);
   }
 
@@ -178,13 +185,15 @@ export class Header implements OnInit {
     this.directMessageService.selectDmUser(user);
     this.closeSearch();
   }
-
+  // Leaves DM mode before activating the selected channel.
   selectChannel(channel: Channel): void {
     this.directMessageService.currentDmUser.set(null);
     this.channelService.setCurrentChannel(channel);
     this.closeSearch();
   }
-
+  
+  // Routes a search result to the correct conversation
+  // based on whether it came from a channel or a DM.
   async selectMessageResult(result: SearchResult): Promise<void> {
     if (result.type === 'channel-message') {
       this.openChannelResult(result);

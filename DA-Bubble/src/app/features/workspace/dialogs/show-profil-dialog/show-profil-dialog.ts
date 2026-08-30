@@ -7,6 +7,7 @@ import { DirectMessageService } from '../../../../core/services/direct-message.s
   templateUrl: './show-profil-dialog.html',
   styleUrl: './show-profil-dialog.scss',
 })
+
 export class ShowProfilDialog {
   directMessageService = inject(DirectMessageService);
   elementRef = inject(ElementRef);
@@ -16,6 +17,8 @@ export class ShowProfilDialog {
     this.closeProfilDialogEvent.emit()
   }
 
+  // Reuses the currently selected profile as the active DM
+  // conversation before closing the profile dialog.
   async openDirectMessage(): Promise<void> {
     const user = this.directMessageService.currentDmUser();
 

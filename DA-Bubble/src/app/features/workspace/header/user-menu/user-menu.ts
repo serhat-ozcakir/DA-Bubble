@@ -7,6 +7,7 @@ import { Auth } from '../../../../core/services/auth.service';
   templateUrl: './user-menu.html',
   styleUrl: './user-menu.scss',
 })
+
 export class UserMenu {
 
   constructor(public auth: Auth) { }

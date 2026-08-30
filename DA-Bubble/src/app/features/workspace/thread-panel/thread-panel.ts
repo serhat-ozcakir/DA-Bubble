@@ -6,7 +6,6 @@ import { MessageView } from '../../../core/models/message-view.model';
 import { ReactionSummary } from '../../../core/models/reaction-summary.model';
 import { ThreadHeader } from './thread-header/thread-header';
 import { ThreadInput } from './thread-input/thread-input';
-import { ThreadMessages } from './thread-messages/thread-messages';
 
 @Component({
   selector: 'app-thread-panel',
@@ -18,7 +17,6 @@ import { ThreadMessages } from './thread-messages/thread-messages';
 export class ThreadPanel {
   messageService = inject(MessageService);
   reactionService = inject(ReactionService);
-
   private elementRef = inject(ElementRef);
 
   openedReactionPickerId = signal<string | null>(null);
@@ -29,6 +27,8 @@ export class ThreadPanel {
 
   readonly threadReactionLimit = 7;
 
+  // Thread replies belong to channel messages, so reactions
+  // are stored as message reactions rather than DM reactions.
   toggleAllThreadReactions(messageId: string): void {
     this.expandedThreadReactionMessageIds.update((current) =>
       this.toggleMessageId(current, messageId)
@@ -41,7 +41,6 @@ export class ThreadPanel {
     updated.has(messageId)
       ? updated.delete(messageId)
       : updated.add(messageId);
-
     return updated;
   }
 
@@ -53,11 +52,10 @@ export class ThreadPanel {
     return this.expandedThreadReactionMessageIds()
       .has(messageId);
   }
-
+  // Keeps thread reactions compact until the user
+  // explicitly expands the full reaction list.
   getVisibleThreadReactions(messageId: string): ReactionSummary[] {
-    const reactions =
-      this.reactionService.getReactionForMessage(messageId);
-
+    const reactions = this.reactionService.getReactionForMessage(messageId);
     if (this.isThreadReactionExpanded(messageId)) {
       return reactions;
     }
@@ -66,19 +64,14 @@ export class ThreadPanel {
 
   getHiddenThreadReactionCount(messageId: string): number {
     if (this.isThreadReactionExpanded(messageId)) return 0;
-
-    const reactions =
-      this.reactionService.getReactionForMessage(messageId);
-
-    return Math.max(
-      0,
-      reactions.length - this.threadReactionLimit
-    );
+    const reactions = this.reactionService.getReactionForMessage(messageId);
+    return Math.max( 0, reactions.length - this.threadReactionLimit);
   }
 
+  // Keeps only one thread reaction picker open at a time
+  // and closes it when the same message is selected again.
   toggleThreadEmojiPicker(messageId: string, event: Event): void {
     event.stopPropagation();
-
     this.openedReactionPickerId.update((currentId) =>
       currentId === messageId ? null : messageId
     );
@@ -90,10 +83,11 @@ export class ThreadPanel {
     this.openedReactionPickerId.set(null);
   }
 
+  // Closes temporary thread actions when the user
+  // clicks outside the panel or presses Escape
   @HostListener('document:click', ['$event'])
   closeThreadOverlaysOnOutsideClick(event: Event): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
-
     if (!clickedInside) this.closeThreadOverlays();
   }
 
@@ -114,7 +108,6 @@ export class ThreadPanel {
 
   startEditingThreadMessage(reply: MessageView, event: Event): void {
     event.stopPropagation();
-
     this.editingThreadMessageId.set(reply.id);
     this.editingThreadText.set(reply.text);
     this.isMessageEdited.set(false);
@@ -125,28 +118,25 @@ export class ThreadPanel {
     this.editingThreadText.set('');
   }
 
+  // Thread replies share the message update flow because
+  // they are stored as regular messages linked to a parent.
   async saveThreadEditedMessage(): Promise<void> {
     const messageId = this.editingThreadMessageId();
     if (!messageId) return;
-
-    await this.messageService.updateMessage(
-      messageId,
-      this.editingThreadText()
-    );
-
+    await this.messageService.updateMessage(messageId, this.editingThreadText());
     this.cancelThreadEdit();
   }
 
+  // Enter saves the edit, while Shift+Enter preserves
+  // multiline editing inside the thread.
   async saveOnEnter(event: KeyboardEvent): Promise<void> {
     if (event.shiftKey) return;
-
     event.preventDefault();
     await this.saveThreadEditedMessage();
   }
 
   getReactionUsersNames(userNames: string[]): string {
     if (userNames.length === 1) return userNames[0];
-
     if (userNames.length === 2) {
       return `${userNames[0]} und ${userNames[1]}`;
     }

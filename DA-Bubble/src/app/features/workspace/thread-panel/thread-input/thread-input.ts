@@ -13,10 +13,10 @@ import { Channel } from '../../../../core/models/channel.model';
   templateUrl: './thread-input.html',
   styleUrl: './thread-input.scss',
 })
+
 export class ThreadInput {
   private messageService = inject(MessageService);
   private elementRef = inject(ElementRef);
-
   userService = inject(UserService);
   channelService = inject(ChannelService);
 
@@ -29,9 +29,7 @@ export class ThreadInput {
   filteredMentionUsers = computed(() => {
     const search = this.getMentionSearch();
     const users = this.userService.user();
-
     if (!search) return users;
-
     return users.filter((user) =>
       user.name.toLowerCase().includes(search)
     );
@@ -40,21 +38,22 @@ export class ThreadInput {
   filteredMentionChannels = computed(() => {
     const search = this.getMentionSearch();
     const channels = this.channelService.channels();
-
     if (!search) return channels;
-
     return channels.filter((channel) =>
       channel.name.toLowerCase().includes(search)
     );
   });
 
+  // Sends the reply with Enter while keeping
+  // Shift+Enter available for multiline text.
   handleEnter(event: KeyboardEvent): void {
     if (event.shiftKey) return;
-
     event.preventDefault();
     this.sendReply();
   }
 
+  // Opens user or channel mention suggestions based on
+  // the prefix of the word currently being typed.
   onReplyInput(): void {
     const lastWord = this.getLastWord();
 
@@ -62,7 +61,6 @@ export class ThreadInput {
       this.setMentionSearch('users', lastWord.slice(1));
       return;
     }
-
     if (lastWord.startsWith('#')) {
       this.setMentionSearch('channels', lastWord.slice(1));
       return;
@@ -89,7 +87,6 @@ export class ThreadInput {
       this.switchToChannelMention();
       return;
     }
-
     this.switchToUserMention();
   }
 
@@ -107,18 +104,18 @@ export class ThreadInput {
     this.mentionSearchText.set('');
   }
 
+  // Replaces an existing mention prefix when switching types,
+  // otherwise starts a new mention at the end of the reply.
   private replaceOrAddMentionCharacter(character: '@' | '#'): void {
     if (this.hasTrailingMentionCharacter()) {
       this.replaceTrailingCharacter(character);
       return;
     }
-
     this.appendMentionCharacter(character);
   }
 
   private hasTrailingMentionCharacter(): boolean {
     const lastCharacter = this.replyText.at(-1);
-
     return lastCharacter === '@' || lastCharacter === '#';
   }
 
@@ -146,23 +143,19 @@ export class ThreadInput {
     this.replaceLastMention(`#${channel.name} `);
   }
 
+  // Replaces only the active mention and preserves
+  // the reply content written before it.
   private replaceLastMention(replacement: string): void {
     const mentionIndex = this.getLastMentionIndex();
     if (mentionIndex === -1) return;
-
-    const textBeforeMention =
-      this.replyText.slice(0, mentionIndex);
-
-    this.replyText =
-      `${textBeforeMention}${replacement}`;
-
+    const textBeforeMention = this.replyText.slice(0, mentionIndex);
+    this.replyText = `${textBeforeMention}${replacement}`;
     this.closeMentionDropdown();
   }
 
   private getLastMentionIndex(): number {
     const lastAtIndex = this.replyText.lastIndexOf('@');
     const lastHashIndex = this.replyText.lastIndexOf('#');
-
     return Math.max(lastAtIndex, lastHashIndex);
   }
 
@@ -173,9 +166,7 @@ export class ThreadInput {
 
   @HostListener('document:click', ['$event'])
   closeOverlaysOnOutsideClick(event: MouseEvent): void {
-    const clickedInside =
-      this.elementRef.nativeElement.contains(event.target);
-
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
     if (!clickedInside) this.closeOverlays();
   }
 
@@ -189,10 +180,11 @@ export class ThreadInput {
     this.closeMentionDropdown();
   }
 
+  // Sends the reply through the thread message flow
+  // and resets the composer only after a successful request.
   async sendReply(): Promise<void> {
     const text = this.replyText.trim();
     if (!text) return;
-
     await this.messageService.sendThreadMessage(text);
     this.resetInput();
   }

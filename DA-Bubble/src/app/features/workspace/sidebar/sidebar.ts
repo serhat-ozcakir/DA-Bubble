@@ -13,6 +13,7 @@ import { Profile } from '../../../core/models/profile.model';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
+
 export class Sidebar implements OnInit {
 
   channelService = inject(ChannelService);
@@ -30,6 +31,8 @@ export class Sidebar implements OnInit {
     await this.userService.loadUsers();
   }
 
+  // Switches to channel mode, clears the active DM
+  // and closes any thread left from the previous conversation.
   selectChannel(channel: Channel): void {
     this.channelService.setCurrentChannel(channel);
     this.direktMessageService.currentDmUser.set(null)
@@ -45,6 +48,8 @@ export class Sidebar implements OnInit {
     }
   }
 
+  // Switches to DM mode, clears the active channel
+  // and reloads messages for the selected user.
   async selectDmUser(user: Profile): Promise<void> {
     this.channelService.currentChannel.set(null);
     this.direktMessageService.currentDmUser.set(user);
@@ -54,10 +59,11 @@ export class Sidebar implements OnInit {
   }
 
   openDialog(): void {
-    console.log('openDialog calisti');
-    this.openCreateChannel.emit()
+    this.openCreateChannel.emit();
   }
 
+  // Clears the current conversation context before
+  // opening the standalone new-message view.
   openNewMessageView(): void {
     this.messageService.closeThread();
     this.channelService.currentChannel.set(null);

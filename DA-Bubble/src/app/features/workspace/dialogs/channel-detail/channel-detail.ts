@@ -9,6 +9,7 @@ import { Auth } from '../../../../core/services/auth.service';
   templateUrl: './channel-detail.html',
   styleUrl: './channel-detail.scss',
 })
+
 export class ChannelDetail {
   channelService = inject(ChannelService);
   authService = inject(Auth);
@@ -21,13 +22,10 @@ export class ChannelDetail {
 
   isLeaving = signal(false);
   leaveErrorMessage = signal('');
-
   isEditingName = signal(false);
   isEditingDescriptionName = signal(false);
-
   isSavingName = signal(false);
   isSavingDescription = signal(false);
-
   nameErrorMessage = signal('');
   descriptionErrorMessage = signal('');
 
@@ -51,6 +49,8 @@ export class ChannelDetail {
     this.openAddMembersDialog.emit();
   }
 
+  // Initializes the name field from the active channel
+  // before entering edit mode.
   startEditingName(): void {
     const channel = this.channelService.currentChannel();
     if (!channel) return;
@@ -79,7 +79,9 @@ export class ChannelDetail {
   cancelDescriptionEdit(): void {
     this.isEditingDescriptionName.set(false);
   }
-
+  
+  // Validates and normalizes the name, skipping the request
+  // when the value has not actually changed.
   async saveChannelName(): Promise<void> {
     const control = this.channelEditForm.controls.name;
     const channel = this.channelService.currentChannel();
@@ -88,22 +90,14 @@ export class ChannelDetail {
 
     const newName = control.getRawValue().trim();
     if (this.isSameName(newName, channel.name)) return;
-
     await this.updateChannelName(channel.id, newName);
   }
 
-  private async updateChannelName(
-    channelId: string,
-    newName: string
-  ): Promise<void> {
+  private async updateChannelName(channelId: string,newName: string): Promise<void> {
     this.startNameSaving();
 
     try {
-      await this.channelService.updateChannelName(
-        channelId,
-        newName
-      );
-
+      await this.channelService.updateChannelName(channelId,newName);
       this.isEditingName.set(false);
     } catch (error) {
       this.handleNameSaveError(error);
@@ -117,6 +111,8 @@ export class ChannelDetail {
     this.nameErrorMessage.set('');
   }
 
+  // Maps the known duplicate-name error to a specific
+  // message while keeping a fallback for other failures.
   private handleNameSaveError(error: unknown): void {
     const message = this.isDuplicateChannelError(error)
       ? 'Dieser Channel-Name existiert bereits.'
@@ -132,16 +128,16 @@ export class ChannelDetail {
     );
   }
 
-  private isSameName(
-    newName: string,
-    currentName: string
-  ): boolean {
+  // Closes edit mode without sending an update
+  // when the channel name is unchanged.
+  private isSameName(newName: string, currentName: string): boolean {
     if (newName !== currentName) return false;
-
     this.isEditingName.set(false);
     return true;
   }
 
+  // Avoids unnecessary updates when the normalized
+  // description matches the currently stored value.
   async saveChannelDescription(): Promise<void> {
     const control = this.channelEditForm.controls.description;
     const channel = this.channelService.currentChannel();
@@ -151,26 +147,15 @@ export class ChannelDetail {
     const newDescription = control.getRawValue().trim();
     const currentDescription = channel.description?.trim() ?? '';
 
-    if (this.isSameDescription(
-      newDescription,
-      currentDescription
-    )) return;
-
-    await this.updateDescription(
-      channel.id,
-      newDescription
-    );
+    if (this.isSameDescription(newDescription,currentDescription)) return;
+    await this.updateDescription( channel.id, newDescription);
   }
 
   private async updateDescription(channelId: string, description: string): Promise<void> {
     this.startDescriptionSaving();
 
     try {
-      await this.channelService.updateChannelDescription(
-        channelId,
-        description
-      );
-
+      await this.channelService.updateChannelDescription(channelId, description);
       this.isEditingDescriptionName.set(false);
     } catch {
       this.setDescriptionSaveError();
@@ -190,16 +175,14 @@ export class ChannelDetail {
     );
   }
 
-  private isSameDescription(
-    newDescription: string,
-    currentDescription: string
-  ): boolean {
+  private isSameDescription(newDescription: string,currentDescription: string):
+   boolean {
     if (newDescription !== currentDescription) return false;
-
     this.isEditingDescriptionName.set(false);
     return true;
   }
-
+  // Marks invalid controls as touched so validation feedback
+  // becomes visible before saving.
   private isControlValid( control: FormControl<string>): boolean {
     if (!control.invalid) return true;
     control.markAsTouched();
@@ -210,10 +193,11 @@ export class ChannelDetail {
     this.closeChannelSettings.emit();
   }
 
+  // Closes the settings only after the user has
+  // successfully left the active channel.
   async leaveChannel(): Promise<void> {
     const channel = this.channelService.currentChannel();
     if (!channel) return;
-
     this.startLeaving();
 
     try {
@@ -232,7 +216,6 @@ export class ChannelDetail {
   }
 
   private handleLeaveError(error: unknown): void {
-    console.log('Unable to leave the channel:', error);
     this.leaveErrorMessage.set('Unable to leave the channel');
   }
 }
