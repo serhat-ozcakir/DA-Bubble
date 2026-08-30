@@ -13,15 +13,14 @@
       <img src="assets/img/header/header_logo.png" alt="DABubble Logo" />
     </div>
 
+    @if(!mobilSearchView()){
     <div class="header__search">
       <input type="text" placeholder="Devspace durchsuchen" [value]="searchText()" (focus)="openSearch()"
         (input)="onSearchInput($event)" />
-
-      <img src="assets/icons/search.png" alt="search icon" />
+        <img src="assets/icons/search.png" alt="search icon" />
 
       @if (isSearchOpen()) {
       <div class="header__search-dropdown">
-
         @if (searchMode() === 'channels') {
         @for (channel of filteredChannels(); track channel.id) {
         <button class="header__search-channel" type="button" (click)="selectChannel(channel)">
@@ -89,6 +88,7 @@
       </div>
       }
     </div>
+     }
 
     <div class="header__user">
       <span class="header__username">

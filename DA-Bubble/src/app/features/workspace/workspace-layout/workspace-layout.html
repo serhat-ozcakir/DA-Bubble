@@ -12,8 +12,12 @@
   </section>
 
   } @else {
-  <app-header [threadOpen]="isThreadOpen" [mobileChatOpen]="mobileView() === 'chat'|| mobileView() === 'thread'"
-    (mobileBack)="showMobileSidebar()" (mobileSearchOpen)="openMobileSearch()">
+  <app-header 
+  [threadOpen]="isThreadOpen" 
+  [mobileChatOpen]="mobileView() === 'chat'|| mobileView() === 'thread'"
+  (mobileBack)="showMobileSidebar()" 
+  (mobileSearchOpen)="openMobileSearch()"
+  [mobilSearchView]="mobileView() === 'search'">
   </app-header>
 
   <main class="workspace__content" [class.sidebar-closed]="isSidebarClosed" [class.thread-open]="isThreadOpen"

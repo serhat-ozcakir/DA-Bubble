@@ -44,9 +44,9 @@
   grid-template-columns: 0 minmax(0, 1fr) 320px;
 }
 
-.workspace__content > app-sidebar,
-.workspace__content > app-chat-area,
-.workspace__content > app-thread-panel {
+.workspace__content>app-sidebar,
+.workspace__content>app-chat-area,
+.workspace__content>app-thread-panel {
   height: 100%;
   min-height: 0;
   overflow: hidden;
@@ -101,12 +101,7 @@ app-thread-panel {
 
     img {
       filter:
-        invert(38%)
-        sepia(93%)
-        saturate(2113%)
-        hue-rotate(222deg)
-        brightness(96%)
-        contrast(96%);
+        invert(38%) sepia(93%) saturate(2113%) hue-rotate(222deg) brightness(96%) contrast(96%);
     }
   }
 }
@@ -184,9 +179,9 @@ app-thread-panel {
     overflow: hidden;
   }
 
-  .workspace__content > app-sidebar,
-  .workspace__content > app-chat-area,
-  .workspace__content > app-thread-panel {
+  .workspace__content>app-sidebar,
+  .workspace__content>app-chat-area,
+  .workspace__content>app-thread-panel {
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -199,13 +194,13 @@ app-thread-panel {
   /* SIDEBAR VIEW */
   .workspace__content.mobile-sidebar-view {
 
-    > app-sidebar {
+    >app-sidebar {
       display: block;
     }
 
-    > app-chat-area,
-    > app-thread-panel,
-    > .workspace__mobile-search {
+    >app-chat-area,
+    >app-thread-panel,
+    >.workspace__mobile-search {
       display: none;
     }
   }
@@ -213,28 +208,28 @@ app-thread-panel {
   /* CHAT VIEW */
   .workspace__content.mobile-chat-view {
 
-    > app-sidebar,
-    > app-thread-panel,
-    > .workspace__mobile-search {
+    >app-sidebar,
+    >app-thread-panel,
+    >.workspace__mobile-search {
       display: none;
     }
 
-    > app-chat-area {
+    >app-chat-area {
       display: block;
     }
   }
 
- /* THREAD VIEW */
+  /* THREAD VIEW */
 
   .workspace__content.mobile-thread-view {
 
-    > app-sidebar,
-    > app-chat-area,
-    > .workspace__mobile-search {
+    >app-sidebar,
+    >app-chat-area,
+    >.workspace__mobile-search {
       display: none;
     }
 
-    > app-thread-panel {
+    >app-thread-panel {
       display: block;
       opacity: 1;
       pointer-events: all;
@@ -245,13 +240,13 @@ app-thread-panel {
   /* SEARCH VIEW */
   .workspace__content.mobile-search-view {
 
-    > app-sidebar,
-    > app-chat-area,
-    > app-thread-panel {
+    >app-sidebar,
+    >app-chat-area,
+    >app-thread-panel {
       display: none;
     }
 
-    > .workspace__mobile-search {
+    >.workspace__mobile-search {
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -263,20 +258,21 @@ app-thread-panel {
   }
 
   .workspace__content.mobile-create-channel-view {
-  > app-sidebar,
-  > app-chat-area,
-  > app-thread-panel,
-  > .workspace__mobile-search {
-    display: none;
-  }
 
-  > .workspace__mobile-create-channel {
-    display: block;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+    >app-sidebar,
+    >app-chat-area,
+    >app-thread-panel,
+    >.workspace__mobile-search {
+      display: none;
+    }
+
+    >.workspace__mobile-create-channel {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
   }
-}
 
   /* SEARCH HEADER  Search */
   .workspace__mobile-search-header {
@@ -355,7 +351,7 @@ app-thread-panel {
       }
     }
 
-    > img {
+    >img {
       position: absolute;
       right: 14px;
       width: 22px;
@@ -365,34 +361,34 @@ app-thread-panel {
     }
   }
 
-    .workspace__mobile-new-message {
-       position: absolute;
-      right: 20px;
-      bottom: calc(20px + env(safe-area-inset-bottom));
-      z-index: 20;
+  .workspace__mobile-new-message {
+    position: absolute;
+    right: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    z-index: 20;
+    width: 70px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+
+    img {
       width: 70px;
       height: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      border: none;
-      border-radius: 50%;
-      background:transparent;
-      cursor: pointer;
-
-      img {
-        width: 70px;
-        height: auto;
-        object-fit: contain;
-        display: block;
-      }
-
-      &:hover {
-        background-color: #535af1;
-      }
-    
+      object-fit: contain;
+      display: block;
     }
+
+    &:hover {
+      background-color: #535af1;
+    }
+
+  }
 
   /* SEARCH RESULTS */
   .workspace__mobile-search-results {
@@ -525,7 +521,7 @@ app-thread-panel {
       font-size: 14px;
     }
 
-    > img {
+    >img {
       right: 12px;
       width: 20px;
       height: 20px;

@@ -42,15 +42,11 @@
 
   <div class="chat-header__right">
     <div class="chat-header__members" (click)="openMemberListDialog()">
-      @for(member of channelService.channelMembers().slice(0,5); track member.id){
+      @for(member of channelService.channelMembers().slice(0,3); track member.id){
       <img [src]="member.avatar" [alt]="member.name">
       }
       <span class="chat-header__member-count">
-        @if(channelService.channelMembers().length > 5){
-        + {{channelService.channelMembers().length - 5}}
-        } @else {
         {{channelService.channelMembers().length}}
-        }
       </span>
     </div>
     @if(!authService.isGuestUser()){
