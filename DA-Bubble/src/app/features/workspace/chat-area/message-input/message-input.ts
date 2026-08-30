@@ -14,6 +14,7 @@ import { Profile } from '../../../../core/models/profile.model';
   templateUrl: './message-input.html',
   styleUrl: './message-input.scss',
 })
+
 export class MessageInput {
   private elementRef = inject(ElementRef);
   messageService = inject(MessageService);
@@ -30,6 +31,8 @@ export class MessageInput {
     this.sendMessage();
   }
 
+  // Clears the input optimistically and restores the message
+  // if sending fails.
   async sendMessage(): Promise<void> {
     const text = this.messageText.trim();
     if (!text) return;
@@ -44,12 +47,13 @@ export class MessageInput {
     }
   }
 
+  // Routes the message to the active DM or channel
+  // while keeping a shared input component.
   private async sendToCurrentConversation(text: string): Promise<void> {
     if (this.directMessageService.currentDmUser()) {
       await this.directMessageService.sendDirectMessage(text);
       return;
     }
-
     await this.messageService.sendMessage(text);
   }
 
@@ -69,6 +73,8 @@ export class MessageInput {
     this.showEmojiPicker = false;
   }
 
+  // Opens the matching mention suggestions when the
+  // current word starts with @ or #.
   onMessageInput(): void {
     const lastWord = this.getLastWord();
 
@@ -76,12 +82,10 @@ export class MessageInput {
       this.openMention('users', lastWord);
       return;
     }
-
     if (lastWord.startsWith('#')) {
       this.openMention('channels', lastWord);
       return;
     }
-
     this.closeMentionDropdown();
   }
 
@@ -89,14 +93,9 @@ export class MessageInput {
     return this.messageText.split(' ').pop() ?? '';
   }
 
-  private openMention(
-    type: 'users' | 'channels',
-    word: string
-  ): void {
+  private openMention(type: 'users' | 'channels', word: string): void {
     this.mentionType.set(type);
-    this.mentionSearchText.set(
-      word.slice(1).toLowerCase()
-    );
+    this.mentionSearchText.set(word.slice(1).toLowerCase());
   }
 
   toggleMentionButton(): void {
@@ -104,7 +103,6 @@ export class MessageInput {
       this.switchToChannelMention();
       return;
     }
-
     this.switchToUserMention();
   }
 
@@ -118,23 +116,20 @@ export class MessageInput {
     this.setMentionType('channels');
   }
 
-  private setMentionType(
-    type: 'users' | 'channels'
-  ): void {
+  private setMentionType(type: 'users' | 'channels'): void {
     this.mentionType.set(type);
     this.mentionSearchText.set('');
   }
 
-  private replaceOrAddMentionCharacter(
-    character: '@' | '#'
-  ): void {
+  // Replaces an existing mention prefix when switching types,
+  // otherwise starts a new mention at the end of the text.
+  private replaceOrAddMentionCharacter(character: '@' | '#'): void {
     const currentText = this.messageText;
 
     if (this.endsWithMentionCharacter(currentText)) {
       this.replaceLastCharacter(currentText, character);
       return;
     }
-
     this.appendMentionCharacter(currentText, character);
   }
 
@@ -143,20 +138,12 @@ export class MessageInput {
     return lastCharacter === '@' || lastCharacter === '#';
   }
 
-  private replaceLastCharacter(
-    text: string,
-    character: '@' | '#'
-  ): void {
+  private replaceLastCharacter(text: string, character: '@' | '#'): void {
     this.messageText = text.slice(0, -1) + character;
   }
 
-  private appendMentionCharacter(
-    text: string,
-    character: '@' | '#'
-  ): void {
-    const separator =
-      text.length > 0 && !text.endsWith(' ') ? ' ' : '';
-
+  private appendMentionCharacter(text: string, character: '@' | '#'): void {
+    const separator = text.length > 0 && !text.endsWith(' ') ? ' ' : '';
     this.messageText = `${text}${separator}${character}`;
   }
 
@@ -190,9 +177,9 @@ export class MessageInput {
     this.replaceCurrentMention(`#${channel.name} `);
   }
 
-  private replaceCurrentMention(
-    replacement: string
-  ): void {
+  // Replaces only the active mention token and preserves
+  // the rest of the composed message.
+  private replaceCurrentMention(replacement: string): void {
     const words = this.messageText.split(' ');
     words[words.length - 1] = replacement.trimEnd();
     this.messageText = `${words.join(' ')} `;
@@ -204,10 +191,11 @@ export class MessageInput {
     this.mentionSearchText.set('');
   }
 
+  // Dismisses open emoji and mention pickers when the user
+  // clicks outside the input or presses Escape.
   @HostListener('document:click', ['$event'])
   closePickersOnOutsideClick(event: MouseEvent): void {
-    const clickedInside =
-      this.elementRef.nativeElement.contains(event.target);
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
 
     if (!clickedInside) {
       this.closeAllPickers();

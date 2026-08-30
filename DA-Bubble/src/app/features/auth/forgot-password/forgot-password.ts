@@ -30,6 +30,8 @@ export class ForgotPassword {
   ) {}
 
   async onForgotPassword(): Promise<void> {
+    // Marks all fields as touched so validation errors
+    // become visible before the reset request is sent.
     if (this.forgotPasswordForm.invalid) {
       this.forgotPasswordForm.markAllAsTouched();
       return;

@@ -20,6 +20,8 @@ export class ChatHeader {
   openChannelSettings = output<void>();
   openShowProfil = output<void>();
 
+  // Detects self-DMs so the header can adapt its UI
+  // when the current user is also the conversation partner.
   isSelfDm = computed(() => {
     const dmUser = this.directMessageService.currentDmUser();
     const currentUser = this.authService.currentUserProfile();
@@ -33,6 +35,8 @@ export class ChatHeader {
     this.openMemberList.emit();
   }
 
+  // Opens the member list on mobile, while desktop
+  // uses the dedicated add-members dialog.
   openMembersMobile(): void {
     if (window.matchMedia('(max-width:1024px)').matches) {
       this.openMemberList.emit();

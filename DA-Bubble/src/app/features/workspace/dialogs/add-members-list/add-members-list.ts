@@ -20,5 +20,4 @@ export class AddMembersList {
   toggleMembersDropdown(): void {
     this.isMembersDropdownOpen.update((value) => !value);
   }
-
 }

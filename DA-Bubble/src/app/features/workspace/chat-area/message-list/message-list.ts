@@ -23,6 +23,8 @@ export class MessageList implements OnInit, OnDestroy {
 
   openProfile = output<void>();
 
+  // Detects self-DMs so the message list can adapt
+  // when the current user is also the conversation partner.
   isSelfDm = computed(() => {
     const dmUser = this.directMessageService.currentDmUser();
     const currentUser = this.authService.currentUserProfile();
@@ -32,6 +34,8 @@ export class MessageList implements OnInit, OnDestroy {
       dmUser.id === currentUser.id;
   });
 
+  // Starts reaction synchronization and watches
+  // the active DM/channel selection from component creation.
   constructor() {
     this.initializeReactionRealtime();
     this.watchConversationChanges();
@@ -42,6 +46,8 @@ export class MessageList implements OnInit, OnDestroy {
     await this.channelService.loadChannels();
   }
 
+  // Removes the reaction realtime subscription when
+  // the message list leaves the workspace view.
   ngOnDestroy(): void {
     this.reactionService.removeReactionsRealtimeChannel();
   }
@@ -50,6 +56,8 @@ export class MessageList implements OnInit, OnDestroy {
     this.reactionService.subscribeToReactions();
   }
 
+  // Reacts to conversation changes and switches loading
+  // and realtime behavior between DMs and channels.
   private watchConversationChanges(): void {
     effect(() => {
       const dmUser = this.directMessageService.currentDmUser();
@@ -61,7 +69,6 @@ export class MessageList implements OnInit, OnDestroy {
         this.loadDirectConversation();
         return;
       }
-
       if (channel) this.loadChannelConversation();
     });
   }
@@ -71,6 +78,8 @@ export class MessageList implements OnInit, OnDestroy {
     this.directMessageService.listenToDirectMessages();
   }
 
+  // Stops the previous DM listener before switching
+  // message loading and realtime updates back to a channel.
   private loadChannelConversation(): void {
     this.directMessageService.removeDmRealtimeChannel();
     this.messageService.loadMessages();
@@ -85,10 +94,9 @@ export class MessageList implements OnInit, OnDestroy {
     return this.messageService.messages();
   }
 
-  shouldShowDate(
-    messages: MessageView[],
-    index: number
-  ): boolean {
+  // Shows a date separator for the first message
+  // and whenever the calendar day changes.
+  shouldShowDate(messages: MessageView[],index: number): boolean {
     if (index === 0) return true;
 
     const currentDate = this.getDateKey(messages[index].createdAt);
@@ -100,9 +108,7 @@ export class MessageList implements OnInit, OnDestroy {
   formatMessageDate(dateString: string): string {
     const date = new Date(dateString);
     const relativeDate = this.getRelativeDateLabel(date);
-
     if (relativeDate) return relativeDate;
-
     return this.formatLongDate(date);
   }
 
@@ -114,7 +120,6 @@ export class MessageList implements OnInit, OnDestroy {
 
     if (this.isSameDay(date, today)) return 'Heute';
     if (this.isSameDay(date, yesterday)) return 'Gestern';
-
     return null;
   }
 

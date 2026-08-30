@@ -38,11 +38,11 @@ export class Login {
   ) {}
 
   async onLogin(): Promise<void> {
+    // Reveals validation errors before attempting authentication.
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
-
     await this.performLogin();
     this.loginForm.reset();
   }
@@ -59,10 +59,10 @@ export class Login {
     }
   }
 
+  // Keeps the success toast visible briefly before
+  // navigating to the workspace.
   private handleLoginSuccess(data: unknown): void {
-    console.log('Login successful:', data);
     this.toastService.show('Erfolgreich eingeloggt!');
-
     setTimeout(() => {
       this.router.navigate(['/workspace']);
     }, 1000);
@@ -89,8 +89,9 @@ export class Login {
   }
 
   async onGuestLogin(): Promise<void> {
+    // Prevents duplicate anonymous sessions from being created
+    // while a guest login request is already in progress.
     if (this.isGuestLoading()) return;
-
     this.isGuestLoading.set(true);
 
     try {
@@ -102,6 +103,8 @@ export class Login {
     }
   }
 
+  // Guest authentication prepares the temporary account
+  // before opening the workspace.
   private async performGuestLogin(): Promise<void> {
     await this.authService.guestLogin();
     this.toastService.show('Erfolgreich als Gast angemeldet!');

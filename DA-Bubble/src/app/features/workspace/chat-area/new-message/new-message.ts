@@ -13,6 +13,7 @@ import { Channel } from '../../../../core/models/channel.model';
   templateUrl: './new-message.html',
   styleUrl: './new-message.scss',
 })
+
 export class NewMessage {
   userService = inject(UserService);
   channelService = inject(ChannelService);
@@ -36,6 +37,8 @@ export class NewMessage {
 
   messageSent = output<void>();
 
+  // Uses # to switch recipient search from users
+  // to channels while keeping a single search field.
   recipientMode = computed<'users' | 'channels'>(() => {
     const search = this.recipientSearchText().trim();
     return search.startsWith('#') ? 'channels' : 'users';
@@ -103,7 +106,6 @@ export class NewMessage {
       this.switchToChannelMention();
       return;
     }
-
     this.switchToUserMention();
   }
 
@@ -121,6 +123,8 @@ export class NewMessage {
     this.mentionSearchText.set('');
   }
 
+  // Replaces an existing mention prefix when switching types,
+  // otherwise starts a new mention at the end of the text.
   private replaceOrAddMentionCharacter(character: '@' | '#'): void {
     const text = this.messageText();
 
@@ -128,7 +132,6 @@ export class NewMessage {
       this.replaceTrailingCharacter(text, character);
       return;
     }
-
     this.appendMentionCharacter(text, character);
   }
 
@@ -158,6 +161,8 @@ export class NewMessage {
     this.replaceLastMention(`#${channel.name} `);
   }
 
+  // Replaces only the active mention while preserving
+  // the message content written before it.
   private replaceLastMention(replacement: string): void {
     const currentText = this.messageText();
     const mentionIndex = this.getLastMentionIndex(currentText);
@@ -172,7 +177,6 @@ export class NewMessage {
   private getLastMentionIndex(text: string): number {
     const lastAtIndex = text.lastIndexOf('@');
     const lastHashIndex = text.lastIndexOf('#');
-
     return Math.max(lastAtIndex, lastHashIndex);
   }
 
@@ -196,6 +200,8 @@ export class NewMessage {
     this.isRecipientDropdownOpen.set(true);
   }
 
+  // Keeps user and channel recipients mutually exclusive;
+  // selecting one always clears the other.
   selectUser(user: Profile): void {
     this.selectedUser.set(user);
     this.selectedChannel.set(null);
@@ -235,7 +241,6 @@ export class NewMessage {
       this.setMentionSearch('users', lastWord.slice(1));
       return;
     }
-
     this.updateChannelMentionSearch(lastWord);
   }
 
@@ -244,7 +249,6 @@ export class NewMessage {
       this.setMentionSearch('channels', lastWord.slice(1));
       return;
     }
-
     this.closeMentionDropdown();
   }
 
@@ -253,11 +257,11 @@ export class NewMessage {
     this.mentionSearchText.set(search);
   }
 
+  // Dismisses recipient, emoji and mention overlays when
+  // the user clicks outside or presses Escape.
   @HostListener('document:click', ['$event'])
   closeOverlaysOnOutsideClick(event: MouseEvent): void {
-    const clickedInside =
-      this.elementRef.nativeElement.contains(event.target);
-
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
     if (!clickedInside) this.closeOverlays();
   }
 
@@ -297,6 +301,8 @@ export class NewMessage {
     this.isErrorMessage.set('');
   }
 
+  // Routes the message to the selected channel or user
+  // while keeping both flows behind one compose screen.
   private async sendToSelectedRecipient(text: string): Promise<void> {
     const channel = this.selectedChannel();
 
@@ -304,16 +310,19 @@ export class NewMessage {
       await this.sendChannelMessage(channel, text);
       return;
     }
-
     await this.sendDirectMessage(text);
   }
 
+  // Switches the workspace from DM mode to the selected
+  // channel before sending through the shared message service.
   private async sendChannelMessage(channel: Channel,text: string): Promise<void> {
     this.directMessageService.currentDmUser.set(null);
     this.channelService.setCurrentChannel(channel);
     await this.messageService.sendMessage(text);
   }
 
+  // Activates the selected DM conversation before sending
+  // so message state and realtime listeners target that user.
   private async sendDirectMessage(text: string): Promise<void> {
     const user = this.selectedUser();
     if (!user) return;
@@ -349,9 +358,7 @@ export class NewMessage {
 
   private userMatchesSearch(user: Profile, search: string): boolean {
     const nameMatches = user.name.toLowerCase().includes(search);
-    const emailMatches =
-      user.email?.toLowerCase().includes(search) ?? false;
-
+    const emailMatches =user.email?.toLowerCase().includes(search) ?? false;
     return nameMatches || emailMatches;
   }
 }

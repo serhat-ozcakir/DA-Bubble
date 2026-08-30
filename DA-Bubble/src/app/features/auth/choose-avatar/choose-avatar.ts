@@ -29,6 +29,8 @@ export class ChooseAvatar implements OnInit {
     private router: Router
   ) {}
 
+  // Determines whether avatar selection belongs to
+  // an email registration or a Google OAuth registration.
   async ngOnInit(): Promise<void> {
     const registerData = this.authService.getRegisterData();
 
@@ -36,7 +38,6 @@ export class ChooseAvatar implements OnInit {
       this.prepareEmailRegistration(registerData.name);
       return;
     }
-
     await this.prepareGoogleRegistration();
   }
 
@@ -45,6 +46,8 @@ export class ChooseAvatar implements OnInit {
     this.userName.set(name);
   }
 
+  // Reloads the authenticated Google profile before
+  // preparing the avatar-selection state.
   private async prepareGoogleRegistration(): Promise<void> {
     try {
       await this.authService.loadCurrentUser();
@@ -80,6 +83,8 @@ export class ChooseAvatar implements OnInit {
     this.errorMessage.set('');
   }
 
+  // Prevents duplicate submissions while the current
+  // registration flow is still being completed.
   async onChooseAvatar(): Promise<void> {
     if (this.loading()) return;
 
@@ -88,7 +93,6 @@ export class ChooseAvatar implements OnInit {
       this.setRegistrationTypeError();
       return;
     }
-
     await this.completeRegistration(registrationType);
   }
 
@@ -112,29 +116,26 @@ export class ChooseAvatar implements OnInit {
     }
   }
 
-  private async runRegistrationFlow(
-    registrationType: 'email' | 'google'
-  ): Promise<void> {
+  // Completes the appropriate registration flow while
+  // sharing the same avatar-selection UI.
+  private async runRegistrationFlow(registrationType: 'email' | 'google'): Promise<void> {
     if (registrationType === 'email') {
       await this.completeEmailRegistration();
       return;
     }
-
     await this.completeGoogleRegistration();
   }
 
   private handleAvatarError(error: unknown): void {
     console.error('Error choosing avatar:', error);
-    this.errorMessage.set(
-      'Der Avatar konnte nicht gespeichert werden.'
-    );
+    this.errorMessage.set('Der Avatar konnte nicht gespeichert werden.');
   }
 
+  // Stores the selected avatar in the pending registration data
+  // before creating the final email-based account.
   private async completeEmailRegistration(): Promise<void> {
     this.authService.setAvatar(this.selectedAvatar());
-    const data = await this.authService.signUp();
-
-    console.log('Supabase user:', data);
+    await this.authService.signUp();
     this.authService.clearRegisterData();
     await this.router.navigate(['/login']);
   }

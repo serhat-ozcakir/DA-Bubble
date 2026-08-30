@@ -16,6 +16,8 @@ export class AuthCallback implements OnInit {
     private toastService: ToastService
   ) {}
 
+  // Processes the OAuth callback as soon as the redirect
+  // returns to the application.
   async ngOnInit(): Promise<void> {
     try {
       await this.handleGoogleCallback();
@@ -24,6 +26,8 @@ export class AuthCallback implements OnInit {
     }
   }
 
+  // New Google users complete their profile first,
+  // while existing users continue directly to the workspace.
   private async handleGoogleCallback(): Promise<void> {
     const isNewUser = await this.authService.ensureGoogleProfile();
 

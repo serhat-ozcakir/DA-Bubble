@@ -13,6 +13,7 @@ import { DirectMessageService } from '../../../../core/services/direct-message.s
   templateUrl: './message-item.html',
   styleUrl: './message-item.scss',
 })
+
 export class MessageItemComponent {
   message = input.required<MessageView>();
   private messageService = inject(MessageService);
@@ -34,12 +35,16 @@ export class MessageItemComponent {
     this.isMobile.set(window.innerWidth <= 1024);
   }
 
+  // Keeps reaction lists compact on mobile while allowing
+  // more reactions to remain visible on larger screens.
   getReactionLimit(): number {
     return this.isMobile()
       ? this.mobileReactionLimit
       : this.desktopReactionLimit;
   }
 
+  // Returns either the full reaction list or the device-specific
+  // limited view depending on the expansion state.
   getVisibleReactions(messageId: string): ReactionSummary[] {
     if (this.isReactionExpanded(messageId)) {
       return this.reactionService.getReactionForMessage(messageId);
@@ -52,18 +57,12 @@ export class MessageItemComponent {
   }
 
   getTotalReactionCount(messageId: string): number {
-    return this.reactionService
-      .getReactionForMessage(messageId)
-      .length;
+    return this.reactionService.getReactionForMessage(messageId).length;
   }
 
   getHiddenReactionCount(messageId: string): number {
     if (this.isReactionExpanded(messageId)) return 0;
-
-    const hiddenCount =
-      this.getTotalReactionCount(messageId) -
-      this.getReactionLimit();
-
+    const hiddenCount = this.getTotalReactionCount(messageId) - this.getReactionLimit();
     return Math.max(0, hiddenCount);
   }
 
@@ -108,6 +107,8 @@ export class MessageItemComponent {
     this.isMessageEdited.set(false);
   }
 
+  // Threads are available only for channel messages,
+  // not for direct messages.
   openThread(): void {
     if (this.isDirectMessage()) return;
     this.messageService.openThread(this.message());
@@ -121,15 +122,12 @@ export class MessageItemComponent {
     this.isShowEmojiPicker.update((value) => !value);
   }
 
+  // Routes the reaction to the correct message type
+  // while sharing the same reaction UI.
   async addEmojiReaction(event: any): Promise<void> {
     const emoji = event.emoji.native;
-
     await this.reactionService.addReaction(
-      this.message().id,
-      emoji,
-      this.isDirectMessage()
-    );
-
+      this.message().id,emoji,this.isDirectMessage());
     this.isShowEmojiPicker.set(false);
   }
 
@@ -139,7 +137,6 @@ export class MessageItemComponent {
   }
 
   startEditingMessage(event: Event): void {
-    console.log('edit:', this.message().id);
     event.stopPropagation();
     this.editingMessageID.set(this.message().id);
     this.editingText.set(this.message().text);
@@ -159,33 +156,28 @@ export class MessageItemComponent {
       this.cancelEditMessage();
       return;
     }
-
     await this.updateCurrentMessage(currentMessage.id, newText);
     this.cancelEditMessage();
   }
 
-  private shouldSaveEdit(
-    newText: string,
-    message: MessageView
-  ): boolean {
+  private shouldSaveEdit(newText: string, message: MessageView): boolean {
     return !!newText && newText !== message.text;
   }
 
+  // Sends edits to the appropriate service depending
+  // on whether the current conversation is a DM or channel.
   private async updateCurrentMessage(messageId: string, text: string): Promise<void> {
     if (this.isDirectMessage()) {
-      await this.directMessageService.updateDirectMessage(
-        messageId,
-        text
-      );
+      await this.directMessageService.updateDirectMessage(messageId, text);
       return;
     }
-
     await this.messageService.updateMessage(messageId, text);
   }
 
+  // Enter saves the edit, while Shift+Enter keeps
+  // the multiline editing behavior.
   async saveOnEnter(event: KeyboardEvent): Promise<void> {
     if (event.shiftKey) return;
-
     event.preventDefault();
     await this.saveEditedMessage();
   }
@@ -195,7 +187,6 @@ export class MessageItemComponent {
     if (userNames.length === 2) {
       return `${userNames[0]} und ${userNames[1]}`;
     }
-
     return this.getMultipleReactionNames(userNames);
   }
 

@@ -1,10 +1,5 @@
 import { Component } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import {FormControl,FormGroup, ReactiveFormsModule,Validators} from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -37,28 +32,25 @@ export class ResetPassword {
     if (!this.isFormValid()) return;
 
     const password = this.resetForm.get('password')?.value ?? '';
-    const confirmPassword =
-      this.resetForm.get('confirmPassword')?.value ?? '';
+    const confirmPassword = this.resetForm.get('confirmPassword')?.value ?? '';
 
     if (!this.passwordsMatch(password, confirmPassword)) return;
-
     await this.updatePassword(password);
   }
 
+  // Reveals validation errors before attempting
+  // to update the password.
   private isFormValid(): boolean {
     if (this.resetForm.valid) return true;
-
     this.resetForm.markAllAsTouched();
     return false;
   }
-
+    
+  // Adds a custom mismatch error to the confirmation field
+  // so the template can show a password-specific validation message.
   private passwordsMatch(password: string, confirmPassword: string): boolean {
     if (password === confirmPassword) return true;
-
-    this.resetForm
-      .get('confirmPassword')
-      ?.setErrors({ mismatch: true });
-
+    this.resetForm.get('confirmPassword')?.setErrors({ mismatch: true });
     return false;
   }
 
@@ -72,18 +64,13 @@ export class ResetPassword {
   }
 
   private handleResetSuccess(): void {
-    console.log('Password reset successful');
-    this.toastService.show(
-      'Passwort erfolgreich zurückgesetzt!'
-    );
+    this.toastService.show('Passwort erfolgreich zurückgesetzt!');
     this.router.navigate(['/login']);
   }
 
   private handleResetError(error: unknown): void {
     console.error('Error resetting password:', error);
-    this.toastService.show(
-      'Fehler beim Zurücksetzen des Passworts.'
-    );
+    this.toastService.show('Fehler beim Zurücksetzen des Passworts.');
   }
 
   goBack(): void {
