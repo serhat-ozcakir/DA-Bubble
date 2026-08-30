@@ -191,9 +191,7 @@ export class MessageService {
       .on('postgres_changes', this.getMessageRealtimeConfig(channelId),
         (payload) => this.handleMessageRealtimePayload(payload)
       )
-      .subscribe((status) => {
-        console.log('Realtime status:', status);
-      });
+      .subscribe();
   }
 
   // Listen to the active channel for both new messages
@@ -300,7 +298,6 @@ export class MessageService {
   // Loads existing replies before subscribing to new ones
   // for the currently selected thread.
   async openThread(message: MessageView): Promise<void> {
-    console.log('Thread geöffnet:', message);
     this.selectedThreadMessage.set(message);
     await this.loadThreadMessages(message.id);
     this.listenToThreadMessage(message.id);
@@ -326,7 +323,7 @@ export class MessageService {
       .order('created_at', { ascending: true });
 
     if (!error) return data;
-    console.log('Fehler beim Laden der Thread-Nachrichten:', error);
+    console.error('Fehler beim Laden der Thread-Nachrichten:', error);
     return null;
   }
 
@@ -392,9 +389,7 @@ export class MessageService {
       .on('postgres_changes', this.getThreadRealtimeConfig(parentMessageId),
         (payload) => this.handleRealtimeThreadMessage(payload.new)
       )
-      .subscribe((status) => {
-        console.log('Thread realtime status:', status);
-      });
+      .subscribe();
   }
 
   private handleRealtimeThreadMessage(newMessage: any): void {
@@ -444,7 +439,7 @@ export class MessageService {
       .eq('id', messageId)
 
     if (!error) return true;
-    console.log('error:', error);
+    console.error('error:', error);
     return false;
   }
 

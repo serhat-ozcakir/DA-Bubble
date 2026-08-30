@@ -281,7 +281,7 @@ export class ChannelService {
       .eq('profile_id', profileId);
 
     if (!error) return;
-    console.log('Error leaving channel:', error);
+    console.error('Error leaving channel:', error);
     throw error;
   }
 

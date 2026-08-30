@@ -113,7 +113,7 @@ export class ReactionService {
       .order('created_at', { ascending: true });
 
     if (error) {
-      console.log('Error', error);
+      console.error('Error', error);
       return;
     }
     this.reactions.set(data);
@@ -158,7 +158,6 @@ export class ReactionService {
       await this.removeReaction(existingReaction.id);
       return;
     }
-
     await this.insertReaction(messageId, emoji, isDirectMessage, currentUser.id);
   }
 
@@ -197,7 +196,6 @@ export class ReactionService {
       console.error('Fehler beim Hinzufügen der Reaction:', error);
       return;
     }
-
     await this.finishReactionInsert(emoji);
   }
 

@@ -79,11 +79,9 @@ export class Search {
   }
 
   private handleChannelSearchError(error: unknown): void {
-    console.log('Error:', error);
+    console.error('Error:', error);
     this.results.set([]);
-    this.errorMessage.set(
-      'Die Nachrichten konnten nicht durchsucht werden.'
-    );
+    this.errorMessage.set('Die Nachrichten konnten nicht durchsucht werden.');
     this.isLoading.set(false);
   }
 
