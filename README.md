@@ -207,25 +207,25 @@ Routes are lazy-loaded to reduce the initial application bundle and separate aut
 ### Workspace
 
 <p align="center">
-  <img src="screenshots/Workspace.png" alt="DA-Bubble Workspace" width="900">
+  <img src="DA-Bubble/screenshots/Workspace.png" alt="DA-Bubble Workspace" width="900">
 </p>
 
 ### 🧵 Threads & Reactions
 
 <p align="center">
-  <img src="screenshots/thread.png" alt="DA-Bubble Thread Conversation" width="900">
+  <img src="DA-Bubble/screenshots/thread.png" alt="DA-Bubble Thread Conversation" width="900">
 </p>
 
 ### 📱 Mobile Experience
 
 <p align="center">
-  <img src="screenshots/mobile.png" alt="DA-Bubble Mobile View" width="350">
+  <img src="DA-Bubble/screenshots/mobile.png" alt="DA-Bubble Mobile View" width="350">
 </p>
 
 ### 👥 Channel Management
 
 <p align="center">
-  <img src="screenshots/channel.png" alt="DA-Bubble Channel Management" width="900">
+  <img src="DA-Bubble/screenshots/channel.png" alt="DA-Bubble Channel Management" width="900">
 </p>
 ---
 
