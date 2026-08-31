@@ -131,6 +131,12 @@ app-thread-panel {
 }
 
 @media (max-width: 1024px) {
+
+  :host,
+  .workspace {
+    height: 100svh;
+  }
+
   :host {
     width: 100%;
     min-width: 0;

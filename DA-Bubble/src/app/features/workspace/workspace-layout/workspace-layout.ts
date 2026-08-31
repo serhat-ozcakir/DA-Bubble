@@ -1,4 +1,4 @@
-import { Component, computed, effect, Host, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, effect, OnDestroy, HostListener, inject, signal } from '@angular/core';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 import { ChatArea } from '../chat-area/chat-area';
@@ -27,7 +27,7 @@ type MobileView = 'sidebar' | 'chat' | 'thread' | 'search' | 'create-channel' | 
   templateUrl: './workspace-layout.html',
   styleUrl: './workspace-layout.scss',
 })
-export class WorkspaceLayout {
+export class WorkspaceLayout implements OnDestroy {
 
   auth = inject(Auth);
   userService = inject(UserService);
@@ -44,6 +44,7 @@ export class WorkspaceLayout {
   showProfilDialog = signal(false);
   mobileSearchText = signal('');
   addMembersAsBottomSheet = signal(false);
+  private previouslyMobile = window.matchMedia('(max-width: 1024px)').matches
 
   constructor() {
     // Keeps mobile navigation synchronized with thread state,
@@ -64,7 +65,10 @@ export class WorkspaceLayout {
   // channel and starts member synchronization for the active channel.
   async ngOnInit(): Promise<void> {
     await this.auth.loadCurrentUser();
+    await this.userService.loadUsers();
+    this.userService.listenToUsers();
     await this.channelService.loadChannels();
+    this.channelService.listenToUserChannels();
     const channels = this.channelService.channels();
 
     if (channels.length > 0) {
@@ -73,11 +77,18 @@ export class WorkspaceLayout {
     this.channelService.subscribeToCurrentChannelMembers();
   }
 
+  ngOnDestroy(): void {
+    this.userService.removeUsersRealtimeChannel();
+    this.channelService.removeUserChannelsRealtimeChannel();
+  }
+
   // Resets incompatible dialog and navigation state when
   // switching between mobile and desktop layouts.
   @HostListener('window:resize')
   onResize(): void {
     const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+    if (isMobile === this.previouslyMobile) return;
+    this.previouslyMobile = isMobile;
     if (isMobile) {
       this.closeDesktopDialogs();
       this.mobileView.set('sidebar');
