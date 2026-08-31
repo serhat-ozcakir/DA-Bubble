@@ -89,7 +89,7 @@ export class Auth {
       await this.supabase.supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${this.getAppBaseUrl()}/auth/callback`,
         },
       });
     if (error) throw error;
@@ -221,12 +221,18 @@ export class Auth {
   async resetPassword(email: string) {
     const { data, error } =
      await this.supabase.supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'http://localhost:4200/reset-password',
+       redirectTo: `${this.getAppBaseUrl()}/reset-password`,
       });
 
     if (error) throw error;
     return data;
   }
+
+  private getAppBaseUrl(): string {
+  return window.location.hostname === 'localhost'
+    ? 'http://localhost:4200'
+    : 'https://serhat-oezcakir.de/DA-Bubble';
+}
 
   async updatePassword(newPassword: string) {
     const { data, error } = await this.supabase.supabase.auth.updateUser({
