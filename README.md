@@ -24,13 +24,9 @@ A full-featured real-time team communication platform built with Angular 20 and 
 </p>
 
 <p align="center">
-  <a href="https://serhat-oezcakir.de/DA-Bubble/">
-    🚀 Live Demo
-  </a>
+  <a href="https://serhat-oezcakir.de/DA-Bubble/">🚀 Live Demo</a>
   •
-  <a href="https://serhat-oezcakir.de">
-    🌐 Portfolio
-  </a>
+  <a href="https://serhat-oezcakir.de">🌐 Portfolio</a>
 </p>
 
 ---
@@ -39,9 +35,9 @@ A full-featured real-time team communication platform built with Angular 20 and 
 
 **DA-Bubble** is a responsive real-time communication platform for teams and communities.
 
-Users can communicate through channels, direct messages and threaded conversations while message updates, reactions, memberships and user data are synchronized in real time.
+Users can communicate through public channels, direct messages and threaded conversations while messages, reactions, channel memberships and user information are synchronized across connected clients in real time.
 
-The application was developed with **Angular 20**, **TypeScript** and **Supabase** and focuses on clean architecture, responsive UX, real-time communication and secure database access.
+The application was developed with **Angular 20**, **TypeScript** and **Supabase**, with a strong focus on maintainable frontend architecture, responsive UX, secure database access and real-time communication.
 
 The project includes a complete authentication flow, channel management, direct messaging, threaded discussions, reactions, search, mentions and guest access.
 
@@ -67,13 +63,12 @@ The project includes a complete authentication flow, channel management, direct 
 - Real-time message synchronization
 - Real-time thread updates
 - Last reply information
-- Automatic message state synchronization
 
 ### 😀 Reactions & Mentions
 
 - Emoji picker
 - Emoji reactions
-- Reaction toggle
+- Reaction toggling
 - Reaction summaries
 - Recently used reactions
 - `@User` mentions
@@ -106,34 +101,81 @@ The project includes a complete authentication flow, channel management, direct 
 - Mobile thread view
 - Mobile search
 - Optimized virtual-keyboard behavior
-- Support down to small smartphone screen sizes
+- Support for small smartphone displays
 
 ---
 
-## ⚡ Real-Time Architecture
+## 🏗️ Architecture & Engineering
 
-DA-Bubble uses **Supabase Realtime** to synchronize important application state without requiring page refreshes.
+DA-Bubble was developed with a strong focus on maintainability, separation of concerns and production-oriented frontend architecture.
 
-Real-time synchronization is implemented for:
+### 🧩 Feature-Based Architecture
 
-- Channel messages
+The application is organized into clearly separated feature areas such as authentication, workspace, messaging, channels, threads and user management.
+
+Business logic and Supabase communication are primarily handled through dedicated services, keeping UI components focused on presentation and user interaction.
+
+### ⚡ Angular Signals
+
+Angular Signals are used extensively for reactive application and UI state, including:
+
+- Messages and direct messages
+- Selected conversations and threads
+- Reaction summaries
+- Search state
+- Dialog and mobile navigation state
+- Current user and channel state
+
+Signals are also integrated with incoming real-time database events to keep the interface synchronized with backend changes.
+
+### 🛡️ Route Guards
+
+Protected application areas are secured using Angular Route Guards.
+
+The workspace cannot be accessed without a valid authenticated session, while public authentication and legal routes remain independently accessible.
+
+### 📦 Lazy Loading & Code Splitting
+
+Major application areas are lazy-loaded through Angular Router.
+
+Authentication and workspace routes are loaded only when required, while standalone pages use `loadComponent()` where appropriate.
+
+This reduces unnecessary code in the initial application bundle and separates major application areas into independently loaded chunks.
+
+### 🔄 Real-Time Architecture
+
+Supabase Realtime is used to synchronize application state across multiple connected clients without requiring page refreshes.
+
+Dedicated real-time listeners handle:
+
+- New channel messages
+- Message updates
 - Direct messages
 - Thread replies
-- Message edits
 - Emoji reactions
-- Channel updates
-- Channel memberships
-- User profiles
+- Channel changes
+- Channel membership changes
+- User profile changes
 
-Angular **Signals** are used throughout the application to keep UI state synchronized efficiently with incoming database events.
+Incoming database events are integrated into the application's Angular state so that the UI responds immediately to backend changes.
 
----
+### 🔐 Authentication Architecture
 
-## 🔒 Security
+Authentication logic is centralized in dedicated services and supports:
 
-Database access is protected through **Supabase Row Level Security (RLS)**.
+- Email / password authentication
+- Google OAuth
+- Anonymous guest sessions
+- Password reset
+- Session restoration
+- Protected routes
+- User presence handling
 
-Policies control access to application data such as:
+### 🗄️ Database Security
+
+Supabase Row Level Security (**RLS**) policies are used to control access to application data.
+
+Authorization rules protect resources such as:
 
 - Profiles
 - Channels
@@ -142,26 +184,72 @@ Policies control access to application data such as:
 - Direct messages
 - Reactions
 
-Authentication and authorization are handled through Supabase Auth together with protected Angular routes.
+This ensures that access control is enforced at the database level rather than relying only on frontend restrictions.
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Performance & Optimization
 
-The project follows a feature-oriented Angular structure with a clear separation between:
+The project went through a dedicated performance and optimization phase after the core functionality was completed.
 
-- UI Components
-- Feature Components
-- Services
-- Models
-- Routing
-- Authentication
-- Database communication
-- Real-time synchronization
+### 🌐 Network & Database Optimization
 
-Application-wide state such as messages, selected conversations, reactions and UI state is managed primarily with **Angular Signals**.
+- Reduced unnecessary Supabase query responses
+- Selected only required database fields where appropriate
+- Removed unnecessary `.select()` calls from write operations
+- Reduced redundant database communication where safely possible
+- Optimized message-to-thread mapping using grouped lookup structures
 
-Routes are lazy-loaded to reduce the initial application bundle and separate authentication and workspace features.
+### ⚡ Angular Optimization
+
+- Lazy-loaded major application areas
+- Used standalone components
+- Used Angular Signals for reactive state management
+- Separated database and application logic into dedicated services
+- Avoided unnecessary component-level data fetching
+- Used route-level code splitting
+
+### 🔄 Real-Time Optimization
+
+- Dedicated subscriptions for different real-time responsibilities
+- Duplicate real-time thread messages are prevented before state updates
+- Local application state is updated from incoming events where appropriate
+- Real-time subscriptions are cleaned up when no longer required
+
+### 📱 Responsive Optimization
+
+The application was tested and optimized across desktop and mobile layouts.
+
+Special attention was given to:
+
+- Small smartphone displays
+- Dynamic mobile viewport behavior
+- Virtual keyboard resizing
+- Mobile navigation
+- Thread layouts
+- Popovers and emoji pickers
+- Responsive message layouts
+
+---
+
+## 🧹 Code Quality
+
+After feature development, the codebase went through a dedicated clean-code and refactoring phase.
+
+The refactoring focused on:
+
+- Single-responsibility methods
+- Small and readable functions
+- Clear service / component separation
+- Reusable private helper methods
+- Consistent naming conventions
+- Reduced code duplication
+- Removal of unused code
+- Removal of development/debug logging
+- Behavior-preserving refactoring
+- Clear comments for non-obvious business and architectural logic
+
+The goal was not only to make the application functional, but also to keep the codebase understandable, maintainable and easier to extend.
 
 ---
 
@@ -174,6 +262,8 @@ Routes are lazy-loaded to reduce the initial application bundle and separate aut
 - Angular Signals
 - Standalone Components
 - Angular Router
+- Route Guards
+- Lazy Loading
 - Reactive Forms
 - RxJS
 - SCSS
@@ -204,29 +294,30 @@ Routes are lazy-loaded to reduce the initial application bundle and separate aut
 
 ## 📸 Screenshots
 
-### Workspace
+### 💬 Workspace
 
 <p align="center">
-  <img src="screenshots/Workspace.png" alt="DA-Bubble Workspace" width="900">
+  <img src="DA-Bubble/screenshots/Workspace.png" alt="DA-Bubble Workspace" width="900">
 </p>
 
 ### 🧵 Threads & Reactions
 
 <p align="center">
-  <img src="screenshots/thread.png" alt="DA-Bubble Thread Conversation" width="900">
+  <img src="DA-Bubble/screenshots/thread.png" alt="DA-Bubble Thread Conversation" width="900">
 </p>
 
 ### 📱 Mobile Experience
 
 <p align="center">
-  <img src="screenshots/mobile.png" alt="DA-Bubble Mobile View" width="350">
+  <img src="DA-Bubble/screenshots/mobile.png" alt="DA-Bubble Mobile View" width="350">
 </p>
 
 ### 👥 Channel Management
 
 <p align="center">
-  <img src="screenshots/channel.png" alt="DA-Bubble Channel Management" width="900">
+  <img src="DA-Bubble/screenshots/channel.png" alt="DA-Bubble Channel Management" width="900">
 </p>
+
 ---
 
 ## 🚀 Running the Project Locally
@@ -235,3 +326,73 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/serhat-ozcakir/DA-Bubble.git
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+ng serve
+```
+
+Then open:
+
+```text
+http://localhost:4200
+```
+
+> Backend functionality requires a configured Supabase project and the corresponding environment configuration.
+
+---
+
+## 🌐 Production
+
+DA-Bubble is deployed as a production Angular build and connected to a hosted Supabase backend.
+
+**Live Application:**  
+https://serhat-oezcakir.de/DA-Bubble/
+
+---
+
+## 🗺️ Possible Future Improvements
+
+Possible extensions for the platform include:
+
+- File sharing
+- Voice messages
+- Voice / video calls
+- Push notifications
+- Read receipts
+- Dark mode
+- Workspace administration
+- AI-assisted communication features
+
+---
+
+## 👨‍💻 Author
+
+### Serhat Özçakır
+
+Frontend Developer
+
+🌐 **Portfolio**  
+https://serhat-oezcakir.de
+
+💼 **LinkedIn**  
+https://www.linkedin.com/in/serhat-%C3%B6z%C3%A7ak%C4%B1r/
+
+💻 **GitHub**  
+https://github.com/serhat-ozcakir
+
+---
+
+## ⭐ Support
+
+If you like the project, feel free to give the repository a **Star ⭐**.
+
+Feedback and suggestions are always welcome.
