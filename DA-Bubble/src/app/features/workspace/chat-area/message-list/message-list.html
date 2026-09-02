@@ -1,4 +1,4 @@
-<div class="message-list">
+<div #messageList class="message-list">
   @if (directMessageService.currentDmUser(); as dmUser) {
    @if(directMessageService.directMessages().length === 0){
     @if(isSelfDm()){

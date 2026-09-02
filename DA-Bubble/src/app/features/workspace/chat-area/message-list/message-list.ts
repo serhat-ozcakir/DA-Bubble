@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, OnDestroy, OnInit, output,} from '@angular/core';
+import { afterNextRender, Component, computed, effect, ElementRef, inject, Injector, OnDestroy, OnInit, output, ViewChild, } from '@angular/core';
 import { MessageItemComponent } from '../message-item/message-item';
 import { MessageService } from '../../../../core/services/message.service';
 import { Auth } from '../../../../core/services/auth.service';
@@ -20,6 +20,8 @@ export class MessageList implements OnInit, OnDestroy {
   private authService = inject(Auth);
   private channelService = inject(ChannelService);
   private reactionService = inject(ReactionService);
+  private injector = inject(Injector);
+  private previousMessageCount = 0;
 
   openProfile = output<void>();
 
@@ -39,6 +41,7 @@ export class MessageList implements OnInit, OnDestroy {
   constructor() {
     this.initializeReactionRealtime();
     this.watchConversationChanges();
+    this.watchMessageChanges();
   }
 
   async ngOnInit(): Promise<void> {
@@ -66,24 +69,43 @@ export class MessageList implements OnInit, OnDestroy {
       this.reactionService.loadReactions();
 
       if (dmUser) {
-        this.loadDirectConversation();
+        void this.loadDirectConversation();
         return;
       }
-      if (channel) this.loadChannelConversation();
+      if (channel) void this.loadChannelConversation();
     });
   }
 
-  private loadDirectConversation(): void {
-    this.directMessageService.loadDirectMessages();
+private watchMessageChanges(): void {
+  effect(() => {
+    const messages = this.getMessages();
+    const currentCount = messages.length;
+
+    if (currentCount <= this.previousMessageCount) {
+      this.previousMessageCount = currentCount;
+      return;
+    }
+    const lastMessage = messages[currentCount - 1];
+    const shouldScroll = lastMessage?.isOwnMessage || this.isNearBottom();
+    this.previousMessageCount = currentCount;
+    if (!shouldScroll) return;
+    this.scrollAfterRender();
+  });
+}
+
+  private async loadDirectConversation(): Promise<void> {
+    await this.directMessageService.loadDirectMessages();
     this.directMessageService.listenToDirectMessages();
+    this.scrollAfterRender();
   }
 
   // Stops the previous DM listener before switching
   // message loading and realtime updates back to a channel.
-  private loadChannelConversation(): void {
+  private async loadChannelConversation(): Promise<void> {
     this.directMessageService.removeDmRealtimeChannel();
-    this.messageService.loadMessages();
+    await this.messageService.loadMessages();
     this.messageService.listenToMessages();
+    this.scrollAfterRender();
   }
 
   getMessages(): MessageView[] {
@@ -96,7 +118,7 @@ export class MessageList implements OnInit, OnDestroy {
 
   // Shows a date separator for the first message
   // and whenever the calendar day changes.
-  shouldShowDate(messages: MessageView[],index: number): boolean {
+  shouldShowDate(messages: MessageView[], index: number): boolean {
     if (index === 0) return true;
 
     const currentDate = this.getDateKey(messages[index].createdAt);
@@ -152,4 +174,28 @@ export class MessageList implements OnInit, OnDestroy {
   openUserProfile(): void {
     this.openProfile.emit();
   }
+
+  @ViewChild('messageList')
+  private messageListRef!: ElementRef<HTMLDivElement>;
+
+  private scrollToBottom(): void {
+    const messageList = this.messageListRef.nativeElement;
+    messageList.scrollTop = messageList.scrollHeight;
+  }
+
+  private isNearBottom(): boolean {
+    const messageList = this.messageListRef.nativeElement;
+    const distanceFromBottom  = 
+    messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight;  
+    return distanceFromBottom < 120;
+  }
+
+  private scrollAfterRender(): void {
+    afterNextRender(
+      () => this.scrollToBottom(),
+      { injector: this.injector },
+    );
+  }
+
+
 }
