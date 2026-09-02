@@ -316,6 +316,7 @@
   font-size: 18px;
   background: transparent;
   transition: background-color 0.2s ease;
+  cursor: default;
   
     &:hover {
       background-color: #eceefe;
@@ -732,13 +733,37 @@
   .thread-emoji-picker {
     max-width: calc(100vw - 32px);
     max-height: 260px;
-
     right: 0;
   }
 
   .message-edit {
+    top: 44px;
     right: 0;
-    min-width: min(260px, calc(100vw - 40px));
+    left: auto;
+    width: max-content;
+    min-width: 0;
+    max-width: calc(100vw - 32px);
+    padding: 6px 8px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-radius: 0 20px 20px 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+  }
+
+    .message-edit__button {
+      width: auto;
+      padding: 9px 12px;
+      font-size: 15px;
+      line-height: 1.2;
+      white-space: nowrap;
+  }
+
+  .thread-actions-container--own {
+    .message-edit {
+      left: 0;
+      right: auto;
+    }
   }
 
   .message-edit-form {
