@@ -21,6 +21,8 @@ export class MessageList implements OnInit, OnDestroy {
   private channelService = inject(ChannelService);
   private reactionService = inject(ReactionService);
   private injector = inject(Injector);
+
+  // Tracks the previous message count to detect newly added messages.
   private previousMessageCount = 0;
 
   openProfile = output<void>();
@@ -76,6 +78,9 @@ export class MessageList implements OnInit, OnDestroy {
     });
   }
 
+// Watches for new messages and controls auto-scroll behavior.
+// Own messages always scroll down, while incoming messages only
+// scroll when the user is already near the bottom.
 private watchMessageChanges(): void {
   effect(() => {
     const messages = this.getMessages();
@@ -178,11 +183,14 @@ private watchMessageChanges(): void {
   @ViewChild('messageList')
   private messageListRef!: ElementRef<HTMLDivElement>;
 
+  // Moves the message list to the latest message.
   private scrollToBottom(): void {
     const messageList = this.messageListRef.nativeElement;
     messageList.scrollTop = messageList.scrollHeight;
   }
-
+  
+  // Checks whether the user is close enough to the bottom
+  // to keep following incoming messages automatically.
   private isNearBottom(): boolean {
     const messageList = this.messageListRef.nativeElement;
     const distanceFromBottom  = 
@@ -190,6 +198,8 @@ private watchMessageChanges(): void {
     return distanceFromBottom < 120;
   }
 
+  // Waits for Angular to render new messages before scrolling,
+  // so the latest scroll height is available.
   private scrollAfterRender(): void {
     afterNextRender(
       () => this.scrollToBottom(),
